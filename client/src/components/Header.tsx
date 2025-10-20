@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Settings } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
 
@@ -34,49 +36,70 @@ export default function Header() {
                     <a className={`text-xs sm:text-sm transition-colors ${
                       location === "/trade" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      Perpetual
+                      {t('nav.perpetual')}
                     </a>
                   </Link>
-                  <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">1001x</a>
-                  <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Spot</a>
+                  <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.1001x')}</a>
+                  <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.spot')}</a>
                   <Link href="/dashboard">
                     <a className={`text-xs sm:text-sm transition-colors ${
                       location === "/dashboard" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      Portfolio
+                      {t('nav.portfolio')}
                     </a>
                   </Link>
                   <Link href="/referral">
                     <a className={`text-xs sm:text-sm transition-colors ${
                       location === "/referral" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      Referral
+                      {t('nav.referral')}
                     </a>
                   </Link>
                   <Link href="/points">
                     <a className={`text-xs sm:text-sm transition-colors ${
                       location === "/points" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      Rewards
+                      {t('nav.rewards')}
                     </a>
                   </Link>
                 </div>
               )}
               {isHomePage && (
                 <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
-                  <a href="#features" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Features</a>
-                  <a href="#stats" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Stats</a>
-                  <a href="#roadmap" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Roadmap</a>
+                  <a href="#features" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.features')}</a>
+                  <a href="#stats" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.stats')}</a>
+                  <a href="#roadmap" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.roadmap')}</a>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="hidden sm:flex items-center gap-2 text-xs">
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">EN</Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-7 px-2 ${language === 'en' ? 'text-white' : 'text-white/80 hover:text-white'}`}
+                  onClick={() => setLanguage('en')}
+                >
+                  EN
+                </Button>
                 <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">JP</Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-7 px-2 ${language === 'jp' ? 'text-white' : 'text-white/80 hover:text-white'}`}
+                  onClick={() => setLanguage('jp')}
+                >
+                  JP
+                </Button>
                 <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">CN</Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-7 px-2 ${language === 'cn' ? 'text-white' : 'text-white/80 hover:text-white'}`}
+                  onClick={() => setLanguage('cn')}
+                >
+                  CN
+                </Button>
               </div>
               {!isHomePage && (
                 <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-white/80 hover:text-white">
@@ -86,12 +109,12 @@ export default function Header() {
               {isHomePage ? (
                 <Link href="/trade">
                   <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                    Launch App
+                    {t('button.launchApp')}
                   </Button>
                 </Link>
               ) : (
                 <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                  Connect wallet
+                  {t('button.connectWallet')}
                 </Button>
               )}
             </div>
@@ -103,12 +126,12 @@ export default function Header() {
       {mobileMenuOpen && !isHomePage && (
         <div className="lg:hidden bg-card border-b border-white/10 p-4">
           <div className="flex flex-col gap-3">
-            <Link href="/trade"><a className="text-sm text-white/60">Perpetual</a></Link>
-            <a href="#" className="text-sm text-white/60">1001x</a>
-            <a href="#" className="text-sm text-white/60">Spot</a>
-            <Link href="/dashboard"><a className="text-sm text-white/60">Portfolio</a></Link>
-            <Link href="/referral"><a className="text-sm text-white/60">Referral</a></Link>
-            <Link href="/points"><a className="text-sm text-white/60">Rewards</a></Link>
+            <Link href="/trade"><a className="text-sm text-white/60">{t('nav.perpetual')}</a></Link>
+            <a href="#" className="text-sm text-white/60">{t('nav.1001x')}</a>
+            <a href="#" className="text-sm text-white/60">{t('nav.spot')}</a>
+            <Link href="/dashboard"><a className="text-sm text-white/60">{t('nav.portfolio')}</a></Link>
+            <Link href="/referral"><a className="text-sm text-white/60">{t('nav.referral')}</a></Link>
+            <Link href="/points"><a className="text-sm text-white/60">{t('nav.rewards')}</a></Link>
           </div>
         </div>
       )}
@@ -116,9 +139,9 @@ export default function Header() {
       {mobileMenuOpen && isHomePage && (
         <div className="lg:hidden bg-card border-b border-white/10 p-4">
           <div className="flex flex-col gap-3">
-            <a href="#features" className="text-sm text-white/60">Features</a>
-            <a href="#stats" className="text-sm text-white/60">Stats</a>
-            <a href="#roadmap" className="text-sm text-white/60">Roadmap</a>
+            <a href="#features" className="text-sm text-white/60">{t('nav.features')}</a>
+            <a href="#stats" className="text-sm text-white/60">{t('nav.stats')}</a>
+            <a href="#roadmap" className="text-sm text-white/60">{t('nav.roadmap')}</a>
           </div>
         </div>
       )}
