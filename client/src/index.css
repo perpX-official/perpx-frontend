@@ -1,49 +1,50 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@layer base {
+  :root {
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Fira Code", "Courier New", monospace;
+  }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
 }
 
-:root {
-  /* PerpDEX Design System - Tiffany Blue Theme (Dark) */
+@layer utilities {
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--secondary)));
+  }
+}
+
+@layer base {
+  :root {
+  /* PerpX Design System - Deep Navy Theme */
   --primary: 177 91% 37%; /* Tiffany Blue #0ABAB5 */
   --primary-foreground: 0 0% 100%;
   --sidebar-primary: 177 91% 37%;
@@ -54,22 +55,22 @@
   --chart-4: 0 84% 60%;
   --chart-5: 215 25% 12%;
   --radius: 0.75rem;
-  --background: 177 91% 37%; /* Tiffany Blue #0ABAB5 */
-  --foreground: 0 0% 100%; /* White text */
-  --card: 177 70% 45%; /* Darker Tiffany Blue */
-  --card-foreground: 0 0% 100%;
+  --background: 210 60% 8%; /* Deep Navy #0A1628 */
+  --foreground: 0 0% 98%; /* White text */
+  --card: 215 25% 12%; /* Charcoal #1A2332 */
+  --card-foreground: 0 0% 98%;
   --popover: 215 25% 12%;
   --popover-foreground: 0 0% 98%;
   --secondary: 267 70% 62%; /* AI Purple #A855F7 */
   --secondary-foreground: 0 0% 100%;
-  --muted: 177 60% 50%;
-  --muted-foreground: 0 0% 95%;
+  --muted: 215 20% 20%;
+  --muted-foreground: 0 0% 65%;
   --accent: 177 91% 37%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%; /* Red #EF4444 */
   --destructive-foreground: 0 0% 100%;
-  --border: 177 60% 50%;
-  --input: 177 60% 50%;
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
   --ring: 177 91% 37%;
   --sidebar: 215 25% 12%;
   --sidebar-foreground: 0 0% 98%;
@@ -80,27 +81,27 @@
 }
 
 .dark {
-  /* Same as root - PerpX is Tiffany Blue first */
+  /* Same as root - PerpX is dark-first */
   --primary: 177 91% 37%;
   --primary-foreground: 0 0% 100%;
   --sidebar-primary: 177 91% 37%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --background: 177 91% 37%; /* Tiffany Blue #0ABAB5 */
-  --foreground: 0 0% 100%; /* White text */
+  --background: 210 60% 8%; /* Deep Navy #0A1628 */
+  --foreground: 0 0% 98%; /* White text */
   --card: 215 25% 12%;
-  --card-foreground: 0 0% 100%;
+  --card-foreground: 0 0% 98%;
   --popover: 215 25% 12%;
   --popover-foreground: 0 0% 98%;
   --secondary: 267 70% 62%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 177 60% 50%;
-  --muted-foreground: 0 0% 95%;
+  --muted: 215 20% 20%;
+  --muted-foreground: 0 0% 65%;
   --accent: 177 91% 37%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 177 60% 50%;
-  --input: 177 60% 50%;
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
   --ring: 177 91% 37%;
   --chart-1: 177 91% 37%;
   --chart-2: 267 70% 62%;
@@ -114,82 +115,5 @@
   --sidebar-border: 215 20% 20%;
   --sidebar-ring: 177 91% 37%;
 }
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  
-  /* Gradient text utility */
-  .gradient-text {
-    background: linear-gradient(135deg, hsl(177 91% 37%) 0%, hsl(267 70% 62%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  /* Glass morphism effect */
-  .glass {
-    background: rgba(26, 35, 50, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(10, 186, 181, 0.1);
-  }
-  
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-  button:not(:disabled),
-  [role="button"]:not([aria-disabled="true"]),
-  [type="button"]:not(:disabled),
-  [type="submit"]:not(:disabled),
-  [type="reset"]:not(:disabled),
-  a[href],
-  select:not(:disabled),
-  input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled) {
-    @apply cursor-pointer;
-  }
 }
 
-@layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
-  .container {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
-    padding-right: 1rem;
-  }
-
-  @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
-      padding-right: 1.5rem;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem; /* 32px - desktop padding */
-      padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
-    }
-  }
-}
