@@ -1,283 +1,337 @@
-import { useEffect, useRef } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useRef, useState } from "react";
+import { Code, Rocket, Layers, Waves, TrendingUp, Zap, Shield, BarChart3, Coins, Network } from "lucide-react";
 
 export default function Home() {
-  const { language, t } = useLanguage();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const roadmapItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const { language, setLanguage, t } = useLanguage();
+  const [isVisible, setIsVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const roadmapRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.2,
-      rootMargin: "0px 0px -100px 0px"
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("animate-in");
-        }
-      });
-    }, observerOptions);
-
-    // Observe roadmap items
-    roadmapItemsRef.current.forEach((item) => {
-      if (item) observer.observe(item);
-    });
-
-    // Parallax effect for hero
     const handleScroll = () => {
-      if (heroRef.current) {
-        const scrolled = window.scrollY;
-        heroRef.current.style.transform = `translateY(${scrolled * 0.5}px)`;
-        heroRef.current.style.opacity = `${1 - scrolled / 800}`;
-      }
+      setScrollY(window.scrollY);
     };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    window.addEventListener("scroll", handleScroll);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (roadmapRef.current) observer.observe(roadmapRef.current);
+    if (featuresRef.current) observer.observe(featuresRef.current);
+    if (ctaRef.current) observer.observe(ctaRef.current);
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
+      if (roadmapRef.current) observer.unobserve(roadmapRef.current);
+      if (featuresRef.current) observer.unobserve(featuresRef.current);
+      if (ctaRef.current) observer.unobserve(ctaRef.current);
     };
   }, []);
 
-  const translations = {
-    en: {
-      tagline: "UNLOCK YOUR TRADING EDGE",
-      title: "Revolutionizing On-Chain Trading for Asia",
-      subtitle: "Trade Freely. Earn Stylishly.",
-      description: "Ultra-fast decentralized perpetual exchange with deep liquidity, powered by advanced AI trading assistance.",
-      startTrading: "Start Trading",
-      learnMore: "Learn More",
-      features: "Key Features",
-      feature1Title: "AI-Powered Trading",
-      feature1Desc: "Advanced AI algorithms provide real-time market insights and trading suggestions",
-      feature2Title: "Deep Liquidity",
-      feature2Desc: "JIT liquidity mechanism ensures optimal execution with minimal slippage",
-      feature3Title: "Cross-Margin System",
-      feature3Desc: "Efficient capital utilization with cross-margin trading up to 100x leverage",
-      feature4Title: "100x Leverage",
-      feature4Desc: "Maximize your trading potential with industry-leading leverage options",
-      feature5Title: "Yield-Earning Collateral",
-      feature5Desc: "Your collateral generates yield while you trade",
-      feature6Title: "Advanced Analytics",
-      feature6Desc: "Professional-grade charting tools and market analysis",
-      roadmapTitle: "Roadmap",
-      q1Title: "Q1 2026 - Foundation",
-      q1Items: ["Development Kickoff", "Core Infrastructure", "Smart Contract Audit"],
-      q2Title: "Q2 2026 - Launch",
-      q2Items: ["Platform Launch", "First Airdrop Round", "Community Building"],
-      q3Title: "Q3 2026 - Expansion",
-      q3Items: ["Second Airdrop Round", "Advanced Features", "Multi-chain Support"],
-      q4Title: "Q4 2026 - Innovation",
-      q4Items: ["NFT Trading Achievements", "VISA Card Integration", "Global Expansion"],
-      ctaTitle: "Ready to Start Trading?",
-      ctaDescription: "Join thousands of traders experiencing the future of decentralized perpetual trading",
-      ctaButton: "Launch App"
+  const roadmapItems = [
+    {
+      quarter: "Q1 2026",
+      title: "PerpX V1: Perpetual and Spot DEX",
+      desc: "Web and Mobile Applications Launch",
+      icon: Rocket,
+      color: "from-blue-500 to-cyan-500"
     },
-    ja: {
-      tagline: "トレーディングの優位性を解き放つ",
-      title: "アジアのためのオンチェーン取引革命",
-      subtitle: "自由に取引。スタイリッシュに稼ぐ。",
-      description: "高度なAI取引支援を搭載した、深い流動性を持つ超高速分散型永続取引所",
-      startTrading: "取引を開始",
-      learnMore: "詳細を見る",
-      features: "主な機能",
-      feature1Title: "AI駆動取引",
-      feature1Desc: "高度なAIアルゴリズムがリアルタイムの市場洞察と取引提案を提供",
-      feature2Title: "深い流動性",
-      feature2Desc: "JIT流動性メカニズムにより、最小限のスリッページで最適な執行を保証",
-      feature3Title: "クロスマージンシステム",
-      feature3Desc: "最大100倍のレバレッジでクロスマージン取引による効率的な資本活用",
-      feature4Title: "100倍レバレッジ",
-      feature4Desc: "業界最高水準のレバレッジオプションで取引の可能性を最大化",
-      feature5Title: "収益を生むコラテラル",
-      feature5Desc: "取引中もコラテラルが収益を生み出します",
-      feature6Title: "高度な分析",
-      feature6Desc: "プロフェッショナルグレードのチャートツールと市場分析",
-      roadmapTitle: "ロードマップ",
-      q1Title: "2026年Q1 - 基盤構築",
-      q1Items: ["開発着手", "コアインフラ構築", "スマートコントラクト監査"],
-      q2Title: "2026年Q2 - ローンチ",
-      q2Items: ["プラットフォームローンチ", "第一弾エアドロップ", "コミュニティ構築"],
-      q3Title: "2026年Q3 - 拡張",
-      q3Items: ["第二弾エアドロップ", "高度な機能追加", "マルチチェーン対応"],
-      q4Title: "2026年Q4 - イノベーション",
-      q4Items: ["NFT取引実績", "VISAカード連携", "グローバル展開"],
-      ctaTitle: "取引を始める準備はできましたか?",
-      ctaDescription: "分散型永続取引の未来を体験する数千人のトレーダーに参加しましょう",
-      ctaButton: "アプリを起動"
+    {
+      quarter: "Q2 2026",
+      title: "Strategy: On-Chain Asset Management",
+      desc: "LP and Trading Strategy Vaults Launch",
+      icon: Layers,
+      color: "from-purple-500 to-pink-500"
     },
-    cn: {
-      tagline: "释放您的交易优势",
-      title: "革新亚洲链上交易",
-      subtitle: "自由交易。时尚赚钱。",
-      description: "超快速去中心化永续交易所，具有深度流动性，由先进的AI交易辅助提供支持",
-      startTrading: "开始交易",
-      learnMore: "了解更多",
-      features: "主要功能",
-      feature1Title: "AI驱动交易",
-      feature1Desc: "先进的AI算法提供实时市场洞察和交易建议",
-      feature2Title: "深度流动性",
-      feature2Desc: "JIT流动性机制确保以最小滑点实现最佳执行",
-      feature3Title: "跨保证金系统",
-      feature3Desc: "通过高达100倍杠杆的跨保证金交易实现高效资本利用",
-      feature4Title: "100倍杠杆",
-      feature4Desc: "通过行业领先的杠杆选项最大化您的交易潜力",
-      feature5Title: "产生收益的抵押品",
-      feature5Desc: "您的抵押品在交易时产生收益",
-      feature6Title: "高级分析",
-      feature6Desc: "专业级图表工具和市场分析",
-      roadmapTitle: "路线图",
-      q1Title: "2026年Q1 - 基础",
-      q1Items: ["开发启动", "核心基础设施", "智能合约审计"],
-      q2Title: "2026年Q2 - 启动",
-      q2Items: ["平台启动", "第一轮空投", "社区建设"],
-      q3Title: "2026年Q3 - 扩展",
-      q3Items: ["第二轮空投", "高级功能", "多链支持"],
-      q4Title: "2026年Q4 - 创新",
-      q4Items: ["NFT交易成就", "VISA卡集成", "全球扩张"],
-      ctaTitle: "准备开始交易了吗？",
-      ctaDescription: "加入数千名体验去中心化永续交易未来的交易者",
-      ctaButton: "启动应用"
+    {
+      quarter: "Q3 2026",
+      title: "PerpX V2: High-Performance Layer 2",
+      desc: "Blockchain Testnet Launch",
+      icon: Code,
+      color: "from-green-500 to-teal-500"
+    },
+    {
+      quarter: "Q4 2026",
+      title: "Permissionless Liquidity Modules",
+      desc: "Anyone can create, manage, and deploy liquidity strategies",
+      icon: Waves,
+      color: "from-orange-500 to-red-500"
     }
+  ];
+
+  const features = [
+    {
+      icon: TrendingUp,
+      title: "AI-Powered Trading",
+      desc: "Advanced AI assistance for smarter trading decisions"
+    },
+    {
+      icon: Zap,
+      title: "Lightning Fast",
+      desc: "Execute trades in milliseconds with low latency"
+    },
+    {
+      icon: Shield,
+      title: "Self-Custody",
+      desc: "Your keys, your crypto. Full control over your assets"
+    },
+    {
+      icon: BarChart3,
+      title: "Advanced Analytics",
+      desc: "Professional-grade charts and trading tools"
+    },
+    {
+      icon: Coins,
+      title: "Deep Liquidity",
+      desc: "Access to deep liquidity pools across multiple chains"
+    },
+    {
+      icon: Network,
+      title: "Multi-Chain",
+      desc: "Trade on Solana and EVM chains seamlessly"
+    }
+  ];
+
+  const languageLabels = {
+    en: "EN",
+    jp: "日本語",
+    cn: "中文"
   };
 
-  const content = translations[language as keyof typeof translations] || translations.en;
-
   return (
-    <div className="min-h-screen bg-[#0A1628] text-white overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Gradient Motion Background */}
+      <div className="fixed inset-0 gradient-motion-fast opacity-20 pointer-events-none"></div>
+      
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
             <Link href="/">
-              <div className="flex items-center gap-3 cursor-pointer">
+              <a className="flex items-center gap-2">
                 <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
-                <span className="text-2xl font-bold text-gradient">PerpX</span>
+                <span className="text-xl font-bold text-white">PerpX</span>
+              </a>
+            </Link>
+
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowLangMenu(!showLangMenu)}
+                  className="px-4 py-2 text-white/80 hover:text-white transition-colors flex items-center gap-1"
+                >
+                  <span className="text-sm">{languageLabels[language]}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showLangMenu && (
+                  <div className="absolute right-0 mt-2 w-40 glass-card rounded-lg shadow-lg">
+                    <button 
+                      onClick={() => { setLanguage("en"); setShowLangMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5 rounded-t-lg"
+                    >
+                      English
+                    </button>
+                    <button 
+                      onClick={() => { setLanguage("jp"); setShowLangMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5"
+                    >
+                      日本語
+                    </button>
+                    <button 
+                      onClick={() => { setLanguage("cn"); setShowLangMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5 rounded-b-lg"
+                    >
+                      中文
+                    </button>
+                  </div>
+                )}
               </div>
-            </Link>
-            <Link href="/trade">
-              <button className="neumorphic px-8 py-3 rounded-xl font-semibold text-lg hover:scale-105 transition-all duration-300">
-                {content.startTrading}
-              </button>
-            </Link>
+
+              <Link href="/trade">
+                <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium px-8">
+                  {t('button.launchApp')}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section with Parallax */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-20">
-        <div className="absolute inset-0 gradient-motion opacity-30"></div>
-        
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Text Content */}
-            <div className="space-y-8 trail-effect">
-              <div className="text-sm tracking-widest text-[#0ABAB5] font-semibold uppercase">
-                {content.tagline}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0">
+          <div 
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl"
+            style={{ transform: `translateY(${scrollY * 0.3}px)` }}
+          ></div>
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+            style={{ transform: `translateY(${scrollY * -0.2}px)` }}
+          ></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8 apple-fade-in">
+              <div className="space-y-6">
+                <p className="text-sm font-medium text-white/60 tracking-wider uppercase">
+                  {t('home.unlock')}
+                </p>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                  {t('home.title')}
+                </h1>
+                <p className="text-xl text-white/70 max-w-xl">
+                  {t('home.subtitle')}
+                </p>
               </div>
-              
-              <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="text-gradient">{content.title}</span>
-              </h1>
-              
-              <p className="text-2xl text-[#FFD700] font-semibold">
-                {content.subtitle}
-              </p>
-              
-              <p className="text-xl text-gray-300 leading-relaxed">
-                {content.description}
-              </p>
-              
-              <div className="flex gap-4 pt-4">
+
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/trade">
-                  <button className="neumorphic px-10 py-4 rounded-xl font-semibold text-lg hover:scale-105 transition-all duration-300 micro-interaction">
-                    {content.startTrading}
-                  </button>
+                  <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-10 py-7 w-full sm:w-auto">
+                    {t('home.startTrading')} →
+                  </Button>
                 </Link>
-                <button className="glass px-10 py-4 rounded-xl font-semibold text-lg border border-white/20 hover:border-[#0ABAB5] transition-all duration-300">
-                  {content.learnMore}
-                </button>
+                <Button size="lg" variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 text-lg px-10 py-7 w-full sm:w-auto">
+                  {t('home.learnMore')}
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-xs text-white/60 mb-1">{t('home.24hVolume')}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-white">$3.37B</div>
+                </div>
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-xs text-white/60 mb-1">{t('home.cumulativeVolume')}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-white">$139.20B</div>
+                </div>
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-xs text-white/60 mb-1">{t('home.addresses')}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-white">147,278</div>
+                </div>
               </div>
             </div>
 
-            {/* Right: Geometric Visual */}
-            <div className="relative hover-reveal">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0ABAB5] to-[#A855F7] rounded-full blur-3xl opacity-20 animate-pulse"></div>
-              <img 
-                src="/hero-visual.png" 
-                alt="PerpX Visualization" 
-                className="relative z-10 w-full h-auto animate-float"
-              />
+            {/* Right Content - Logo Display with Parallax */}
+            <div 
+              className="relative apple-scale-in"
+              style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+            >
+              <div className="glass-card rounded-2xl p-12 aspect-square flex items-center justify-center gradient-border relative overflow-hidden">
+                {/* Animated Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
+                <img src="/logo-horizontal.png" alt="PerpX" className="w-full max-w-md relative z-10" />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-32 relative">
-        <div className="container mx-auto px-6">
-          <h2 className="text-5xl font-bold text-center mb-20 text-gradient scroll-reveal">
-            {content.features}
-          </h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { title: content.feature1Title, desc: content.feature1Desc, icon: "🤖" },
-              { title: content.feature2Title, desc: content.feature2Desc, icon: "💧" },
-              { title: content.feature3Title, desc: content.feature3Desc, icon: "⚡" },
-              { title: content.feature4Title, desc: content.feature4Desc, icon: "🚀" },
-              { title: content.feature5Title, desc: content.feature5Desc, icon: "💰" },
-              { title: content.feature6Title, desc: content.feature6Desc, icon: "📊" }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="glass p-8 rounded-2xl hover-reveal hover:scale-105 transition-all duration-500 scroll-reveal"
+      <section ref={featuresRef} className="py-24 relative opacity-0 transition-opacity duration-1000">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 apple-fade-in">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+              Why Choose PerpX?
+            </h2>
+            <p className="text-xl text-white/60">
+              Next-generation trading experience designed for everyone
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div 
+                key={index} 
+                className="glass-card rounded-xl p-8 hover-reveal apple-fade-in group cursor-pointer"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h3 className="text-2xl font-bold mb-4 text-[#0ABAB5]">{feature.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{feature.desc}</p>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
+                <p className="text-white/60 text-lg">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Roadmap Section - Vertical Scroll */}
-      <section className="py-32 relative">
-        <div className="container mx-auto px-6">
-          <h2 className="text-5xl font-bold text-center mb-20 text-gradient">
-            {content.roadmapTitle}
-          </h2>
-          
-          <div className="max-w-4xl mx-auto space-y-12">
-            {[
-              { title: content.q1Title, items: content.q1Items, color: "#0ABAB5" },
-              { title: content.q2Title, items: content.q2Items, color: "#A855F7" },
-              { title: content.q3Title, items: content.q3Items, color: "#FFD700" },
-              { title: content.q4Title, items: content.q4Items, color: "#10B981" }
-            ].map((quarter, index) => (
+      {/* Roadmap Section */}
+      <section ref={roadmapRef} className="py-24 relative overflow-hidden opacity-0 transition-opacity duration-1000">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 apple-fade-in">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+              Roadmap
+            </h2>
+            <p className="text-xl text-white/60">
+              Aggressive Launch Plan for a Fast-Moving Market
+            </p>
+          </div>
+
+          {/* Roadmap Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {roadmapItems.map((item, index) => (
               <div
                 key={index}
-                ref={(el: HTMLDivElement | null) => { roadmapItemsRef.current[index] = el; }}
-                className="roadmap-item glass p-8 rounded-2xl border-l-4 hover:scale-105 transition-all duration-500"
-                style={{ borderLeftColor: quarter.color }}
+                className="relative overflow-hidden rounded-3xl p-[1.5px] apple-fade-in"
+                style={{ 
+                  animationDelay: `${index * 200}ms`,
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 3.9%, rgba(255,255,255,0.85) 6.2%, rgba(255,255,255,0.8) 9.2%, rgba(255,255,255,0.72) 15%, rgba(255,255,255,0.64) 22.8%, rgba(255,255,255,0) 35.7%, rgba(255,255,255,0.12) 48.2%, rgba(255,255,255,0) 66.9%, rgba(255,255,255,0.4) 82.5%, rgba(153,153,153,0.4) 100%)'
+                }}
               >
-                <h3 className="text-3xl font-bold mb-6" style={{ color: quarter.color }}>
-                  {quarter.title}
-                </h3>
-                <ul className="space-y-3">
-                  {quarter.items.map((item: string, i: number) => (
-                    <li key={i} className="flex items-center gap-3 text-lg text-gray-300">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: quarter.color }}></span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <div className="relative w-full overflow-hidden rounded-[22px] bg-[#181818] shadow-[24px_24px_120px_rgba(255,255,255,0.08)]">
+                  {/* Glow Effect */}
+                  <div className="absolute z-10 pointer-events-none top-0 left-0">
+                    <div className="absolute left-0 top-0 rounded-full bg-[#d9d9d9]" style={{ width: '72px', height: '72px', filter: 'blur(160px)' }}></div>
+                    <div className="absolute left-0 top-0 rounded-full bg-white" style={{ width: '32px', height: '32px', filter: 'blur(64px)' }}></div>
+                  </div>
+
+                  <div className="flex flex-col justify-between p-8 min-h-[280px]">
+                    {/* Icon */}
+                    <div className="flex w-full items-start justify-end">
+                      <div className={`w-[120px] h-[120px] rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center`}>
+                        <item.icon className="h-16 w-16 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col gap-6">
+                      <div className="text-left text-[40px] font-bold leading-[1.172] text-[#F9F9F9]">
+                        {item.quarter}
+                      </div>
+                      <div className="flex w-full flex-col gap-4">
+                        <div className="text-left text-[20px] font-medium leading-[1.5] text-[#F9F9F9]">
+                          {item.title}
+                        </div>
+                        <div className="w-full text-left text-[16px] leading-[1.5] text-[#F9F9F9]">
+                          {item.desc}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -285,67 +339,57 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 relative">
-        <div className="absolute inset-0 gradient-motion opacity-20"></div>
-        
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-5xl font-bold mb-6 text-gradient scroll-reveal">
-            {content.ctaTitle}
-          </h2>
-          <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto scroll-reveal">
-            {content.ctaDescription}
-          </p>
-          <Link href="/trade">
-            <button className="neumorphic px-12 py-5 rounded-xl font-semibold text-xl hover:scale-110 transition-all duration-300 micro-interaction">
-              {content.ctaButton}
-            </button>
-          </Link>
+      <section ref={ctaRef} className="py-24 relative opacity-0 transition-opacity duration-1000">
+        <div className="container mx-auto px-4">
+          <div className="glass-card rounded-2xl p-16 text-center max-w-4xl mx-auto relative overflow-hidden apple-scale-in">
+            {/* Animated Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+                {t('home.readyToStart')}
+              </h2>
+              <p className="text-xl text-white/60 mb-10 max-w-2xl mx-auto">
+                {t('home.readyToStartDesc')}
+              </p>
+              <Link href="/trade">
+                <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium text-xl px-16 py-8">
+                  {t('home.startTrading')} →
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="glass border-t border-white/10 py-12">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
-                <span className="text-xl font-bold text-gradient">PerpX</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Next-generation decentralized perpetual exchange for Asia
-              </p>
+      <footer className="border-t border-white/10 py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
+              <span className="text-lg font-bold text-white">PerpX</span>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-[#0ABAB5]">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/trade" className="hover:text-white transition-colors">Trade</Link></li>
-                <li><Link href="/stats" className="hover:text-white transition-colors">Stats</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
-              </ul>
+            <div className="text-white/60 text-sm">
+              © 2025 PerpX. All rights reserved.
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-[#0ABAB5]">Community</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-                <li><Link href="/referral" className="hover:text-white transition-colors">Referral</Link></li>
-              </ul>
+            <div className="flex gap-8">
+              <Link href="/privacy">
+                <a className="text-white/60 hover:text-white transition-colors text-sm">
+                  Privacy Policy
+                </a>
+              </Link>
+              <Link href="/terms">
+                <a className="text-white/60 hover:text-white transition-colors text-sm">
+                  Terms of Service
+                </a>
+              </Link>
+              <Link href="/docs">
+                <a className="text-white/60 hover:text-white transition-colors text-sm">
+                  Documentation
+                </a>
+              </Link>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-[#0ABAB5]">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-gray-400">
-            <p>&copy; 2025 PerpX. All rights reserved.</p>
           </div>
         </div>
       </footer>
