@@ -518,3 +518,7 @@
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
 }
+
+.animate-visible {
+  opacity: 1 !important;
+}

@@ -10,6 +10,9 @@ import Trade from "./pages/Trade";
 import Dashboard from "./pages/Dashboard";
 import Points from "./pages/Points";
 import Referral from "./pages/Referral";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Docs from "./pages/Docs";
 
 function Router() {
   return (
@@ -19,6 +22,9 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/points"} component={Points} />
       <Route path={"/referral"} component={Referral} />
+      <Route path={"/privacy"} component={Privacy} />
+      <Route path={"/terms"} component={Terms} />
+      <Route path={"/docs"} component={Docs} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
