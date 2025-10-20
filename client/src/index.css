@@ -192,3 +192,329 @@
 .animate-fade-in-right.animated {
   animation-name: fadeInRight;
 }
+
+/* ========================================
+   Advanced Animations for PerpX
+   ======================================== */
+
+/* 1. Parallax Scrolling */
+.parallax {
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.parallax-slow {
+  transform: translateY(calc(var(--scroll) * 0.5px));
+}
+
+.parallax-fast {
+  transform: translateY(calc(var(--scroll) * -0.3px));
+}
+
+/* 2. Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-menu {
+  background: rgba(26, 35, 50, 0.8);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 3. Neumorphism */
+.neuro-button {
+  background: linear-gradient(145deg, #1e2a3a, #16202e);
+  box-shadow: 
+    8px 8px 16px rgba(0, 0, 0, 0.4),
+    -8px -8px 16px rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.neuro-button:hover {
+  box-shadow: 
+    4px 4px 8px rgba(0, 0, 0, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.05);
+  transform: translateY(2px);
+}
+
+.neuro-button:active {
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+}
+
+.neuro-input {
+  background: linear-gradient(145deg, #16202e, #1e2a3a);
+  box-shadow: 
+    inset 6px 6px 12px rgba(0, 0, 0, 0.4),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.05);
+  border: none;
+}
+
+/* 4. Gradient Motion */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-motion {
+  background: linear-gradient(
+    -45deg,
+    #0ABAB5,
+    #A855F7,
+    #0ABAB5,
+    #10B981
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.gradient-motion-fast {
+  background: linear-gradient(
+    -45deg,
+    rgba(10, 186, 181, 0.3),
+    rgba(168, 85, 247, 0.3),
+    rgba(10, 186, 181, 0.3),
+    rgba(16, 185, 129, 0.3)
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* 5. Micro Interactions */
+.micro-bounce {
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.micro-bounce:hover {
+  transform: scale(1.05);
+}
+
+.micro-bounce:active {
+  transform: scale(0.95);
+}
+
+.micro-glow {
+  transition: all 0.3s ease;
+}
+
+.micro-glow:hover {
+  box-shadow: 0 0 20px rgba(10, 186, 181, 0.6);
+  filter: brightness(1.2);
+}
+
+.micro-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.micro-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.micro-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* 6. Hover Reveal */
+.hover-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-reveal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(10, 186, 181, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.hover-reveal:hover::before {
+  left: 100%;
+}
+
+.hover-reveal-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-reveal-image img {
+  transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+.hover-reveal-image:hover img {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.hover-reveal-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-reveal-text::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0ABAB5, #A855F7);
+  transition: width 0.3s ease;
+}
+
+.hover-reveal-text:hover::after {
+  width: 100%;
+}
+
+/* 7. Scroll Trigger Animations */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes rotate-in {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.scroll-trigger {
+  opacity: 0;
+}
+
+.scroll-trigger.triggered {
+  animation-duration: 0.8s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-scale-in.triggered {
+  animation-name: scale-in;
+}
+
+.scroll-slide-left.triggered {
+  animation-name: slide-in-left;
+}
+
+.scroll-slide-right.triggered {
+  animation-name: slide-in-right;
+}
+
+.scroll-rotate-in.triggered {
+  animation-name: rotate-in;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Glow */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(10, 186, 181, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(10, 186, 181, 0.8);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
