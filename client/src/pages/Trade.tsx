@@ -44,7 +44,7 @@ export default function Trade() {
   const [side, setSide] = useState<"long" | "short">("long");
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col" style={{backgroundColor: '#0ABAB5'}}>
       {/* Top Navigation */}
       <nav className="border-b border-primary/10 bg-card">
         <div className="px-4 py-3">
@@ -52,8 +52,8 @@ export default function Trade() {
             <div className="flex items-center gap-6">
               <Link href="/">
                 <div className="flex items-center gap-2 cursor-pointer">
-                  <img src="/logo-icon.png" alt="PerpDEX" className="h-8 w-8" />
-                  <img src="/logo-dark.png" alt="PerpDEX" className="h-5" />
+                  <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
+                  <img src="/logo-horizontal.png" alt="PerpX" className="h-5" />
                 </div>
               </Link>
               <div className="flex items-center gap-4">

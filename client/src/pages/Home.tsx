@@ -16,14 +16,14 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{backgroundColor: '#0ABAB5'}}>
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 glass border-b border-primary/10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/logo-icon.png" alt="PerpDEX" className="h-8 w-8" />
-              <img src="/logo-dark.png" alt="PerpDEX" className="h-6" />
+              <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
+              <img src="/logo-horizontal.png" alt="PerpX" className="h-6" />
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm hover:text-primary transition-colors">
@@ -293,8 +293,8 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo-icon.png" alt="PerpDEX" className="h-8 w-8" />
-                <img src="/logo-dark.png" alt="PerpDEX" className="h-6" />
+                <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
+                <img src="/logo-horizontal.png" alt="PerpX" className="h-6" />
               </div>
               <p className="text-sm text-muted-foreground">
                 Next-generation AI-powered perpetual DEX for Asia and beyond.
@@ -334,7 +334,7 @@ export default function Home() {
           
           <div className="border-t border-primary/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2025 PerpDEX. All rights reserved.
+              © 2025 PerpX. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>

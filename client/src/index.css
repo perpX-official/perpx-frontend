@@ -54,22 +54,22 @@
   --chart-4: 0 84% 60%;
   --chart-5: 215 25% 12%;
   --radius: 0.75rem;
-  --background: 210 60% 8%; /* Deep Navy #0A1628 */
-  --foreground: 0 0% 98%;
-  --card: 215 25% 12%; /* Charcoal #1A2332 */
-  --card-foreground: 0 0% 98%;
+  --background: 177 91% 37%; /* Tiffany Blue #0ABAB5 */
+  --foreground: 0 0% 100%; /* White text */
+  --card: 177 70% 45%; /* Darker Tiffany Blue */
+  --card-foreground: 0 0% 100%;
   --popover: 215 25% 12%;
   --popover-foreground: 0 0% 98%;
   --secondary: 267 70% 62%; /* AI Purple #A855F7 */
   --secondary-foreground: 0 0% 100%;
-  --muted: 215 20% 20%;
-  --muted-foreground: 0 0% 65%;
+  --muted: 177 60% 50%;
+  --muted-foreground: 0 0% 95%;
   --accent: 177 91% 37%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%; /* Red #EF4444 */
   --destructive-foreground: 0 0% 100%;
-  --border: 215 20% 20%;
-  --input: 215 20% 20%;
+  --border: 177 60% 50%;
+  --input: 177 60% 50%;
   --ring: 177 91% 37%;
   --sidebar: 215 25% 12%;
   --sidebar-foreground: 0 0% 98%;
@@ -80,27 +80,27 @@
 }
 
 .dark {
-  /* Same as root - PerpDEX is dark-first */
+  /* Same as root - PerpX is Tiffany Blue first */
   --primary: 177 91% 37%;
   --primary-foreground: 0 0% 100%;
   --sidebar-primary: 177 91% 37%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --background: 210 60% 8%;
-  --foreground: 0 0% 98%;
+  --background: 177 91% 37%; /* Tiffany Blue #0ABAB5 */
+  --foreground: 0 0% 100%; /* White text */
   --card: 215 25% 12%;
-  --card-foreground: 0 0% 98%;
+  --card-foreground: 0 0% 100%;
   --popover: 215 25% 12%;
   --popover-foreground: 0 0% 98%;
   --secondary: 267 70% 62%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 215 20% 20%;
-  --muted-foreground: 0 0% 65%;
+  --muted: 177 60% 50%;
+  --muted-foreground: 0 0% 95%;
   --accent: 177 91% 37%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 215 20% 20%;
-  --input: 215 20% 20%;
+  --border: 177 60% 50%;
+  --input: 177 60% 50%;
   --ring: 177 91% 37%;
   --chart-1: 177 91% 37%;
   --chart-2: 267 70% 62%;
