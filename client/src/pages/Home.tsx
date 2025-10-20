@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useRef, useState } from "react";
-import { Rocket, Gift, Palette, CreditCard } from "lucide-react";
+import { Code, Rocket, Layers, Waves } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -34,46 +34,32 @@ export default function Home() {
 
   const roadmapItems = [
     {
-      date: "Oct 2025",
-      title: { en: "Development Kickoff", ja: "開発着手", zh: "开发启动" },
+      quarter: "Q1 2026",
+      title: { en: "PerpX V1: Perpetual and Spot DEX", ja: "PerpX V1: 永続取引とスポットDEX", zh: "PerpX V1: 永续和现货DEX" },
+      desc: { en: "Web and Mobile Applications Launch", ja: "ウェブおよびモバイルアプリケーション開始", zh: "网页和移动应用启动" },
       icon: Rocket,
-      color: "from-yellow-500 to-orange-500"
+      color: "from-blue-500 to-cyan-500"
     },
     {
-      date: "Nov 2025",
-      title: { en: "Testing & Marketing Prep", ja: "テスト・マーケティング", zh: "测试与营销" },
-      icon: Palette,
-      color: "from-green-500 to-teal-500"
-    },
-    {
-      date: "Dec 2025",
-      title: { en: "Platform Launch", ja: "プラットフォームローンチ", zh: "平台启动" },
-      icon: Rocket,
-      color: "from-blue-500 to-purple-500"
-    },
-    {
-      date: "End of Dec 2025",
-      title: { en: "First Airdrop Round", ja: "第一弾エアドロップ", zh: "第一轮空投" },
-      icon: Gift,
+      quarter: "Q2 2026",
+      title: { en: "Strategy: On-Chain Asset Management", ja: "戦略: オンチェーン資産管理", zh: "策略: 链上资产管理" },
+      desc: { en: "LP and Trading Strategy Vaults Launch", ja: "LPおよび取引戦略ボールト開始", zh: "LP和交易策略金库启动" },
+      icon: Layers,
       color: "from-purple-500 to-pink-500"
     },
     {
-      date: "Jan 2026",
-      title: { en: "Second Airdrop Round", ja: "第二弾エアドロップ", zh: "第二轮空投" },
-      icon: Gift,
-      color: "from-pink-500 to-red-500"
+      quarter: "Q3 2026",
+      title: { en: "PerpX V2: High-Performance Layer 2", ja: "PerpX V2: 高性能レイヤー2", zh: "PerpX V2: 高性能Layer 2" },
+      desc: { en: "Blockchain Testnet Launch", ja: "ブロックチェーンテストネット開始", zh: "区块链测试网启动" },
+      icon: Code,
+      color: "from-green-500 to-teal-500"
     },
     {
-      date: "Apr 2026",
-      title: { en: "NFT Trading Achievements", ja: "NFTインテグレーション", zh: "NFT集成" },
-      icon: Palette,
-      color: "from-cyan-500 to-blue-500"
-    },
-    {
-      date: "Late 2026",
-      title: { en: "VISA Card Integration", ja: "VISAカード連携", zh: "VISA卡集成" },
-      icon: CreditCard,
-      color: "from-indigo-500 to-purple-500"
+      quarter: "Q4 2026",
+      title: { en: "Permissionless Liquidity Modules", ja: "パーミッションレス流動性モジュール", zh: "无许可流动性模块" },
+      desc: { en: "Anyone can create, manage, and deploy liquidity strategies", ja: "誰でも流動性戦略を作成、管理、展開可能", zh: "任何人都可以创建、管理和部署流动性策略" },
+      icon: Waves,
+      color: "from-orange-500 to-red-500"
     }
   ];
 
@@ -93,7 +79,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <div className="relative group">
                 <button className="px-4 py-2 text-white/80 hover:text-white transition-colors flex items-center gap-1">
-                  <span className="text-sm">{t('language')}</span>
+                  <span className="text-sm">EN</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -112,7 +98,7 @@ export default function Home() {
               </div>
 
               <Link href="/trade">
-                <Button className="neuro-button micro-bounce micro-glow text-white font-medium">
+                <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium px-8">
                   {t('launchApp')}
                 </Button>
               </Link>
@@ -134,23 +120,23 @@ export default function Home() {
             {/* Left Content */}
             <div className="text-left space-y-6 apple-fade-in">
               <div className="text-sm text-white/60 uppercase tracking-wider">
-                {t('unlockYourTradingEdge')}
+                UNLOCK YOUR TRADING EDGE
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                {t('liquidityForAll')}
+                Liquidity for all
               </h1>
               <p className="text-lg text-white/70 max-w-xl">
-                {t('ultraFastDecentralized')}
+                Ultra-fast decentralized perpetual exchange with deep liquidity, powered by advanced AI trading assistance.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/trade">
-                  <Button className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-8 py-6">
-                    {t('startTrading')} →
+                  <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-10 py-7">
+                    Start Trading →
                   </Button>
                 </Link>
-                <Button variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 text-lg px-8 py-6">
-                  {t('learnMore')}
+                <Button size="lg" variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 text-lg px-10 py-7">
+                  Learn More
                 </Button>
               </div>
 
@@ -188,39 +174,39 @@ export default function Home() {
             {[
               {
                 icon: "🎨",
-                title: { en: "Beautiful UI/UX", ja: "美しいUI/UX", zh: "精美UI/UX" },
-                desc: { en: "Intuitive design for seamless trading", ja: "シームレスな取引のための直感的なデザイン", zh: "无缝交易的直观设计" }
+                title: "Beautiful UI/UX",
+                desc: "Intuitive design for seamless trading"
               },
               {
                 icon: "🚀",
-                title: { en: "Lightning Fast", ja: "超高速", zh: "闪电般快速" },
-                desc: { en: "Execute trades in milliseconds", ja: "ミリ秒単位で取引を実行", zh: "毫秒级交易执行" }
+                title: "Lightning Fast",
+                desc: "Execute trades in milliseconds"
               },
               {
                 icon: "🔒",
-                title: { en: "Self-Custody", ja: "自己管理", zh: "自我托管" },
-                desc: { en: "Your keys, your crypto", ja: "あなたの鍵、あなたの暗号資産", zh: "您的密钥，您的加密货币" }
+                title: "Self-Custody",
+                desc: "Your keys, your crypto"
               },
               {
                 icon: "📊",
-                title: { en: "Advanced Analytics", ja: "高度な分析", zh: "高级分析" },
-                desc: { en: "Professional trading tools", ja: "プロフェッショナルな取引ツール", zh: "专业交易工具" }
+                title: "Advanced Analytics",
+                desc: "Professional trading tools"
               },
               {
                 icon: "🎓",
-                title: { en: "Built-in Education", ja: "組み込み教育", zh: "内置教育" },
-                desc: { en: "Learn while you trade", ja: "取引しながら学ぶ", zh: "边交易边学习" }
+                title: "Built-in Education",
+                desc: "Learn while you trade"
               },
               {
                 icon: "🌐",
-                title: { en: "Multi-Chain Support", ja: "マルチチェーン対応", zh: "多链支持" },
-                desc: { en: "Solana & EVM compatible", ja: "Solana & EVM対応", zh: "Solana & EVM兼容" }
+                title: "Multi-Chain Support",
+                desc: "Solana & EVM compatible"
               }
             ].map((feature, index) => (
               <div key={index} className="glass-card rounded-xl p-6 hover-reveal apple-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-white mb-2">{feature.title.en}</h3>
-                <p className="text-white/60">{feature.desc.en}</p>
+                <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-white/60">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -232,49 +218,59 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              {t('roadmap') || 'Roadmap'}
+              Roadmap
             </h2>
             <p className="text-white/60 text-lg">
-              {t('aggressiveLaunchPlan') || 'Aggressive Launch Plan for a Fast-Moving Market'}
+              Aggressive Launch Plan for a Fast-Moving Market
             </p>
           </div>
 
-          <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary via-purple-500 to-pink-500 hidden lg:block"></div>
-
-            {/* Roadmap Items */}
-            <div className="space-y-12">
-              {roadmapItems.map((item, index) => (
-                <div
-                  key={index}
-                  className={`flex flex-col lg:flex-row items-center gap-8 ${
-                    index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
-                  } ${isVisible ? 'apple-fade-in' : 'opacity-0'}`}
-                  style={{ animationDelay: `${index * 200}ms` }}
-                >
-                  {/* Content Card */}
-                  <div className={`flex-1 ${index % 2 === 0 ? 'lg:text-right' : 'lg:text-left'}`}>
-                    <div className="glass-card rounded-xl p-6 hover-reveal">
-                      <div className={`flex items-center gap-3 mb-3 ${index % 2 === 0 ? 'lg:justify-end' : 'lg:justify-start'}`}>
-                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center`}>
-                          <item.icon className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="text-sm text-primary font-bold">{item.date}</div>
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-2">{item.title.en}</h3>
-                      <p className="text-white/60 text-sm">{item.title.ja}</p>
-                    </div>
+          {/* Roadmap Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {roadmapItems.map((item, index) => (
+              <div
+                key={index}
+                className={`relative overflow-hidden rounded-3xl p-[1.5px] ${
+                  isVisible ? 'apple-fade-in' : 'opacity-0'
+                }`}
+                style={{ 
+                  animationDelay: `${index * 200}ms`,
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 3.9%, rgba(255,255,255,0.85) 6.2%, rgba(255,255,255,0.8) 9.2%, rgba(255,255,255,0.72) 15%, rgba(255,255,255,0.64) 22.8%, rgba(255,255,255,0) 35.7%, rgba(255,255,255,0.12) 48.2%, rgba(255,255,255,0) 66.9%, rgba(255,255,255,0.4) 82.5%, rgba(153,153,153,0.4) 100%)'
+                }}
+              >
+                <div className="relative w-full overflow-hidden rounded-[22px] bg-[#181818] shadow-[24px_24px_120px_rgba(255,255,255,0.08)]">
+                  {/* Glow Effect */}
+                  <div className="absolute z-10 pointer-events-none">
+                    <div className="absolute left-0 top-0 rounded-full bg-[#d9d9d9]" style={{ width: '72px', height: '72px', filter: 'blur(160px)' }}></div>
+                    <div className="absolute left-0 top-0 rounded-full bg-white" style={{ width: '32px', height: '32px', filter: 'blur(64px)' }}></div>
                   </div>
 
-                  {/* Center Dot */}
-                  <div className="hidden lg:block w-4 h-4 rounded-full bg-white border-4 border-primary shadow-lg z-10"></div>
+                  <div className="flex flex-col justify-between p-8 phone:p-4 min-h-[280px]">
+                    {/* Icon */}
+                    <div className="flex w-full items-start justify-end">
+                      <div className={`w-[120px] h-[120px] rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center phone:w-10 phone:h-10`}>
+                        <item.icon className="h-16 w-16 text-white phone:h-5 phone:w-5" />
+                      </div>
+                    </div>
 
-                  {/* Spacer */}
-                  <div className="flex-1 hidden lg:block"></div>
+                    {/* Content */}
+                    <div className="flex flex-col gap-6 phone:gap-2">
+                      <div className="text-left text-[40px] font-bold leading-[1.172] text-[#F9F9F9] phone:text-xl phone:leading-none">
+                        {item.quarter}
+                      </div>
+                      <div className="flex w-full max-w-[409px] flex-col gap-4 phone:max-w-none phone:gap-2">
+                        <div className="text-left text-[20px] font-medium leading-[1.5] text-[#F9F9F9] phone:text-[16px] phone:font-normal">
+                          {item.title.en}
+                        </div>
+                        <div className="w-full text-left text-[16px] leading-[1.5] text-[#F9F9F9] phone:max-w-none phone:text-[12px] phone:leading-[1.6]">
+                          {item.desc.en}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -284,14 +280,14 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="glass-card rounded-2xl p-12 text-center max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              {t('readyToStartTrading')}
+              Ready to Start Trading?
             </h2>
             <p className="text-white/60 text-lg mb-8">
-              {t('joinThousandsOfTraders')}
+              Join thousands of traders on the next-generation perpetual DEX
             </p>
             <Link href="/trade">
-              <Button className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-12 py-6">
-                {t('startTrading')} →
+              <Button size="lg" className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-12 py-6">
+                Start Trading →
               </Button>
             </Link>
           </div>
