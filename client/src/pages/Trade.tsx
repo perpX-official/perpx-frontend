@@ -2,15 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "wouter";
 import { useState } from "react";
 import {
   Star,
-  Settings,
-  Menu,
-  X,
   ChevronDown,
 } from "lucide-react";
+import Header from "@/components/Header";
 
 const markets = [
   { symbol: "BTCUSDT", price: "111,062.6", change: "+3.17%", positive: true },
@@ -37,50 +34,13 @@ const orderBookBids = [
 ];
 
 export default function Trade() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orderType, setOrderType] = useState("Market");
   const [marginType, setMarginType] = useState("Cross");
   const [leverage, setLeverage] = useState("25x");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Top Navigation */}
-      <nav className="border-b border-white/10 bg-card">
-        <div className="px-3 sm:px-4 py-2 sm:py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                className="lg:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
-              <Link href="/">
-                <a className="flex items-center gap-2">
-                  <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                  <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
-                </a>
-              </Link>
-              <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
-                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Perpetual</a>
-                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">1001x</a>
-                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Spot</a>
-                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Portfolio</a>
-                <Link href="/referral"><a className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Referral</a></Link>
-                <Link href="/points"><a className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Rewards</a></Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-white/80 hover:text-white">
-                <Settings className="h-4 w-4" />
-              </Button>
-              <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                Connect wallet
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Market Info Bar */}
       <div className="border-b border-white/10 bg-card">

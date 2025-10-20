@@ -9,67 +9,13 @@ import {
   Coins,
   Network,
   ArrowRight,
-  Menu,
-  X,
 } from "lucide-react";
-import { useState } from "react";
+import Header from "@/components/Header";
 
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <nav className="border-b border-white/10 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
-        <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                className="md:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
-              <Link href="/">
-                <a className="flex items-center gap-2">
-                  <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                  <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
-                </a>
-              </Link>
-              <div className="hidden md:flex items-center gap-3 sm:gap-6 ml-4 sm:ml-8">
-                <a href="#features" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Features</a>
-                <a href="#stats" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Stats</a>
-                <a href="#roadmap" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Roadmap</a>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden sm:flex items-center gap-2 text-xs">
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">EN</Button>
-                <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">JP</Button>
-                <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">CN</Button>
-              </div>
-              <Link href="/trade">
-                <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                  Launch App
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-card border-b border-white/10 p-4">
-          <div className="flex flex-col gap-3">
-            <a href="#features" className="text-sm text-white/60">Features</a>
-            <a href="#stats" className="text-sm text-white/60">Stats</a>
-            <a href="#roadmap" className="text-sm text-white/60">Roadmap</a>
-          </div>
-        </div>
-      )}
+      <Header />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden px-3 sm:px-4 lg:px-6 py-12 sm:py-16 lg:py-24">

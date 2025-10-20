@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,69 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "wouter";
-import { Copy, ExternalLink, Menu, X, Settings } from "lucide-react";
-import { useState } from "react";
+import { Copy, ExternalLink } from "lucide-react";
 
 export default function Referral() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <nav className="border-b border-white/10 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
-        <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                className="md:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
-              <Link href="/">
-                <a className="flex items-center gap-2">
-                  <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                  <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
-                </a>
-              </Link>
-              <div className="hidden md:flex items-center gap-3 sm:gap-6 ml-4 sm:ml-8">
-                <Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Perpetual</a></Link>
-                <Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Portfolio</a></Link>
-                <Link href="/referral"><a className="text-xs sm:text-sm text-white hover:text-white transition-colors">Referral</a></Link>
-                <Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Rewards</a></Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden sm:flex items-center gap-2 text-xs">
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">EN</Button>
-                <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">JP</Button>
-                <span className="text-white/40">|</span>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">CN</Button>
-              </div>
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-white/80 hover:text-white">
-                <Settings className="h-4 w-4" />
-              </Button>
-              <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                Connect wallet
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-card border-b border-white/10 p-4">
-          <div className="flex flex-col gap-3">
-            <Link href="/trade"><a className="text-sm text-white/60">Perpetual</a></Link>
-            <Link href="/dashboard"><a className="text-sm text-white/60">Portfolio</a></Link>
-            <Link href="/referral"><a className="text-sm text-white">Referral</a></Link>
-            <Link href="/points"><a className="text-sm text-white/60">Rewards</a></Link>
-          </div>
-        </div>
-      )}
+      <Header />
 
       {/* Main Content */}
       <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12">
