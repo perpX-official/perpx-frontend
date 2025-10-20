@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { TrendingUp, Zap, Shield, BarChart3, Coins, Network } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 export default function Home() {
   const { t } = useLanguage();
+  useScrollAnimation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -16,7 +18,7 @@ export default function Home() {
         <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-12 sm:py-16 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6 sm:space-y-8 animate-on-scroll animate-fade-in-left">
               <div className="space-y-4 sm:space-y-6">
                 <p className="text-xs sm:text-sm font-medium text-white/60 tracking-wider uppercase">
                   {t('home.unlock')}
@@ -58,34 +60,11 @@ export default function Home() {
             </div>
 
             {/* Right Content - Screenshot with Border Animation */}
-            <div className="relative">
+            <div className="relative animate-on-scroll animate-fade-in-right">
               <div className="relative rounded-3xl overflow-hidden border-2 border-white/10 shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent animate-pulse"></div>
                 <div className="relative bg-card/50 backdrop-blur-sm p-8 sm:p-12 lg:p-16 aspect-[4/3] flex items-center justify-center">
                   <img src="/logo-horizontal.png" alt="PerpX" className="w-full max-w-md opacity-90" />
-                </div>
-              </div>
-
-              {/* Feature Cards */}
-              <div className="absolute -left-4 sm:-left-8 top-1/4 transform -translate-y-1/2 hidden md:block">
-                <div className="bg-card border border-white/10 rounded-2xl p-4 sm:p-5 w-40 sm:w-48 shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-white font-medium">{t('home.selfCustody')}</p>
-                </div>
-              </div>
-
-              <div className="absolute -left-4 sm:-left-8 bottom-1/4 transform translate-y-1/2 hidden md:block">
-                <div className="bg-card border border-white/10 rounded-2xl p-4 sm:p-5 w-40 sm:w-48 shadow-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-white font-medium">{t('home.lightningFast')}</p>
                 </div>
               </div>
             </div>
@@ -96,7 +75,7 @@ export default function Home() {
       {/* High-Performance Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-card/30">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-12 sm:mb-16">
+          <div className="text-center mb-12 sm:mb-16 animate-on-scroll animate-fade-in-up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
               {t('home.highPerformance')}
             </h2>
@@ -106,7 +85,7 @@ export default function Home() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.1s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -114,7 +93,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.ultraDeepLiquidityDesc')}</p>
             </div>
 
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -122,7 +101,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.highPerformanceDesc2')}</p>
             </div>
 
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.3s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -130,7 +109,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.provenSecurityDesc')}</p>
             </div>
 
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.4s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -138,7 +117,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.leverageDesc')}</p>
             </div>
 
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.5s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <Coins className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -146,7 +125,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.earnYieldDesc')}</p>
             </div>
 
-            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all">
+            <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-primary/50 transition-all animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.6s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6">
                 <Network className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -160,7 +139,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="bg-gradient-to-r from-primary/20 to-transparent border border-white/10 rounded-3xl p-8 sm:p-12 lg:p-16 text-center">
+          <div className="bg-gradient-to-r from-primary/20 to-transparent border border-white/10 rounded-3xl p-8 sm:p-12 lg:p-16 text-center animate-on-scroll animate-fade-in-up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
               {t('home.readyToStart')}
             </h2>
@@ -185,7 +164,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-8 sm:py-12">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div>
+            <div className="animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.1s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Product</h3>
               <ul className="space-y-2">
                 <li><Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white">Trade</a></Link></li>
@@ -194,7 +173,7 @@ export default function Home() {
                 <li><Link href="/referral"><a className="text-xs sm:text-sm text-white/60 hover:text-white">Referral</a></Link></li>
               </ul>
             </div>
-            <div>
+            <div className="animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white">Documentation</a></li>
@@ -203,7 +182,7 @@ export default function Home() {
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white">Blog</a></li>
               </ul>
             </div>
-            <div>
+            <div className="animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.3s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Community</h3>
               <ul className="space-y-2">
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white">Twitter</a></li>
@@ -211,7 +190,7 @@ export default function Home() {
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white">Telegram</a></li>
               </ul>
             </div>
-            <div>
+            <div className="animate-on-scroll animate-fade-in-up" style={{animationDelay: '0.4s'}}>
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
                 <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
