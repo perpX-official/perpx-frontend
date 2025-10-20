@@ -1,272 +1,317 @@
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { TrendingUp, Zap, Shield, BarChart3, Coins, Network } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Rocket, Gift, Palette, CreditCard } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
-  const [scrollY, setScrollY] = useState(0);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const roadmapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
 
-      // Apple-style scroll animations
-      const elements = document.querySelectorAll('.apple-fade-in');
-      elements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        if (rect.top < windowHeight * 0.75) {
-          el.classList.add('visible');
-        }
-      });
+    if (roadmapRef.current) {
+      observer.observe(roadmapRef.current);
+    }
+
+    return () => {
+      if (roadmapRef.current) {
+        observer.unobserve(roadmapRef.current);
+      }
     };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calculate parallax values
-  const heroParallax = scrollY * 0.5;
-  const imageParallax = scrollY * -0.3;
-  const heroOpacity = Math.max(1 - scrollY / 500, 0);
-  const heroScale = Math.max(1 - scrollY / 2000, 0.95);
+  const roadmapItems = [
+    {
+      date: "Oct 2025",
+      title: { en: "Development Kickoff", ja: "開発着手", zh: "开发启动" },
+      icon: Rocket,
+      color: "from-yellow-500 to-orange-500"
+    },
+    {
+      date: "Nov 2025",
+      title: { en: "Testing & Marketing Prep", ja: "テスト・マーケティング", zh: "测试与营销" },
+      icon: Palette,
+      color: "from-green-500 to-teal-500"
+    },
+    {
+      date: "Dec 2025",
+      title: { en: "Platform Launch", ja: "プラットフォームローンチ", zh: "平台启动" },
+      icon: Rocket,
+      color: "from-blue-500 to-purple-500"
+    },
+    {
+      date: "End of Dec 2025",
+      title: { en: "First Airdrop Round", ja: "第一弾エアドロップ", zh: "第一轮空投" },
+      icon: Gift,
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      date: "Jan 2026",
+      title: { en: "Second Airdrop Round", ja: "第二弾エアドロップ", zh: "第二轮空投" },
+      icon: Gift,
+      color: "from-pink-500 to-red-500"
+    },
+    {
+      date: "Apr 2026",
+      title: { en: "NFT Trading Achievements", ja: "NFTインテグレーション", zh: "NFT集成" },
+      icon: Palette,
+      color: "from-cyan-500 to-blue-500"
+    },
+    {
+      date: "Late 2026",
+      title: { en: "VISA Card Integration", ja: "VISAカード連携", zh: "VISA卡集成" },
+      icon: CreditCard,
+      color: "from-indigo-500 to-purple-500"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Gradient Motion Background */}
-      <div className="fixed inset-0 gradient-motion-fast opacity-20 pointer-events-none"></div>
-      
-      <Header />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/">
+              <a className="flex items-center gap-2">
+                <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
+                <span className="text-xl font-bold text-white">PerpX</span>
+              </a>
+            </Link>
 
-      {/* Hero Section with Apple-style Parallax */}
-      <section 
-        ref={heroRef}
-        className="relative overflow-hidden min-h-screen flex items-center"
-        style={{
-          transform: `translateY(${heroParallax}px)`,
-          opacity: heroOpacity,
-        }}
-      >
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-12 sm:py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left Content */}
-            <div 
-              className="space-y-6 sm:space-y-8 relative z-10 apple-fade-in"
-              style={{
-                transform: `scale(${heroScale})`,
-              }}
-            >
-              <div className="space-y-4 sm:space-y-6">
-                <p className="text-xs sm:text-sm font-medium text-white/60 tracking-wider uppercase">
-                  {t('home.unlock')}
-                </p>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-                  {t('home.title')}
-                </h1>
-                <p className="text-sm sm:text-base lg:text-lg text-white/70 max-w-xl">
-                  {t('home.subtitle')}
-                </p>
+            <div className="flex items-center gap-4">
+              <div className="relative group">
+                <button className="px-4 py-2 text-white/80 hover:text-white transition-colors flex items-center gap-1">
+                  <span className="text-sm">{t('language')}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute right-0 mt-2 w-40 glass-card rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <button className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5 rounded-t-lg">
+                    English
+                  </button>
+                  <button className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5">
+                    日本語
+                  </button>
+                  <button className="w-full px-4 py-2 text-left text-white/80 hover:text-white hover:bg-white/5 rounded-b-lg">
+                    中文
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Link href="/trade">
+                <Button className="neuro-button micro-bounce micro-glow text-white font-medium">
+                  {t('launchApp')}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-left space-y-6 apple-fade-in">
+              <div className="text-sm text-white/60 uppercase tracking-wider">
+                {t('unlockYourTradingEdge')}
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                {t('liquidityForAll')}
+              </h1>
+              <p className="text-lg text-white/70 max-w-xl">
+                {t('ultraFastDecentralized')}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/trade">
-                  <Button className="neuro-button micro-bounce micro-glow text-white font-medium px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base w-full sm:w-auto">
-                    {t('home.startTrading')} →
+                  <Button className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-8 py-6">
+                    {t('startTrading')} →
                   </Button>
                 </Link>
-                <Button variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base w-full sm:w-auto micro-bounce">
-                  {t('home.learnMore')}
+                <Button variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 text-lg px-8 py-6">
+                  {t('learnMore')}
                 </Button>
               </div>
 
-              {/* Stats with Glassmorphism */}
-              <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-8">
-                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.1s'}}>
-                  <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.24hVolume')}</div>
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">$3.37B</div>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 pt-8">
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-sm text-white/60 mb-1">24h Volume</div>
+                  <div className="text-2xl font-bold text-white">$3.37B</div>
                 </div>
-                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.2s'}}>
-                  <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.cumulativeVolume')}</div>
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">$139.20B</div>
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-sm text-white/60 mb-1">Cumulative Volume</div>
+                  <div className="text-2xl font-bold text-white">$139.20B</div>
                 </div>
-                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.3s'}}>
-                  <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.addresses')}</div>
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">147,278</div>
+                <div className="glass-card rounded-lg p-4">
+                  <div className="text-sm text-white/60 mb-1">Addresses</div>
+                  <div className="text-2xl font-bold text-white">147,278</div>
                 </div>
               </div>
             </div>
 
-            {/* Right Content - Screenshot with Parallax */}
-            <div 
-              className="relative apple-fade-in"
-              style={{ 
-                transform: `translateY(${imageParallax}px)`,
-                transitionDelay: '0.2s'
-              }}
-            >
-              <div className="relative rounded-3xl overflow-hidden glass-card pulse-glow">
-                <div className="absolute inset-0 gradient-motion opacity-30"></div>
-                <div className="relative bg-card/50 backdrop-blur-sm p-8 sm:p-12 lg:p-16 aspect-[4/3] flex items-center justify-center hover-reveal-image">
-                  <img src="/logo-horizontal.png" alt="PerpX" className="w-full max-w-md opacity-90" />
-                </div>
+            {/* Right Content - Logo Display */}
+            <div className="relative apple-scale-in">
+              <div className="glass-card rounded-2xl p-12 aspect-square flex items-center justify-center gradient-border">
+                <img src="/logo-horizontal.png" alt="PerpX" className="w-full max-w-md" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* High-Performance Section with Apple-style Animation */}
-      <section 
-        ref={featuresRef}
-        className="py-12 sm:py-16 lg:py-24 bg-card/30 relative"
-      >
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-12 sm:mb-16 apple-fade-in">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-              {t('home.highPerformance')}
+      {/* Features Section */}
+      <section className="py-20 relative">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: "🎨",
+                title: { en: "Beautiful UI/UX", ja: "美しいUI/UX", zh: "精美UI/UX" },
+                desc: { en: "Intuitive design for seamless trading", ja: "シームレスな取引のための直感的なデザイン", zh: "无缝交易的直观设计" }
+              },
+              {
+                icon: "🚀",
+                title: { en: "Lightning Fast", ja: "超高速", zh: "闪电般快速" },
+                desc: { en: "Execute trades in milliseconds", ja: "ミリ秒単位で取引を実行", zh: "毫秒级交易执行" }
+              },
+              {
+                icon: "🔒",
+                title: { en: "Self-Custody", ja: "自己管理", zh: "自我托管" },
+                desc: { en: "Your keys, your crypto", ja: "あなたの鍵、あなたの暗号資産", zh: "您的密钥，您的加密货币" }
+              },
+              {
+                icon: "📊",
+                title: { en: "Advanced Analytics", ja: "高度な分析", zh: "高级分析" },
+                desc: { en: "Professional trading tools", ja: "プロフェッショナルな取引ツール", zh: "专业交易工具" }
+              },
+              {
+                icon: "🎓",
+                title: { en: "Built-in Education", ja: "組み込み教育", zh: "内置教育" },
+                desc: { en: "Learn while you trade", ja: "取引しながら学ぶ", zh: "边交易边学习" }
+              },
+              {
+                icon: "🌐",
+                title: { en: "Multi-Chain Support", ja: "マルチチェーン対応", zh: "多链支持" },
+                desc: { en: "Solana & EVM compatible", ja: "Solana & EVM対応", zh: "Solana & EVM兼容" }
+              }
+            ].map((feature, index) => (
+              <div key={index} className="glass-card rounded-xl p-6 hover-reveal apple-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-2">{feature.title.en}</h3>
+                <p className="text-white/60">{feature.desc.en}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Roadmap Section */}
+      <section ref={roadmapRef} className="py-20 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              {t('roadmap') || 'Roadmap'}
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-white/70 max-w-2xl mx-auto">
-              {t('home.highPerformanceDesc')}
+            <p className="text-white/60 text-lg">
+              {t('aggressiveLaunchPlan') || 'Aggressive Launch Plan for a Fast-Moving Market'}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {/* Feature Cards with Apple-style stagger */}
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.1s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.ultraDeepLiquidity')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.ultraDeepLiquidityDesc')}</p>
-            </div>
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary via-purple-500 to-pink-500 hidden lg:block"></div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.2s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.highPerformanceTitle')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.highPerformanceDesc2')}</p>
-            </div>
+            {/* Roadmap Items */}
+            <div className="space-y-12">
+              {roadmapItems.map((item, index) => (
+                <div
+                  key={index}
+                  className={`flex flex-col lg:flex-row items-center gap-8 ${
+                    index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
+                  } ${isVisible ? 'apple-fade-in' : 'opacity-0'}`}
+                  style={{ animationDelay: `${index * 200}ms` }}
+                >
+                  {/* Content Card */}
+                  <div className={`flex-1 ${index % 2 === 0 ? 'lg:text-right' : 'lg:text-left'}`}>
+                    <div className="glass-card rounded-xl p-6 hover-reveal">
+                      <div className={`flex items-center gap-3 mb-3 ${index % 2 === 0 ? 'lg:justify-end' : 'lg:justify-start'}`}>
+                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center`}>
+                          <item.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-sm text-primary font-bold">{item.date}</div>
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2">{item.title.en}</h3>
+                      <p className="text-white/60 text-sm">{item.title.ja}</p>
+                    </div>
+                  </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.3s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.provenSecurity')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.provenSecurityDesc')}</p>
-            </div>
+                  {/* Center Dot */}
+                  <div className="hidden lg:block w-4 h-4 rounded-full bg-white border-4 border-primary shadow-lg z-10"></div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.4s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.leverage')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.leverageDesc')}</p>
-            </div>
-
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.5s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <Coins className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.earnYield')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.earnYieldDesc')}</p>
-            </div>
-
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.6s'}}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
-                <Network className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 hover-reveal-text">{t('home.multiChain')}</h3>
-              <p className="text-xs sm:text-sm text-white/60">{t('home.multiChainDesc')}</p>
+                  {/* Spacer */}
+                  <div className="flex-1 hidden lg:block"></div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section with Apple-style reveal */}
-      <section 
-        ref={ctaRef}
-        className="py-12 sm:py-16 lg:py-24 relative"
-      >
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="glass-card rounded-3xl p-8 sm:p-12 lg:p-16 text-center apple-fade-in relative overflow-hidden">
-            <div className="absolute inset-0 gradient-motion opacity-20"></div>
-            <div className="relative z-10">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-                {t('home.readyToStart')}
-              </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-white/70 mb-6 sm:mb-8 max-w-2xl mx-auto">
-                {t('home.readyToStartDesc')}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <Link href="/trade">
-                  <Button className="neuro-button micro-bounce micro-glow text-white font-medium px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base w-full sm:w-auto">
-                    {t('button.launchApp')}
-                  </Button>
-                </Link>
-                <Button variant="outline" className="glass-card border-white/20 text-white hover:bg-white/10 px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base w-full sm:w-auto micro-bounce">
-                  {t('home.viewDocs')}
-                </Button>
-              </div>
-            </div>
+      {/* CTA Section */}
+      <section className="py-20 relative">
+        <div className="container mx-auto px-4">
+          <div className="glass-card rounded-2xl p-12 text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              {t('readyToStartTrading')}
+            </h2>
+            <p className="text-white/60 text-lg mb-8">
+              {t('joinThousandsOfTraders')}
+            </p>
+            <Link href="/trade">
+              <Button className="neuro-button micro-bounce micro-glow text-white font-medium text-lg px-12 py-6">
+                {t('startTrading')} →
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Footer with Glassmorphism */}
-      <footer className="border-t border-white/10 py-8 sm:py-12 glass-menu">
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="apple-fade-in" style={{transitionDelay: '0.1s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Product</h3>
-              <ul className="space-y-2">
-                <li><Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Trade</a></Link></li>
-                <li><Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Dashboard</a></Link></li>
-                <li><Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Points</a></Link></li>
-                <li><Link href="/referral"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Referral</a></Link></li>
-              </ul>
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-white/60 text-sm">
+              © 2025 PerpX. All rights reserved.
             </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.2s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Documentation</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">API</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Tutorials</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Blog</a></li>
-              </ul>
-            </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.3s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Community</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Twitter</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Discord</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Telegram</a></li>
-              </ul>
-            </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.4s'}}>
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
-              </div>
-              <p className="text-xs sm:text-sm text-white/60">
-                Next-generation AI-powered perpetual DEX for Asia and beyond.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 sm:pt-8 border-t border-white/10">
-            <p className="text-xs sm:text-sm text-white/60">© 2025 PerpX. All rights reserved.</p>
-            <div className="flex gap-4 sm:gap-6">
-              <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</a>
-              <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</a>
+            <div className="flex gap-6">
+              <a href="#" className="text-white/60 hover:text-white transition-colors text-sm">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-white/60 hover:text-white transition-colors text-sm">
+                Terms of Service
+              </a>
             </div>
           </div>
         </div>
