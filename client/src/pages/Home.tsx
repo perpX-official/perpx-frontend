@@ -3,21 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { TrendingUp, Zap, Shield, BarChart3, Coins, Network } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Home() {
   const { t } = useLanguage();
-  useScrollAnimation();
   const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
+
+      // Apple-style scroll animations
+      const elements = document.querySelectorAll('.apple-fade-in');
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        if (rect.top < windowHeight * 0.75) {
+          el.classList.add('visible');
+        }
+      });
     };
+
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Calculate parallax values
+  const heroParallax = scrollY * 0.5;
+  const imageParallax = scrollY * -0.3;
+  const heroOpacity = Math.max(1 - scrollY / 500, 0);
+  const heroScale = Math.max(1 - scrollY / 2000, 0.95);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -26,12 +47,24 @@ export default function Home() {
       
       <Header />
 
-      {/* Hero Section with Parallax */}
-      <section className="relative overflow-hidden">
+      {/* Hero Section with Apple-style Parallax */}
+      <section 
+        ref={heroRef}
+        className="relative overflow-hidden min-h-screen flex items-center"
+        style={{
+          transform: `translateY(${heroParallax}px)`,
+          opacity: heroOpacity,
+        }}
+      >
         <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-12 sm:py-16 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
-            <div className="space-y-6 sm:space-y-8 animate-on-scroll animate-fade-in-left relative z-10">
+            <div 
+              className="space-y-6 sm:space-y-8 relative z-10 apple-fade-in"
+              style={{
+                transform: `scale(${heroScale})`,
+              }}
+            >
               <div className="space-y-4 sm:space-y-6">
                 <p className="text-xs sm:text-sm font-medium text-white/60 tracking-wider uppercase">
                   {t('home.unlock')}
@@ -57,25 +90,28 @@ export default function Home() {
 
               {/* Stats with Glassmorphism */}
               <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-8">
-                <div className="glass-card p-3 sm:p-4 rounded-xl">
+                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.1s'}}>
                   <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.24hVolume')}</div>
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">$3.37B</div>
                 </div>
-                <div className="glass-card p-3 sm:p-4 rounded-xl">
+                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.2s'}}>
                   <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.cumulativeVolume')}</div>
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">$139.20B</div>
                 </div>
-                <div className="glass-card p-3 sm:p-4 rounded-xl">
+                <div className="glass-card p-3 sm:p-4 rounded-xl apple-fade-in" style={{transitionDelay: '0.3s'}}>
                   <div className="text-xs sm:text-sm text-white/60 mb-1">{t('home.addresses')}</div>
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">147,278</div>
                 </div>
               </div>
             </div>
 
-            {/* Right Content - Screenshot with Parallax & Gradient Motion */}
+            {/* Right Content - Screenshot with Parallax */}
             <div 
-              className="relative animate-on-scroll animate-fade-in-right float-animation"
-              style={{ transform: `translateY(${scrollY * -0.1}px)` }}
+              className="relative apple-fade-in"
+              style={{ 
+                transform: `translateY(${imageParallax}px)`,
+                transitionDelay: '0.2s'
+              }}
             >
               <div className="relative rounded-3xl overflow-hidden glass-card pulse-glow">
                 <div className="absolute inset-0 gradient-motion opacity-30"></div>
@@ -88,10 +124,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* High-Performance Section with Scroll Trigger */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-card/30 relative">
+      {/* High-Performance Section with Apple-style Animation */}
+      <section 
+        ref={featuresRef}
+        className="py-12 sm:py-16 lg:py-24 bg-card/30 relative"
+      >
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-12 sm:mb-16 scroll-trigger scroll-scale-in">
+          <div className="text-center mb-12 sm:mb-16 apple-fade-in">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
               {t('home.highPerformance')}
             </h2>
@@ -101,8 +140,8 @@ export default function Home() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {/* Feature Cards with Glassmorphism & Hover Reveal */}
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-slide-left" style={{animationDelay: '0.1s'}}>
+            {/* Feature Cards with Apple-style stagger */}
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.1s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -110,7 +149,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.ultraDeepLiquidityDesc')}</p>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-scale-in" style={{animationDelay: '0.2s'}}>
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.2s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -118,7 +157,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.highPerformanceDesc2')}</p>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-slide-right" style={{animationDelay: '0.3s'}}>
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.3s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -126,7 +165,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.provenSecurityDesc')}</p>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-slide-left" style={{animationDelay: '0.4s'}}>
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.4s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -134,7 +173,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.leverageDesc')}</p>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-scale-in" style={{animationDelay: '0.5s'}}>
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.5s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <Coins className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -142,7 +181,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-white/60">{t('home.earnYieldDesc')}</p>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal scroll-trigger scroll-slide-right" style={{animationDelay: '0.6s'}}>
+            <div className="glass-card rounded-2xl p-6 sm:p-8 hover-reveal apple-fade-in" style={{transitionDelay: '0.6s'}}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 sm:mb-6 micro-bounce">
                 <Network className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
               </div>
@@ -153,10 +192,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section with Gradient Motion */}
-      <section className="py-12 sm:py-16 lg:py-24 relative">
+      {/* CTA Section with Apple-style reveal */}
+      <section 
+        ref={ctaRef}
+        className="py-12 sm:py-16 lg:py-24 relative"
+      >
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="glass-card rounded-3xl p-8 sm:p-12 lg:p-16 text-center scroll-trigger scroll-scale-in relative overflow-hidden">
+          <div className="glass-card rounded-3xl p-8 sm:p-12 lg:p-16 text-center apple-fade-in relative overflow-hidden">
             <div className="absolute inset-0 gradient-motion opacity-20"></div>
             <div className="relative z-10">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
@@ -184,7 +226,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-8 sm:py-12 glass-menu">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="scroll-trigger scroll-slide-left" style={{animationDelay: '0.1s'}}>
+            <div className="apple-fade-in" style={{transitionDelay: '0.1s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Product</h3>
               <ul className="space-y-2">
                 <li><Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Trade</a></Link></li>
@@ -193,7 +235,7 @@ export default function Home() {
                 <li><Link href="/referral"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Referral</a></Link></li>
               </ul>
             </div>
-            <div className="scroll-trigger scroll-scale-in" style={{animationDelay: '0.2s'}}>
+            <div className="apple-fade-in" style={{transitionDelay: '0.2s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Documentation</a></li>
@@ -202,7 +244,7 @@ export default function Home() {
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Blog</a></li>
               </ul>
             </div>
-            <div className="scroll-trigger scroll-scale-in" style={{animationDelay: '0.3s'}}>
+            <div className="apple-fade-in" style={{transitionDelay: '0.3s'}}>
               <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Community</h3>
               <ul className="space-y-2">
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Twitter</a></li>
@@ -210,7 +252,7 @@ export default function Home() {
                 <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Telegram</a></li>
               </ul>
             </div>
-            <div className="scroll-trigger scroll-slide-right" style={{animationDelay: '0.4s'}}>
+            <div className="apple-fade-in" style={{transitionDelay: '0.4s'}}>
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
                 <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
