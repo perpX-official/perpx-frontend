@@ -10,9 +10,13 @@ import Trade from "./pages/Trade";
 import Dashboard from "./pages/Dashboard";
 import Points from "./pages/Points";
 import Referral from "./pages/Referral";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
+import Stats from "./pages/Stats";
+import Rewards from "./pages/Rewards";
+import Feedback from "./pages/Feedback";
+import VIP from "./pages/VIP";
+import API from "./pages/API";
 import Docs from "./pages/Docs";
+import Blog from "./pages/Blog";
 
 function Router() {
   return (
@@ -22,9 +26,13 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/points"} component={Points} />
       <Route path={"/referral"} component={Referral} />
-      <Route path={"/privacy"} component={Privacy} />
-      <Route path={"/terms"} component={Terms} />
+      <Route path={"/stats"} component={Stats} />
+      <Route path={"/rewards"} component={Rewards} />
+      <Route path={"/feedback"} component={Feedback} />
+      <Route path={"/vip"} component={VIP} />
+      <Route path={"/api"} component={API} />
       <Route path={"/docs"} component={Docs} />
+      <Route path={"/blog"} component={Blog} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
