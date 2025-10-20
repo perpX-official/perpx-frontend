@@ -1,39 +1,46 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
 import { Link } from "wouter";
 import { useState } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
+  Star,
   Settings,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 
 const markets = [
-  { symbol: "BTC/USDC", price: "112,238.5", change: "+2.45%", positive: true },
-  { symbol: "ETH/USDC", price: "4,028.41", change: "+1.44%", positive: true },
-  { symbol: "SOL/USDC", price: "245.67", change: "-0.82%", positive: false },
-  { symbol: "ARB/USDC", price: "1.234", change: "+5.23%", positive: true },
-  { symbol: "OP/USDC", price: "2.567", change: "+3.12%", positive: true },
+  { symbol: "BTCUSDT", price: "111,062.6", change: "+3.17%", positive: true },
+  { symbol: "ETHUSDT", price: "4,030.1", change: "+2.76%", positive: true },
+  { symbol: "SOLUSDT", price: "191.91", change: "+1.56%", positive: true },
+  { symbol: "XRPUSDT", price: "2.4491", change: "+3.21%", positive: true },
+  { symbol: "DOGEUSDT", price: "0.2006", change: "+3.53%", positive: true },
 ];
 
-const orderBook = [
-  { price: "112,238.96", size: "0.0157", total: "116.16" },
-  { price: "112,238.91", size: "0.0472", total: "116.14" },
-  { price: "112,238.87", size: "0.2783", total: "76.09" },
-  { price: "112,238.85", size: "0.0616", total: "75.82" },
-  { price: "112,238.84", size: "24.8370", total: "75.75" },
+const orderBookAsks = [
+  { price: "111,073.6", size: "1,110.8", sum: "4,116,250.1" },
+  { price: "111,073.5", size: "165,355.9", sum: "4,115,139.3" },
+  { price: "111,073.1", size: "89,969.3", sum: "3,952,083.4" },
+  { price: "111,072.9", size: "111.1", sum: "3,862,114.1" },
+  { price: "111,071.6", size: "84,969.8", sum: "3,862,003.0" },
+];
+
+const orderBookBids = [
+  { price: "111,062.6", size: "111,063.0", sum: "" },
+  { price: "111,062.6", size: "1,388,504.7", sum: "1,388,504.7" },
+  { price: "111,057.2", size: "141,486.9", sum: "1,529,991.6" },
+  { price: "111,056.9", size: "68,189.0", sum: "1,598,180.6" },
+  { price: "111,056.7", size: "68,188.9", sum: "1,666,369.5" },
 ];
 
 export default function Trade() {
-  const [leverage, setLeverage] = useState([10]);
-  const [orderType, setOrderType] = useState("market");
-  const [side, setSide] = useState<"long" | "short">("long");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [orderType, setOrderType] = useState("Market");
+  const [marginType, setMarginType] = useState("Cross");
+  const [leverage, setLeverage] = useState("25x");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -43,7 +50,7 @@ export default function Trade() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
               <button
-                className="md:hidden p-2"
+                className="lg:hidden p-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -54,11 +61,13 @@ export default function Trade() {
                   <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
                 </a>
               </Link>
-              <div className="hidden md:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
-                <Link href="/trade"><a className="text-xs sm:text-sm text-primary font-semibold">Trade</a></Link>
-                <Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Dashboard</a></Link>
-                <Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Points</a></Link>
-                <Link href="/referral"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Referral</a></Link>
+              <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
+                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Perpetual</a>
+                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">1001x</a>
+                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Spot</a>
+                <a href="#" className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Portfolio</a>
+                <Link href="/referral"><a className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Referral</a></Link>
+                <Link href="/points"><a className="text-xs sm:text-sm text-white/80 hover:text-white transition-colors">Rewards</a></Link>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -66,67 +75,68 @@ export default function Trade() {
                 <Settings className="h-4 w-4" />
               </Button>
               <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                Connect Wallet
+                Connect wallet
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-card border-b border-white/10 p-4">
-          <div className="flex flex-col gap-3">
-            <Link href="/trade"><a className="text-sm text-primary font-semibold">Trade</a></Link>
-            <Link href="/dashboard"><a className="text-sm text-white/60">Dashboard</a></Link>
-            <Link href="/points"><a className="text-sm text-white/60">Points</a></Link>
-            <Link href="/referral"><a className="text-sm text-white/60">Referral</a></Link>
-          </div>
-        </div>
-      )}
-
       {/* Market Info Bar */}
       <div className="border-b border-white/10 bg-card">
-        <div className="px-3 sm:px-4 py-2 sm:py-3 overflow-x-auto">
-          <div className="flex items-center gap-3 sm:gap-6 min-w-max">
-            <div>
-              <div className="text-xs text-white/60">Mark Price</div>
-              <div className="text-sm sm:text-base font-semibold text-white">$112,238.55</div>
+        <div className="px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-yellow-500" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-white">BTCUSDT</span>
+                <ChevronDown className="h-4 w-4 text-white/60" />
+              </div>
             </div>
-            <div>
-              <div className="text-xs text-white/60">24h Change</div>
-              <div className="text-sm sm:text-base font-semibold text-green-500">+2.45%</div>
-            </div>
-            <div>
-              <div className="text-xs text-white/60">24h Volume</div>
-              <div className="text-sm sm:text-base font-semibold text-white">$1.4B</div>
-            </div>
-            <div>
-              <div className="text-xs text-white/60">Open Interest</div>
-              <div className="text-sm sm:text-base font-semibold text-white">$336.8M</div>
-            </div>
-            <div>
-              <div className="text-xs text-white/60">1hr Funding</div>
-              <div className="text-sm sm:text-base font-semibold text-white">-0.0002%</div>
+            <div className="flex items-center gap-6">
+              <div>
+                <div className="text-lg font-bold text-white">111,062.6</div>
+                <div className="text-xs text-green-500">+3.17%</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Mark</div>
+                <div className="text-sm text-white">111,063.0</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Index</div>
+                <div className="text-sm text-white">111,091.0</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Funding/Countdown</div>
+                <div className="text-sm text-white">0.0100% / 03:19:18</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">24h volume</div>
+                <div className="text-sm text-white">11.04B USDT</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Open Interest</div>
+                <div className="text-sm text-white">1.54B USDT</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Trading Interface */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left Sidebar - Markets (Hidden on mobile) */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Markets */}
         <div className="hidden lg:block w-64 border-r border-white/10 bg-card overflow-y-auto">
           <div className="p-3">
             <Input
-              placeholder="Search markets..."
+              placeholder="Search"
               className="mb-3 bg-background border-white/10 text-sm"
             />
             <div className="space-y-1">
               {markets.map((market) => (
                 <button
                   key={market.symbol}
-                  className="w-full p-2 hover:bg-white/5 rounded-lg transition-colors text-left"
+                  className="w-full p-2 hover:bg-white/5 rounded transition-colors text-left"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-semibold text-white">{market.symbol}</span>
@@ -134,195 +144,291 @@ export default function Trade() {
                       {market.change}
                     </span>
                   </div>
-                  <div className="text-sm text-white/80">${market.price}</div>
+                  <div className="text-sm text-white/80">{market.price}</div>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Center - Chart Area */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Chart Placeholder */}
-          <div className="flex-1 bg-card border-b border-white/10 p-3 sm:p-4">
-            <div className="h-full bg-background/50 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-base sm:text-lg text-white/60 mb-2">TradingView Chart</div>
-                <div className="text-xs sm:text-sm text-white/40">BTC/USDC • 5m</div>
+        {/* Center & Right Content */}
+        <div className="flex-1 flex flex-col lg:flex-row">
+          {/* Chart Area */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 bg-card p-3 sm:p-4">
+              <div className="h-full bg-background/50 rounded flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-base sm:text-lg text-white/60 mb-2">TradingView Chart</div>
+                  <div className="text-xs sm:text-sm text-white/40">BTCUSDT • 1D</div>
+                </div>
               </div>
+            </div>
+
+            {/* Bottom Tabs */}
+            <div className="bg-card border-t border-white/10">
+              <Tabs defaultValue="positions" className="w-full">
+                <div className="border-b border-white/10 px-3 sm:px-4">
+                  <TabsList className="bg-transparent h-auto p-0">
+                    <TabsTrigger value="positions" className="text-xs sm:text-sm">Positions</TabsTrigger>
+                    <TabsTrigger value="orders" className="text-xs sm:text-sm">Open orders</TabsTrigger>
+                    <TabsTrigger value="history" className="text-xs sm:text-sm">Order history</TabsTrigger>
+                    <TabsTrigger value="trade" className="text-xs sm:text-sm">Trade history</TabsTrigger>
+                    <TabsTrigger value="transaction" className="text-xs sm:text-sm">Transaction history</TabsTrigger>
+                    <TabsTrigger value="deposits" className="text-xs sm:text-sm">Deposits & withdrawals</TabsTrigger>
+                    <TabsTrigger value="assets" className="text-xs sm:text-sm">Assets</TabsTrigger>
+                  </TabsList>
+                </div>
+                <TabsContent value="positions" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No positions
+                  </div>
+                </TabsContent>
+                <TabsContent value="orders" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No open orders
+                  </div>
+                </TabsContent>
+                <TabsContent value="history" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No order history
+                  </div>
+                </TabsContent>
+                <TabsContent value="trade" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No trade history
+                  </div>
+                </TabsContent>
+                <TabsContent value="transaction" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No transaction history
+                  </div>
+                </TabsContent>
+                <TabsContent value="deposits" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No deposits or withdrawals
+                  </div>
+                </TabsContent>
+                <TabsContent value="assets" className="p-3 sm:p-4 m-0">
+                  <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
+                    No assets
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 
-          {/* Bottom Tabs - Positions/Orders */}
-          <div className="bg-card border-t border-white/10">
-            <Tabs defaultValue="positions" className="w-full">
+          {/* Right Sidebar - Order Book & Trading Panel */}
+          <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-white/10 bg-card flex flex-col">
+            {/* Order Book & Trades Tabs */}
+            <Tabs defaultValue="orderbook" className="flex-1 flex flex-col">
               <div className="border-b border-white/10 px-3 sm:px-4">
                 <TabsList className="bg-transparent h-auto p-0">
-                  <TabsTrigger value="positions" className="text-xs sm:text-sm">Positions</TabsTrigger>
-                  <TabsTrigger value="orders" className="text-xs sm:text-sm">Open Orders</TabsTrigger>
-                  <TabsTrigger value="history" className="text-xs sm:text-sm">Order History</TabsTrigger>
+                  <TabsTrigger value="orderbook" className="text-xs sm:text-sm">Order book</TabsTrigger>
+                  <TabsTrigger value="trades" className="text-xs sm:text-sm">Trades</TabsTrigger>
                 </TabsList>
               </div>
-              <TabsContent value="positions" className="p-3 sm:p-4 m-0">
-                <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
-                  No active positions
+
+              <TabsContent value="orderbook" className="flex-1 p-3 overflow-y-auto m-0">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-2">
+                  <span>Price (USDT)</span>
+                  <span>Size (USDT)</span>
+                  <span>Sum (USDT)</span>
+                </div>
+
+                {/* Asks */}
+                <div className="space-y-0.5 mb-2">
+                  {orderBookAsks.map((order, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-red-500">{order.price}</span>
+                      <span className="text-white/60">{order.size}</span>
+                      <span className="text-white/40">{order.sum}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Current Price */}
+                <div className="py-2 text-center border-y border-white/10 my-2">
+                  <span className="text-lg font-bold text-green-500">111,062.6 ↑</span>
+                </div>
+
+                {/* Bids */}
+                <div className="space-y-0.5">
+                  {orderBookBids.map((order, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-green-500">{order.price}</span>
+                      <span className="text-white/60">{order.size}</span>
+                      <span className="text-white/40">{order.sum}</span>
+                    </div>
+                  ))}
                 </div>
               </TabsContent>
-              <TabsContent value="orders" className="p-3 sm:p-4 m-0">
-                <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
-                  No open orders
-                </div>
-              </TabsContent>
-              <TabsContent value="history" className="p-3 sm:p-4 m-0">
-                <div className="text-center py-6 sm:py-8 text-white/60 text-sm">
-                  No order history
+
+              <TabsContent value="trades" className="flex-1 p-3 overflow-y-auto m-0">
+                <div className="text-center py-8 text-white/60 text-sm">
+                  No recent trades
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
-        </div>
 
-        {/* Right Sidebar - Order Book & Trading Panel */}
-        <div className="w-full lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-white/10 bg-card flex flex-col">
-          {/* Order Book */}
-          <div className="flex-1 p-3 border-b border-white/10 overflow-y-auto max-h-64 lg:max-h-none">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs sm:text-sm font-semibold text-white">Order Book</h3>
+            {/* Trading Panel */}
+            <div className="border-t border-white/10 p-3 sm:p-4 space-y-3 sm:space-y-4">
+              {/* Margin Type & Leverage */}
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white/60">
-                  <span className="text-xs">0.01</span>
+                <Button
+                  variant={marginType === "Cross" ? "default" : "outline"}
+                  size="sm"
+                  className={`flex-1 text-xs ${
+                    marginType === "Cross"
+                      ? "bg-primary text-white"
+                      : "border-white/20 text-white/60"
+                  }`}
+                  onClick={() => setMarginType("Cross")}
+                >
+                  Cross
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 text-white/60 text-xs"
+                >
+                  {leverage}
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-white/20 text-white/60 text-xs"
+                >
+                  M
+                </Button>
+              </div>
+
+              {/* Order Type Tabs */}
+              <div className="flex gap-2">
+                {["Market", "Limit", "Stop Limit"].map((type) => (
+                  <Button
+                    key={type}
+                    variant={orderType === type ? "default" : "outline"}
+                    size="sm"
+                    className={`flex-1 text-xs ${
+                      orderType === type
+                        ? "bg-primary text-white"
+                        : "border-white/20 text-white/60"
+                    }`}
+                    onClick={() => setOrderType(type)}
+                  >
+                    {type}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Price Input */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-white/60">Price (USDT)</label>
+                  <span className="text-xs text-white/60">Avbl 0.00 USDT</span>
+                </div>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value="111073.6"
+                    className="bg-background border-white/10 text-sm pr-16"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">
+                    Mid
+                  </span>
+                </div>
+              </div>
+
+              {/* Size Input */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Size</label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="0"
+                    className="bg-background border-white/10 text-sm pr-16"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 text-xs text-white/60"
+                  >
+                    USDT
+                    <ChevronDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Percentage Slider */}
+              <div className="flex gap-1">
+                {["0%", "25%", "50%", "75%", "100%"].map((pct) => (
+                  <button
+                    key={pct}
+                    className="flex-1 py-1 text-xs text-white/60 hover:text-white hover:bg-white/5 rounded transition-colors"
+                  >
+                    {pct}
+                  </button>
+                ))}
+              </div>
+
+              {/* Advanced Options */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs text-white/60">
+                  <input type="checkbox" className="rounded" />
+                  TP/SL
+                </label>
+                <label className="flex items-center gap-2 text-xs text-white/60">
+                  <input type="checkbox" className="rounded" />
+                  Hidden Order
+                </label>
+                <label className="flex items-center gap-2 text-xs text-white/60">
+                  <input type="checkbox" className="rounded" />
+                  Reduce-Only
+                </label>
+              </div>
+
+              {/* Order Summary */}
+              <div className="space-y-1 text-xs pt-2 border-t border-white/10">
+                <div className="flex justify-between text-white/60">
+                  <span>Liq.Price --</span>
+                  <span>Liq.Price --</span>
+                </div>
+                <div className="flex justify-between text-white/60">
+                  <span>Margin 0.00</span>
+                  <span>Margin 0.00</span>
+                </div>
+                <div className="flex justify-between text-white/60">
+                  <span>Max 0.0 USDT</span>
+                  <span>Max 0.0 USDT</span>
+                </div>
+                <div className="flex justify-between text-white/60">
+                  <span>Fees</span>
+                  <span>----</span>
+                </div>
+              </div>
+
+              {/* Buy/Sell Buttons */}
+              <Button className="w-full bg-primary hover:bg-primary/90 text-white text-sm">
+                Connect wallet
+              </Button>
+            </div>
+
+            {/* Account Section */}
+            <div className="border-t border-white/10 p-3 sm:p-4">
+              <div className="text-sm font-semibold text-white mb-3">Account</div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 border-white/20 text-white/60 text-xs">
+                  Deposit
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1 border-white/20 text-white/60 text-xs">
+                  Withdraw
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1 border-white/20 text-white/60 text-xs">
+                  Transfer
                 </Button>
               </div>
             </div>
-            
-            {/* Asks */}
-            <div className="space-y-0.5 mb-2">
-              {orderBook.map((order, i) => (
-                <div key={i} className="flex items-center justify-between text-xs">
-                  <span className="text-red-500">{order.price}</span>
-                  <span className="text-white/60">{order.size}</span>
-                  <span className="text-white/40">{order.total}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Spread */}
-            <div className="py-2 text-center">
-              <span className="text-xs text-white/60">Spread: 0.20 (0.005%)</span>
-            </div>
-
-            {/* Bids */}
-            <div className="space-y-0.5">
-              {orderBook.map((order, i) => (
-                <div key={i} className="flex items-center justify-between text-xs">
-                  <span className="text-green-500">{order.price}</span>
-                  <span className="text-white/60">{order.size}</span>
-                  <span className="text-white/40">{order.total}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Trading Panel */}
-          <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-            {/* Order Type Tabs */}
-            <Tabs value={orderType} onValueChange={setOrderType}>
-              <TabsList className="w-full bg-background">
-                <TabsTrigger value="market" className="flex-1 text-xs sm:text-sm">Market</TabsTrigger>
-                <TabsTrigger value="limit" className="flex-1 text-xs sm:text-sm">Limit</TabsTrigger>
-                <TabsTrigger value="stop" className="flex-1 text-xs sm:text-sm">Stop</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {/* Long/Short Buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant={side === "long" ? "default" : "outline"}
-                className={`${
-                  side === "long"
-                    ? "bg-green-500 hover:bg-green-600 text-white"
-                    : "border-white/20 text-white/60 hover:bg-white/5"
-                } text-xs sm:text-sm`}
-                onClick={() => setSide("long")}
-              >
-                <TrendingUp className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-                Long
-              </Button>
-              <Button
-                variant={side === "short" ? "default" : "outline"}
-                className={`${
-                  side === "short"
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "border-white/20 text-white/60 hover:bg-white/5"
-                } text-xs sm:text-sm`}
-                onClick={() => setSide("short")}
-              >
-                <TrendingDown className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-                Short
-              </Button>
-            </div>
-
-            {/* Amount Input */}
-            <div>
-              <label className="text-xs text-white/60 mb-1 block">Amount</label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="0.0000"
-                  className="bg-background border-white/10 pr-16 text-sm"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">
-                  BTC
-                </span>
-              </div>
-            </div>
-
-            {/* Leverage Slider */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs text-white/60">Leverage</label>
-                <span className="text-xs sm:text-sm font-semibold text-white">{leverage[0]}x</span>
-              </div>
-              <Slider
-                value={leverage}
-                onValueChange={setLeverage}
-                min={1}
-                max={100}
-                step={1}
-                className="mb-1"
-              />
-              <div className="flex justify-between text-xs text-white/40">
-                <span>1x</span>
-                <span>100x</span>
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-white/60">
-                <span>Order Value:</span>
-                <span>--</span>
-              </div>
-              <div className="flex justify-between text-white/60">
-                <span>Est. Liq. Price:</span>
-                <span>--</span>
-              </div>
-              <div className="flex justify-between text-white/60">
-                <span>Fees:</span>
-                <span>Taker: 0% | Maker: 0%</span>
-              </div>
-            </div>
-
-            {/* Place Order Button */}
-            <Button
-              className={`w-full ${
-                side === "long"
-                  ? "bg-green-500 hover:bg-green-600"
-                  : "bg-red-500 hover:bg-red-600"
-              } text-white text-sm sm:text-base`}
-            >
-              Connect Wallet to Trade
-            </Button>
           </div>
         </div>
       </div>

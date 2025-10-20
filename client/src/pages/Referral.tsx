@@ -1,36 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
 import {
-  Users,
-  DollarSign,
-  Gift,
-  Award,
-  Copy,
-  Check,
-  Twitter,
-  Send,
-  Menu,
-  X,
-} from "lucide-react";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Link } from "wouter";
+import { Copy, ExternalLink, Menu, X, Settings } from "lucide-react";
 import { useState } from "react";
 
-const referrals = [
-  { address: "0x1234...5678", status: "Active", volume: "$12,450", earnings: "$124.50" },
-  { address: "0x8765...4321", status: "Active", volume: "$8,230", earnings: "$82.30" },
-  { address: "0xabcd...efgh", status: "Active", volume: "$5,670", earnings: "$56.70" },
-];
-
 export default function Referral() {
-  const [copied, setCopied] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText("PERPX-ABC123");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,10 +36,10 @@ export default function Referral() {
                 </a>
               </Link>
               <div className="hidden md:flex items-center gap-3 sm:gap-6 ml-4 sm:ml-8">
-                <Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Trade</a></Link>
-                <Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Dashboard</a></Link>
-                <Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Points</a></Link>
-                <Link href="/referral"><a className="text-xs sm:text-sm text-primary font-semibold">Referral</a></Link>
+                <Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Perpetual</a></Link>
+                <Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Portfolio</a></Link>
+                <Link href="/referral"><a className="text-xs sm:text-sm text-white hover:text-white transition-colors">Referral</a></Link>
+                <Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Rewards</a></Link>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -66,8 +50,11 @@ export default function Referral() {
                 <span className="text-white/40">|</span>
                 <Button variant="ghost" size="sm" className="text-white/80 hover:text-white h-7 px-2">CN</Button>
               </div>
+              <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-white/80 hover:text-white">
+                <Settings className="h-4 w-4" />
+              </Button>
               <Button className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm px-3 sm:px-4">
-                Connect Wallet
+                Connect wallet
               </Button>
             </div>
           </div>
@@ -78,230 +65,214 @@ export default function Referral() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-card border-b border-white/10 p-4">
           <div className="flex flex-col gap-3">
-            <Link href="/trade"><a className="text-sm text-white/60">Trade</a></Link>
-            <Link href="/dashboard"><a className="text-sm text-white/60">Dashboard</a></Link>
-            <Link href="/points"><a className="text-sm text-white/60">Points</a></Link>
-            <Link href="/referral"><a className="text-sm text-primary font-semibold">Referral</a></Link>
+            <Link href="/trade"><a className="text-sm text-white/60">Perpetual</a></Link>
+            <Link href="/dashboard"><a className="text-sm text-white/60">Portfolio</a></Link>
+            <Link href="/referral"><a className="text-sm text-white">Referral</a></Link>
+            <Link href="/points"><a className="text-sm text-white/60">Rewards</a></Link>
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-        {/* Header - AsterDEX Style */}
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12">
+        {/* Hero Section */}
+        <div className="mb-8 sm:mb-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3">
+                Invite friends, Earn together
+              </h1>
+              <p className="text-sm sm:text-base text-white/70 mb-4">
+                Invite friends to trade on PerpX and earn commission on their trading fees.
+              </p>
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                Learn more about our referral program
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+            <div className="hidden sm:block">
+              <img
+                src="/logo-horizontal.png"
+                alt="Referral"
+                className="w-48 sm:w-60 md:w-64 opacity-80"
+              />
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3">
-            Referral Program
-          </h1>
-          <p className="text-sm sm:text-base text-white/70 max-w-2xl mx-auto mb-2">
-            Earn up to a <span className="text-orange-500 font-semibold">10% Rebate</span> when you invite friends!
-          </p>
-          <p className="text-xs sm:text-sm text-white/60 max-w-2xl mx-auto">
-            The more friends you invite, the more you earn!
-          </p>
-          <a href="#" className="inline-block text-xs sm:text-sm text-primary hover:underline mt-2">
-            View referral rules →
-          </a>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-card border-white/10">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <div className="text-xs sm:text-sm text-white/60">Total Referrals</div>
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+        {/* Invite & Summary Cards */}
+        <div className="grid gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 mb-8 sm:mb-12">
+          {/* Invite Now Card */}
+          <Card className="bg-gradient-to-b from-primary/10 to-transparent border-white/10">
+            <CardHeader className="border-b border-white/10">
+              <CardTitle className="text-base sm:text-lg text-white">Invite now</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-white/60 mb-1">You receive</div>
+                  <div className="text-primary font-semibold">--</div>
+                </div>
+                <div>
+                  <div className="text-white/60 mb-1">Your invitee receive</div>
+                  <div className="text-primary font-semibold">--</div>
+                </div>
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">0</div>
-              <div className="text-xs text-white/40">All time</div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-card border-white/10">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <div className="text-xs sm:text-sm text-white/60">Total Earnings</div>
-                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">$0.00</div>
-              <div className="text-xs text-green-500">+0%</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-white/10">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <div className="text-xs sm:text-sm text-white/60">This Month</div>
-                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">$0.00</div>
-              <div className="text-xs text-white/40">0 referrals</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-white/10">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <div className="text-xs sm:text-sm text-white/60">Bonus Points</div>
-                <Award className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">0</div>
-              <div className="text-xs text-white/40">From referrals</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Invite & Tiers */}
-        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Your Referral Link */}
-          <Card className="bg-card border-white/10">
-            <CardContent className="p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">
-                Invite now
-              </h3>
-              
               <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="text-xs sm:text-sm text-white/60 mb-2 block">Referral Code</label>
-                  <div className="flex gap-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm text-white/80">Referral code</label>
+                    <button className="text-white/60 hover:text-white transition-colors">
+                      <Copy className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Input
-                      value="PERPX-ABC123"
+                      value="--"
                       readOnly
-                      className="bg-background border-white/10 text-sm"
+                      className="bg-card border-white/10 text-white/60 text-sm"
                     />
-                    <Button
-                      onClick={handleCopy}
-                      className="bg-primary hover:bg-primary/90 text-white px-3"
-                    >
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs sm:text-sm text-white/60 mb-2 block">Referral Link</label>
-                  <div className="flex gap-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm text-white/80">Referral link</label>
+                    <button className="text-white/60 hover:text-white transition-colors">
+                      <Copy className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Input
-                      value="https://perpx.io/ref/PERPX-ABC123"
+                      value="--"
                       readOnly
-                      className="bg-background border-white/10 text-sm"
+                      className="bg-card border-white/10 text-white/60 text-sm"
                     />
-                    <Button
-                      onClick={handleCopy}
-                      className="bg-primary hover:bg-primary/90 text-white px-3"
-                    >
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <Button className="flex-1 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white text-sm">
-                    <Twitter className="mr-2 h-4 w-4" />
-                    Share on Twitter
-                  </Button>
-                  <Button className="flex-1 bg-[#0088cc] hover:bg-[#006699] text-white text-sm">
-                    <Send className="mr-2 h-4 w-4" />
-                    Share on Telegram
-                  </Button>
-                </div>
-
-                <div className="mt-4 p-3 bg-background/50 rounded-lg">
-                  <div className="text-xs sm:text-sm font-semibold text-white mb-2">How it works</div>
-                  <ul className="text-xs sm:text-sm text-white/60 space-y-1">
-                    <li>• Share your referral link with friends</li>
-                    <li>• They sign up and start trading</li>
-                    <li>• You earn 10% of their trading fees</li>
-                    <li>• Earnings are paid out weekly</li>
-                  </ul>
-                </div>
               </div>
+
+              <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+                Connect wallet
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Referral Tiers */}
-          <Card className="bg-card border-white/10">
+          {/* Summary Card */}
+          <Card className="bg-gradient-to-b from-card/50 to-transparent border-white/10">
+            <CardHeader className="border-b border-white/10">
+              <CardTitle className="text-base sm:text-lg text-white">Summary of invitations</CardTitle>
+            </CardHeader>
             <CardContent className="p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">
-                Referral Tiers
-              </h3>
-
-              <div className="space-y-3 sm:space-y-4">
-                <div className="p-3 bg-gradient-to-r from-orange-500/20 to-orange-600/10 border border-orange-500/30 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm sm:text-base font-bold text-orange-500">Bronze (0-9 referrals)</div>
-                    <div className="text-base sm:text-lg font-bold text-orange-500">10%</div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-white/60">Standard commission rate</div>
+              <dl className="grid grid-cols-1 gap-4 sm:gap-6">
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-white/60">Total Volume</dt>
+                  <dd className="text-sm text-white font-semibold">
+                    <span className="text-white/60">/</span>
+                  </dd>
                 </div>
-
-                <div className="p-3 bg-gradient-to-r from-gray-400/20 to-gray-500/10 border border-gray-400/30 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm sm:text-base font-bold text-gray-400">Silver (10-49 referrals)</div>
-                    <div className="text-base sm:text-lg font-bold text-gray-400">15%</div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-white/60">+500 bonus points</div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-white/60">Referral rewards</dt>
+                  <dd className="text-sm text-white font-semibold">
+                    <span className="text-white/60">/</span>
+                  </dd>
                 </div>
-
-                <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-yellow-600/10 border border-yellow-500/30 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm sm:text-base font-bold text-yellow-500">Gold (50-99 referrals)</div>
-                    <div className="text-base sm:text-lg font-bold text-yellow-500">20%</div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-white/60">+2,000 bonus points</div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-white/60">Referred friends</dt>
+                  <dd className="text-sm text-white font-semibold">
+                    <span className="text-white/60">/</span>
+                  </dd>
                 </div>
-
-                <div className="p-3 bg-gradient-to-r from-primary/20 to-secondary/10 border border-primary/30 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm sm:text-base font-bold text-primary">Platinum (100+ referrals)</div>
-                    <div className="text-base sm:text-lg font-bold text-primary">25%</div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-white/60">+10,000 bonus points + NFT badge</div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-white/60">Friends who traded</dt>
+                  <dd className="text-sm text-white font-semibold">
+                    <span className="text-white/60">/</span>
+                  </dd>
                 </div>
-              </div>
+              </dl>
             </CardContent>
           </Card>
         </div>
 
-        {/* Your Referrals Table */}
-        <Card className="bg-card border-white/10">
-          <CardContent className="p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">
-              Your Referrals
-            </h3>
-
+        {/* Referral Tiers */}
+        <Card className="border-white/10 mb-8 sm:mb-12">
+          <CardHeader className="border-b border-white/10">
+            <CardTitle className="text-base sm:text-lg text-white">Referral tiers</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left text-xs sm:text-sm text-white/60 font-semibold pb-3">Address</th>
-                    <th className="text-left text-xs sm:text-sm text-white/60 font-semibold pb-3">Status</th>
-                    <th className="text-right text-xs sm:text-sm text-white/60 font-semibold pb-3">Volume</th>
-                    <th className="text-right text-xs sm:text-sm text-white/60 font-semibold pb-3">Your Earnings</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {referrals.map((ref, i) => (
-                    <tr key={i} className="border-b border-white/5">
-                      <td className="py-3 text-xs sm:text-sm text-white">{ref.address}</td>
-                      <td className="py-3">
-                        <span className="inline-block px-2 py-1 bg-green-500/20 text-green-500 text-xs rounded">
-                          {ref.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right text-xs sm:text-sm text-white">{ref.volume}</td>
-                      <td className="py-3 text-right text-xs sm:text-sm text-green-500 font-semibold">{ref.earnings}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Tier</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">30-day Volume</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Your Rewards</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Friend Discount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow className="border-white/10 hover:bg-white/5">
+                    <TableCell className="text-white text-xs sm:text-sm">Tier 1</TableCell>
+                    <TableCell className="text-white/80 text-xs sm:text-sm">≥ $0</TableCell>
+                    <TableCell className="text-primary text-xs sm:text-sm">10%</TableCell>
+                    <TableCell className="text-green-500 text-xs sm:text-sm">5%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-white/10 hover:bg-white/5">
+                    <TableCell className="text-white text-xs sm:text-sm">Tier 2</TableCell>
+                    <TableCell className="text-white/80 text-xs sm:text-sm">≥ $100K</TableCell>
+                    <TableCell className="text-primary text-xs sm:text-sm">15%</TableCell>
+                    <TableCell className="text-green-500 text-xs sm:text-sm">7%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-white/10 hover:bg-white/5">
+                    <TableCell className="text-white text-xs sm:text-sm">Tier 3</TableCell>
+                    <TableCell className="text-white/80 text-xs sm:text-sm">≥ $500K</TableCell>
+                    <TableCell className="text-primary text-xs sm:text-sm">20%</TableCell>
+                    <TableCell className="text-green-500 text-xs sm:text-sm">10%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-white/10 hover:bg-white/5">
+                    <TableCell className="text-white text-xs sm:text-sm">Tier 4</TableCell>
+                    <TableCell className="text-white/80 text-xs sm:text-sm">≥ $1M</TableCell>
+                    <TableCell className="text-primary text-xs sm:text-sm">25%</TableCell>
+                    <TableCell className="text-green-500 text-xs sm:text-sm">12%</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
-      </div>
+
+        {/* Referral List */}
+        <Card className="border-white/10">
+          <CardHeader className="border-b border-white/10">
+            <CardTitle className="text-base sm:text-lg text-white">Referral list</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Address</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Volume (USDT)</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Your rewards (USDT)</TableHead>
+                    <TableHead className="text-white/60 text-xs sm:text-sm">Date joined</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-12 text-white/60 text-sm">
+                      Please connect your wallet first
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }
