@@ -8,6 +8,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Header from "@/components/Header";
+import TradingViewChart from "@/components/TradingViewChart";
 
 const markets = [
   { symbol: "BTCUSDT", price: "111,062.6", change: "+3.17%", positive: true },
@@ -115,7 +116,7 @@ export default function Trade() {
           </div>
 
           {/* Main Trading Interface - Perpetual */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden flex-col lg:flex-row">
             {/* Left Sidebar - Markets */}
             <div className="hidden lg:block w-64 border-r border-white/10 bg-card overflow-y-auto">
               <div className="p-3">
@@ -143,15 +144,13 @@ export default function Trade() {
             </div>
 
             {/* Center - Chart Area */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 bg-card border-b border-white/10">
-                <div className="h-full flex items-center justify-center text-white/40">
-                  TradingView Chart Area
-                </div>
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <div className="flex-1 bg-card border-b border-white/10 min-h-[300px] lg:min-h-[500px] overflow-hidden">
+                <TradingViewChart symbol="BINANCE:BTCUSDT" />
               </div>
 
               {/* Bottom Tabs - Positions, Orders, etc. */}
-              <div className="h-64 bg-card">
+              <div className="h-48 lg:h-64 bg-card overflow-y-auto">
                 <Tabs defaultValue="positions" className="h-full">
                   <TabsList className="w-full justify-start bg-transparent border-b border-white/10 rounded-none h-auto p-0">
                     <TabsTrigger value="positions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Positions</TabsTrigger>
@@ -481,11 +480,9 @@ export default function Trade() {
             </div>
 
             {/* Center - Chart Area */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 bg-card border-b border-white/10">
-                <div className="h-full flex items-center justify-center text-white/40">
-                  TradingView Chart Area (Spot)
-                </div>
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <div className="flex-1 bg-card border-b border-white/10 min-h-[300px] lg:min-h-[500px] overflow-hidden">
+                <TradingViewChart symbol="BINANCE:BTCUSDT" />
               </div>
 
               {/* Bottom Tabs - Open Orders, Order History, etc. */}
