@@ -44,7 +44,8 @@ export default function Header() {
               </button>
               <Link href="/">
                 <a className="flex items-center gap-2">
-                  <img src="/perpx-logo.jpg" alt="PerpX" className="h-8 sm:h-10 w-auto" />
+                  <img src="/perpx-icon.png" alt="PerpX" className="h-8 w-8 sm:h-10 sm:w-10" />
+                  <span className="text-lg sm:text-xl font-bold text-white">PerpX</span>
                 </a>
               </Link>
               {!isHomePage && (
@@ -205,7 +206,8 @@ export default function Header() {
             <div className="flex items-center justify-between mb-6">
               <Link href="/">
                 <a className="flex items-center gap-2">
-                  <img src="/perpx-logo.jpg" alt="PerpX" className="h-10 w-auto" />
+                  <img src="/perpx-icon.png" alt="PerpX" className="h-10 w-10" />
+                  <span className="text-xl font-bold text-white">PerpX</span>
                 </a>
               </Link>
               <button onClick={() => setMobileMenuOpen(false)}>
