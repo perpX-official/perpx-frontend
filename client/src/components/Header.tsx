@@ -20,7 +20,6 @@ export default function Header() {
   };
 
   const moreItems = [
-    { icon: Award, title: 'Rewards & Points', desc: 'Earn points and claim rewards', href: '/rewards' },
     { icon: MessageSquare, title: 'Feedback', desc: 'Share your ideas and suggestions', href: '/feedback' },
     { icon: Shield, title: 'VIP', desc: 'Enjoy lower trading fees', href: '/vip' },
     { icon: FileText, title: 'API', desc: 'Apply for access to the API', href: '/api' },
@@ -63,8 +62,8 @@ export default function Header() {
                     }`}>
                     {t('nav.referral')}
                   </Link>
-                  <Link href="/points" className={`text-xs sm:text-sm transition-colors ${
-                      location === "/points" ? "text-white" : "text-white/60 hover:text-white"
+                  <Link href="/rewards" className={`text-xs sm:text-sm transition-colors ${
+                      location === "/rewards" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
                     {t('nav.rewards')}
                   </Link>
@@ -197,25 +196,21 @@ export default function Header() {
               </button>
             </div>
             <div className="space-y-2">
-              {!isHomePage ? (
-                <>
-                  <Link href="/trade" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.perpetual')}
-                  </Link>
-                  <Link href="/dashboard" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.portfolio')}
-                  </Link>
-                  <Link href="/referral" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.referral')}
-                  </Link>
-                  <Link href="/points" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.rewards')}
-                  </Link>
-                  <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    Stats
-                  </Link>
-                </>
-              ) : null}
+              <Link href="/trade" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.perpetual')}
+              </Link>
+              <Link href="/dashboard" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.portfolio')}
+              </Link>
+              <Link href="/referral" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.referral')}
+              </Link>
+              <Link href="/rewards" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.rewards')}
+              </Link>
+              <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                Stats
+              </Link>
               <div className="pt-4 border-t border-white/10">
                 <button
                   onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
