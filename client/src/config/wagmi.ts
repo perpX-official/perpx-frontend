@@ -1,14 +1,11 @@
-import { http, createConfig } from 'wagmi'
+import { http } from 'wagmi'
 import { mainnet, arbitrum, base, optimism } from 'wagmi/chains'
-import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors'
+import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 
-export const config = createConfig({
+export const config = getDefaultConfig({
+  appName: 'PerpX',
+  projectId: 'c0d6e8e3c8f8b4c5e6f7a8b9c0d1e2f3',
   chains: [mainnet, arbitrum, base, optimism],
-  connectors: [
-    injected(),
-    walletConnect({ projectId: 'YOUR_PROJECT_ID' }),
-    coinbaseWallet({ appName: 'PerpX' }),
-  ],
   transports: {
     [mainnet.id]: http(),
     [arbitrum.id]: http(),

@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Gift, 
   Trophy, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function Rewards() {
+  const { t } = useLanguage();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
 
   const handleTaskComplete = (taskId: string) => {
@@ -23,32 +25,31 @@ export default function Rewards() {
 
   const handleLogin = () => {
     handleTaskComplete('daily-login');
-    alert('ログイン完了！1ポイント獲得しました。');
+    alert(`${t('rewards.loginBonus')} ${t('rewards.completed')}! 1 ${t('rewards.points')}`);
   };
 
   const handleDemoTrade = () => {
     handleTaskComplete('daily-demo');
-    alert('デモ取引完了！5ポイント獲得しました。');
+    alert(`${t('rewards.demoTrade')} ${t('rewards.completed')}! 5 ${t('rewards.points')}`);
   };
 
   const handleSocialPost = (platform: string) => {
     const urls: Record<string, string> = {
-      twitter: 'https://twitter.com/intent/tweet?text=PerpXで取引を始めました！&url=https://perpx.com',
-      telegram: 'https://t.me/share/url?url=https://perpx.com&text=PerpXで取引を始めました！',
+      twitter: 'https://twitter.com/intent/tweet?text=PerpX&url=https://perpx.com',
+      telegram: 'https://t.me/share/url?url=https://perpx.com&text=PerpX',
     };
     
     window.open(urls[platform], '_blank');
     
-    // 投稿後にタスク完了とする（実際にはバックエンドで確認が必要）
     setTimeout(() => {
       handleTaskComplete(`daily-sns-${platform}`);
-      alert('SNS投稿完了！5ポイント獲得しました。');
+      alert(`SNS ${t('rewards.post')} ${t('rewards.completed')}! 5 ${t('rewards.points')}`);
     }, 2000);
   };
 
   const handleWeeklyLogin = () => {
     handleTaskComplete('weekly-login');
-    alert('7日連続ログイン達成！10ポイント獲得しました。');
+    alert(`${t('rewards.weeklyLogin')} ${t('rewards.completed')}! 10 ${t('rewards.points')}`);
   };
 
   const handleCommunityJoin = (platform: string) => {
@@ -61,39 +62,39 @@ export default function Rewards() {
     
     setTimeout(() => {
       handleTaskComplete(`weekly-community-${platform}`);
-      alert(`${platform === 'discord' ? 'Discord' : 'Telegram'}参加完了！30ポイント獲得しました。`);
+      alert(`${platform === 'discord' ? 'Discord' : 'Telegram'} ${t('rewards.join')} ${t('rewards.completed')}! 30 ${t('rewards.points')}`);
     }, 2000);
   };
 
   const handleGuildJoin = () => {
     handleTaskComplete('special-guild');
-    alert('ギルド参加完了！50ポイント獲得しました（一回限り）。');
+    alert(`${t('rewards.joinGuild')} ${t('rewards.completed')}! 50 ${t('rewards.points')} (${t('rewards.oneTime')})`);
   };
 
   const dailyTasks = [
     {
       id: 'daily-login',
-      title: 'ログインボーナス',
-      description: '毎日ログインして報酬を獲得',
+      title: t('rewards.loginBonus'),
+      description: t('rewards.loginBonusDesc'),
       points: 1,
       action: handleLogin,
-      buttonText: 'ログイン',
+      buttonText: t('rewards.login'),
     },
     {
       id: 'daily-demo',
-      title: 'デモ取引を3回実行',
-      description: '学習モードで3回取引を体験',
+      title: t('rewards.demoTrade'),
+      description: t('rewards.demoTradeDesc'),
       points: 5,
       action: handleDemoTrade,
-      buttonText: '取引する',
+      buttonText: t('rewards.trade'),
     },
     {
       id: 'daily-sns-twitter',
-      title: 'X (Twitter) に投稿',
-      description: 'PerpXについてツイート',
+      title: t('rewards.socialPost'),
+      description: t('rewards.socialPostDesc'),
       points: 5,
       action: () => handleSocialPost('twitter'),
-      buttonText: '投稿する',
+      buttonText: t('rewards.post'),
       icon: Twitter,
     },
   ];
@@ -101,28 +102,28 @@ export default function Rewards() {
   const weeklyTasks = [
     {
       id: 'weekly-login',
-      title: '7日連続ログイン',
-      description: '1週間毎日ログインして特別報酬を獲得',
+      title: t('rewards.weeklyLogin'),
+      description: t('rewards.weeklyLoginDesc'),
       points: 10,
       action: handleWeeklyLogin,
-      buttonText: '報酬を受け取る',
+      buttonText: t('rewards.claim'),
     },
     {
       id: 'weekly-community-discord',
-      title: 'Discordに参加',
-      description: '公式Discordサーバーに参加',
+      title: t('rewards.joinDiscord'),
+      description: t('rewards.joinDiscordDesc'),
       points: 30,
       action: () => handleCommunityJoin('discord'),
-      buttonText: '参加する',
+      buttonText: t('rewards.join'),
       icon: MessageCircle,
     },
     {
       id: 'weekly-community-telegram',
-      title: 'Telegramに参加',
-      description: '公式Telegramグループに参加',
+      title: t('rewards.joinTelegram'),
+      description: t('rewards.joinTelegramDesc'),
       points: 30,
       action: () => handleCommunityJoin('telegram'),
-      buttonText: '参加する',
+      buttonText: t('rewards.join'),
       icon: MessageCircle,
     },
   ];
@@ -130,11 +131,11 @@ export default function Rewards() {
   const specialTasks = [
     {
       id: 'special-guild',
-      title: 'ギルドに参加',
-      description: 'ギルドに参加して特別報酬を獲得（一回限り）',
+      title: t('rewards.joinGuild'),
+      description: t('rewards.joinGuildDesc'),
       points: 50,
       action: handleGuildJoin,
-      buttonText: 'ギルドに参加',
+      buttonText: t('rewards.join'),
       icon: Users,
       oneTime: true,
     },
@@ -160,124 +161,143 @@ export default function Rewards() {
 
   const totalPoints = calculateDailyPoints() + calculateWeeklyPoints() + calculateSpecialPoints();
 
-  const renderTask = (task: any) => {
-    const isCompleted = completedTasks.has(task.id);
-    const TaskIcon = task.icon || Star;
-
-    return (
-      <Card key={task.id} className="glass-card p-6 hover-reveal">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-4 flex-1">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <TaskIcon className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-white">{task.title}</h3>
-                {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
-              </div>
-              <p className="text-sm text-white/60 mb-2">{task.description}</p>
-              <div className="text-primary font-bold">+{task.points} ポイント</div>
-            </div>
-          </div>
-        </div>
-        <Button
-          onClick={task.action}
-          disabled={isCompleted}
-          className={`w-full ${
-            isCompleted
-              ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
-              : 'neuro-button micro-bounce'
-          }`}
-        >
-          {isCompleted ? '完了' : task.buttonText}
-        </Button>
-      </Card>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+              <Trophy className="w-10 h-10 text-primary" />
+              {t('rewards.title')}
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-2xl font-semibold">
+              <Star className="w-6 h-6 text-yellow-500" />
+              <span>{t('rewards.totalPoints')}: {totalPoints} {t('rewards.points')}</span>
+            </div>
+          </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">ポイント獲得</h1>
-          <p className="text-white/60">タスクをこなしてポイントを貯めよう</p>
-        </div>
+          {/* Daily Tasks */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Zap className="w-6 h-6 text-primary" />
+              {t('rewards.dailyTasks')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {dailyTasks.map((task) => {
+                const isCompleted = completedTasks.has(task.id);
+                const Icon = task.icon || Gift;
+                return (
+                  <Card key={task.id} className="p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <Icon className="w-8 h-8 text-primary" />
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <Circle className="w-6 h-6 text-gray-400" />
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{task.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary font-bold">+{task.points} {t('rewards.points')}</span>
+                      <Button
+                        onClick={task.action}
+                        disabled={isCompleted}
+                        size="sm"
+                        variant={isCompleted ? "outline" : "default"}
+                      >
+                        {isCompleted ? t('rewards.completed') : task.buttonText}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
 
-        {/* Total Points */}
-        <div className="glass-card rounded-xl p-8 mb-8 text-center">
-          <div className="text-sm text-white/60 mb-2">今日の獲得ポイント</div>
-          <div className="text-4xl sm:text-5xl font-bold text-white mb-4">{totalPoints} pt</div>
-          <div className="text-sm text-green-500 mb-2">≈ ${totalPoints} USD</div>
-          <div className="text-xs text-white/60">
-            デイリー: {calculateDailyPoints()}pt | ウィークリー: {calculateWeeklyPoints()}pt | 特別: {calculateSpecialPoints()}pt
+          {/* Weekly Tasks */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-primary" />
+              {t('rewards.weeklyTasks')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {weeklyTasks.map((task) => {
+                const isCompleted = completedTasks.has(task.id);
+                const Icon = task.icon || Gift;
+                return (
+                  <Card key={task.id} className="p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <Icon className="w-8 h-8 text-primary" />
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <Circle className="w-6 h-6 text-gray-400" />
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{task.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary font-bold">+{task.points} {t('rewards.points')}</span>
+                      <Button
+                        onClick={task.action}
+                        disabled={isCompleted}
+                        size="sm"
+                        variant={isCompleted ? "outline" : "default"}
+                      >
+                        {isCompleted ? t('rewards.completed') : task.buttonText}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Daily Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">デイリータスク</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dailyTasks.map(renderTask)}
-          </div>
-          <div className="mt-4 text-sm text-white/60">
-            月間獲得可能: {dailyTasks.reduce((sum, t) => sum + t.points, 0) * 30} ポイント
-          </div>
-        </div>
-
-        {/* Weekly Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Trophy className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">ウィークリータスク</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {weeklyTasks.map(renderTask)}
-          </div>
-          <div className="mt-4 text-sm text-white/60">
-            月間獲得可能: {weeklyTasks.reduce((sum, t) => sum + t.points, 0) * 4} ポイント
-          </div>
-        </div>
-
-        {/* Special Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Gift className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">特別タスク</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {specialTasks.map(renderTask)}
-          </div>
-        </div>
-
-        {/* Reward History */}
-        <div className="glass-card rounded-xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">獲得履歴</h2>
-          <div className="space-y-4">
-            {Array.from(completedTasks).map((taskId, index) => {
-              const task = [...dailyTasks, ...weeklyTasks, ...specialTasks].find(t => t.id === taskId);
-              if (!task) return null;
-              
-              return (
-                <div key={index} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                  <div>
-                    <div className="text-white font-medium">{task.title}</div>
-                    <div className="text-sm text-white/60">{new Date().toLocaleDateString('ja-JP')}</div>
-                  </div>
-                  <div className="text-green-500 font-bold">+{task.points} pt</div>
-                </div>
-              );
-            })}
-            {completedTasks.size === 0 && (
-              <div className="text-sm text-white/60 text-center py-8">
-                まだタスクを完了していません
-              </div>
-            )}
+          {/* Special Tasks */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Star className="w-6 h-6 text-yellow-500" />
+              {t('rewards.specialTasks')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {specialTasks.map((task) => {
+                const isCompleted = completedTasks.has(task.id);
+                const Icon = task.icon || Gift;
+                return (
+                  <Card key={task.id} className="p-6 hover:shadow-lg transition-shadow border-2 border-yellow-500/50">
+                    <div className="flex items-start justify-between mb-4">
+                      <Icon className="w-8 h-8 text-yellow-500" />
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <Circle className="w-6 h-6 text-gray-400" />
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{task.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-yellow-500 font-bold">+{task.points} {t('rewards.points')}</span>
+                      <Button
+                        onClick={task.action}
+                        disabled={isCompleted}
+                        size="sm"
+                        variant={isCompleted ? "outline" : "default"}
+                      >
+                        {isCompleted ? t('rewards.completed') : task.buttonText}
+                      </Button>
+                    </div>
+                    {task.oneTime && (
+                      <div className="mt-2 text-xs text-yellow-600 font-medium">
+                        ⭐ {t('rewards.oneTime')}
+                      </div>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
