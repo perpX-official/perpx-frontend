@@ -2,14 +2,18 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAccount } from 'wagmi';
+import WalletConnect from './WalletConnect';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [location] = useLocation();
   const { language, setLanguage, t } = useLanguage();
+  const { address, isConnected } = useAccount();
 
   const isHomePage = location === "/";
 
@@ -136,9 +140,8 @@ export default function Header() {
                   onClick={() => setIsLanguageOpen(!isLanguageOpen)}
                   className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg glass-card hover:bg-white/5 transition-colors"
                 >
-                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="text-xs sm:text-sm font-medium">{language.toUpperCase()}</span>
-                  <ChevronDown className={`h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+                  <Globe className="h-4 w-4" />
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {isLanguageOpen && (
@@ -174,9 +177,18 @@ export default function Header() {
                 )}
               </div>
 
-              <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
-                {t('button.launchApp')}
-              </Link>
+              {isHomePage ? (
+                <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
+                  {t('button.launchApp')}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setWalletModalOpen(true)}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                >
+                  {isConnected && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -261,6 +273,7 @@ export default function Header() {
           </div>
         </div>
       )}
+      <WalletConnect open={walletModalOpen} onOpenChange={setWalletModalOpen} />
     </>
   );
 }
