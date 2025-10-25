@@ -42,48 +42,36 @@ export default function Header() {
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
-              <Link href="/">
-                <a className="flex items-center gap-2">
-                  <img src="/perpx-icon.png" alt="PerpX" className="h-8 w-8 sm:h-10 sm:w-10" />
-                  <span className="text-lg sm:text-xl font-bold text-white">PerpX</span>
-                </a>
+              <Link href="/" className="flex items-center gap-2">
+                <img src="/perpx-icon.png" alt="PerpX" className="h-8 w-8 sm:h-10 sm:w-10" />
+                <span className="text-lg sm:text-xl font-bold text-white">PerpX</span>
               </Link>
               {!isHomePage && (
                 <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
-                  <Link href="/trade">
-                    <a className={`text-xs sm:text-sm transition-colors ${
+                  <Link href="/trade" className={`text-xs sm:text-sm transition-colors ${
                       location === "/trade" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      {t('nav.perpetual')}
-                    </a>
+                    {t('nav.perpetual')}
                   </Link>
-                  <Link href="/dashboard">
-                    <a className={`text-xs sm:text-sm transition-colors ${
+                  <Link href="/dashboard" className={`text-xs sm:text-sm transition-colors ${
                       location === "/dashboard" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      {t('nav.portfolio')}
-                    </a>
+                    {t('nav.portfolio')}
                   </Link>
-                  <Link href="/referral">
-                    <a className={`text-xs sm:text-sm transition-colors ${
+                  <Link href="/referral" className={`text-xs sm:text-sm transition-colors ${
                       location === "/referral" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      {t('nav.referral')}
-                    </a>
+                    {t('nav.referral')}
                   </Link>
-                  <Link href="/points">
-                    <a className={`text-xs sm:text-sm transition-colors ${
+                  <Link href="/points" className={`text-xs sm:text-sm transition-colors ${
                       location === "/points" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      {t('nav.rewards')}
-                    </a>
+                    {t('nav.rewards')}
                   </Link>
-                  <Link href="/stats">
-                    <a className={`text-xs sm:text-sm transition-colors ${
+                  <Link href="/stats" className={`text-xs sm:text-sm transition-colors ${
                       location === "/stats" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                      Stats
-                    </a>
+                    Stats
                   </Link>
                   
                   {/* More Dropdown */}
@@ -121,17 +109,15 @@ export default function Header() {
                                   </div>
                                 </a>
                               ) : (
-                                <Link key={index} href={item.href}>
-                                  <a
-                                    className="p-4 hover:bg-white/5 transition-colors flex items-start gap-3 bg-card/50"
-                                    onClick={() => setIsMoreOpen(false)}
-                                  >
-                                    <item.icon className="h-5 w-5 text-primary mt-0.5" />
-                                    <div>
-                                      <div className="text-sm font-medium text-white mb-0.5">{item.title}</div>
-                                      <div className="text-xs text-white/60">{item.desc}</div>
-                                    </div>
-                                  </a>
+                                <Link key={index} href={item.href}
+                                  className="p-4 hover:bg-white/5 transition-colors flex items-start gap-3 bg-card/50"
+                                  onClick={() => setIsMoreOpen(false)}
+                                >
+                                  <item.icon className="h-5 w-5 text-primary mt-0.5" />
+                                  <div>
+                                    <div className="text-sm font-medium text-white mb-0.5">{item.title}</div>
+                                    <div className="text-xs text-white/60">{item.desc}</div>
+                                  </div>
                                 </Link>
                               )
                             ))}
@@ -189,10 +175,8 @@ export default function Header() {
                 )}
               </div>
 
-              <Link href="/trade">
-                <a className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
-                  {t('button.launchApp')}
-                </a>
+              <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
+                {t('button.launchApp')}
               </Link>
             </div>
           </div>
@@ -204,11 +188,9 @@ export default function Header() {
         <div className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
           <div className="p-4">
             <div className="flex items-center justify-between mb-6">
-              <Link href="/">
-                <a className="flex items-center gap-2">
-                  <img src="/perpx-icon.png" alt="PerpX" className="h-10 w-10" />
-                  <span className="text-xl font-bold text-white">PerpX</span>
-                </a>
+              <Link href="/" className="flex items-center gap-2">
+                <img src="/perpx-icon.png" alt="PerpX" className="h-10 w-10" />
+                <span className="text-xl font-bold text-white">PerpX</span>
               </Link>
               <button onClick={() => setMobileMenuOpen(false)}>
                 <X className="h-6 w-6" />
@@ -217,30 +199,20 @@ export default function Header() {
             <div className="space-y-2">
               {!isHomePage ? (
                 <>
-                  <Link href="/trade">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      {t('nav.perpetual')}
-                    </a>
+                  <Link href="/trade" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.perpetual')}
                   </Link>
-                  <Link href="/dashboard">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      {t('nav.portfolio')}
-                    </a>
+                  <Link href="/dashboard" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.portfolio')}
                   </Link>
-                  <Link href="/referral">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      {t('nav.referral')}
-                    </a>
+                  <Link href="/referral" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.referral')}
                   </Link>
-                  <Link href="/points">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      {t('nav.rewards')}
-                    </a>
+                  <Link href="/points" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.rewards')}
                   </Link>
-                  <Link href="/stats">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      Stats
-                    </a>
+                  <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                    Stats
                   </Link>
                 </>
               ) : null}
@@ -273,19 +245,17 @@ export default function Header() {
                           </div>
                         </a>
                       ) : (
-                        <Link key={index} href={item.href}>
-                          <a
-                            className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <item.icon className="h-5 w-5 text-primary" />
-                              <div>
-                                <div className="text-sm font-medium text-white">{item.title}</div>
-                                <div className="text-xs text-white/60">{item.desc}</div>
-                              </div>
+                        <Link key={index} href={item.href}
+                          className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-5 w-5 text-primary" />
+                            <div>
+                              <div className="text-sm font-medium text-white">{item.title}</div>
+                              <div className="text-xs text-white/60">{item.desc}</div>
                             </div>
-                          </a>
+                          </div>
                         </Link>
                       )
                     ))}

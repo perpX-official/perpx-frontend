@@ -344,8 +344,8 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs sm:text-sm text-white/60">© 2025 PerpX. All rights reserved.</p>
             <div className="flex gap-4 sm:gap-6">
-              <Link href="/privacy-policy"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</a></Link>
-              <Link href="/terms-of-service"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</a></Link>
+              <Link href="/privacy-policy" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</Link>
+              <Link href="/terms-of-service" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>
