@@ -254,6 +254,7 @@ export default function Trade() {
                       <Input
                         type="text"
                         value="111073.6"
+                        readOnly
                         className="flex-1 bg-background border-white/10 text-sm"
                       />
                       <span className="text-xs text-white/60">Mid</span>
@@ -364,6 +365,7 @@ export default function Trade() {
                   <Input
                     type="text"
                     value="111073.6"
+                    readOnly
                     className="flex-1 bg-background border-white/10 text-sm h-9"
                   />
                   <span className="text-xs text-white/60">Mid</span>
@@ -577,6 +579,7 @@ export default function Trade() {
                       <Input
                         type="text"
                         value="111073.6"
+                        readOnly
                         className="flex-1 bg-background border-white/10 text-sm"
                       />
                       <span className="text-xs text-white/60">USDT</span>
@@ -673,6 +676,7 @@ export default function Trade() {
                   <Input
                     type="text"
                     value="111073.6"
+                    readOnly
                     className="flex-1 bg-background border-white/10 text-sm h-9"
                   />
                   <span className="text-xs text-white/60">USDT</span>
