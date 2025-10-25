@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Gift, 
   Trophy, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function Rewards() {
+  const { t } = useLanguage();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
 
   const handleTaskComplete = (taskId: string) => {
@@ -23,12 +25,12 @@ export default function Rewards() {
 
   const handleLogin = () => {
     handleTaskComplete('daily-login');
-    alert('ログイン完了！1ポイント獲得しました。');
+    alert(t('rewards.loginSuccess'));
   };
 
   const handleDemoTrade = () => {
     handleTaskComplete('daily-demo');
-    alert('デモ取引完了！5ポイント獲得しました。');
+    alert(t('rewards.demoSuccess'));
   };
 
   const handleSocialPost = (platform: string) => {
@@ -42,13 +44,13 @@ export default function Rewards() {
     // 投稿後にタスク完了とする（実際にはバックエンドで確認が必要）
     setTimeout(() => {
       handleTaskComplete(`daily-sns-${platform}`);
-      alert('SNS投稿完了！5ポイント獲得しました。');
+      alert(t('rewards.snsSuccess'));
     }, 2000);
   };
 
   const handleWeeklyLogin = () => {
     handleTaskComplete('weekly-login');
-    alert('7日連続ログイン達成！10ポイント獲得しました。');
+    alert(t('rewards.weeklyLoginSuccess'));
   };
 
   const handleCommunityJoin = (platform: string) => {
@@ -61,39 +63,39 @@ export default function Rewards() {
     
     setTimeout(() => {
       handleTaskComplete(`weekly-community-${platform}`);
-      alert(`${platform === 'discord' ? 'Discord' : 'Telegram'}参加完了！30ポイント獲得しました。`);
+      alert(t('rewards.communitySuccess'));
     }, 2000);
   };
 
   const handleGuildJoin = () => {
     handleTaskComplete('special-guild');
-    alert('ギルド参加完了！50ポイント獲得しました（一回限り）。');
+    alert(t('rewards.guildSuccess'));
   };
 
   const dailyTasks = [
     {
       id: 'daily-login',
-      title: 'ログインボーナス',
-      description: '毎日ログインして報酬を獲得',
+      title: t('rewards.loginBonus'),
+      description: t('rewards.loginBonusDesc'),
       points: 1,
       action: handleLogin,
-      buttonText: 'ログイン',
+      buttonText: t('rewards.login'),
     },
     {
       id: 'daily-demo',
-      title: 'デモ取引を3回実行',
-      description: '学習モードで3回取引を体験',
+      title: t('rewards.demoTrade'),
+      description: t('rewards.demoTradeDesc'),
       points: 5,
       action: handleDemoTrade,
-      buttonText: '取引する',
+      buttonText: t('rewards.trade'),
     },
     {
       id: 'daily-sns-twitter',
-      title: 'X (Twitter) に投稿',
-      description: 'PerpXについてツイート',
+      title: t('rewards.twitterPost'),
+      description: t('rewards.twitterPostDesc'),
       points: 5,
       action: () => handleSocialPost('twitter'),
-      buttonText: '投稿する',
+      buttonText: t('rewards.post'),
       icon: Twitter,
     },
   ];
@@ -101,28 +103,28 @@ export default function Rewards() {
   const weeklyTasks = [
     {
       id: 'weekly-login',
-      title: '7日連続ログイン',
-      description: '1週間毎日ログインして特別報酬を獲得',
+      title: t('rewards.weeklyLogin'),
+      description: t('rewards.weeklyLoginDesc'),
       points: 10,
       action: handleWeeklyLogin,
-      buttonText: '報酬を受け取る',
+      buttonText: t('rewards.claim'),
     },
     {
       id: 'weekly-community-discord',
-      title: 'Discordに参加',
-      description: '公式Discordサーバーに参加',
+      title: t('rewards.joinDiscord'),
+      description: t('rewards.joinDiscordDesc'),
       points: 30,
       action: () => handleCommunityJoin('discord'),
-      buttonText: '参加する',
+      buttonText: t('rewards.join'),
       icon: MessageCircle,
     },
     {
       id: 'weekly-community-telegram',
-      title: 'Telegramに参加',
-      description: '公式Telegramグループに参加',
+      title: t('rewards.joinTelegram'),
+      description: t('rewards.joinTelegramDesc'),
       points: 30,
       action: () => handleCommunityJoin('telegram'),
-      buttonText: '参加する',
+      buttonText: t('rewards.join'),
       icon: MessageCircle,
     },
   ];
@@ -130,13 +132,12 @@ export default function Rewards() {
   const specialTasks = [
     {
       id: 'special-guild',
-      title: 'ギルドに参加',
-      description: 'ギルドに参加して特別報酬を獲得（一回限り）',
+      title: t('rewards.joinGuild'),
+      description: t('rewards.joinGuildDesc'),
       points: 50,
       action: handleGuildJoin,
-      buttonText: 'ギルドに参加',
+      buttonText: t('rewards.join'),
       icon: Users,
-      oneTime: true,
     },
   ];
 
@@ -177,7 +178,7 @@ export default function Rewards() {
                 {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
               </div>
               <p className="text-sm text-white/60 mb-2">{task.description}</p>
-              <div className="text-primary font-bold">+{task.points} ポイント</div>
+              <div className="text-primary font-bold">+{task.points} {t('rewards.points')}</div>
             </div>
           </div>
         </div>
@@ -190,7 +191,7 @@ export default function Rewards() {
               : 'neuro-button micro-bounce'
           }`}
         >
-          {isCompleted ? '完了' : task.buttonText}
+          {isCompleted ? t('rewards.completed') : task.buttonText}
         </Button>
       </Card>
     );
@@ -202,17 +203,17 @@ export default function Rewards() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">ポイント獲得</h1>
-          <p className="text-white/60">タスクをこなしてポイントを貯めよう</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('nav.rewards')}</h1>
+          <p className="text-white/60">{t('rewards.dailyTasks')} & {t('rewards.weeklyTasks')}</p>
         </div>
 
         {/* Total Points */}
         <div className="glass-card rounded-xl p-8 mb-8 text-center">
-          <div className="text-sm text-white/60 mb-2">今日の獲得ポイント</div>
+          <div className="text-sm text-white/60 mb-2">Total Points</div>
           <div className="text-4xl sm:text-5xl font-bold text-white mb-4">{totalPoints} pt</div>
           <div className="text-sm text-green-500 mb-2">≈ ${totalPoints} USD</div>
           <div className="text-xs text-white/60">
-            デイリー: {calculateDailyPoints()}pt | ウィークリー: {calculateWeeklyPoints()}pt | 特別: {calculateSpecialPoints()}pt
+            {t('rewards.dailyTasks')}: {calculateDailyPoints()}pt | {t('rewards.weeklyTasks')}: {calculateWeeklyPoints()}pt | {t('rewards.specialTasks')}: {calculateSpecialPoints()}pt
           </div>
         </div>
 
@@ -220,13 +221,13 @@ export default function Rewards() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Zap className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">デイリータスク</h2>
+            <h2 className="text-2xl font-bold text-white">{t('rewards.dailyTasks')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {dailyTasks.map(renderTask)}
           </div>
           <div className="mt-4 text-sm text-white/60">
-            月間獲得可能: {dailyTasks.reduce((sum, t) => sum + t.points, 0) * 30} ポイント
+            Monthly: {dailyTasks.reduce((sum, t) => sum + t.points, 0) * 30} {t('rewards.points')}
           </div>
         </div>
 
@@ -234,13 +235,13 @@ export default function Rewards() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">ウィークリータスク</h2>
+            <h2 className="text-2xl font-bold text-white">{t('rewards.weeklyTasks')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {weeklyTasks.map(renderTask)}
           </div>
           <div className="mt-4 text-sm text-white/60">
-            月間獲得可能: {weeklyTasks.reduce((sum, t) => sum + t.points, 0) * 4} ポイント
+            Monthly: {weeklyTasks.reduce((sum, t) => sum + t.points, 0) * 4} {t('rewards.points')}
           </div>
         </div>
 
@@ -248,7 +249,7 @@ export default function Rewards() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Gift className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">特別タスク</h2>
+            <h2 className="text-2xl font-bold text-white">{t('rewards.specialTasks')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {specialTasks.map(renderTask)}
