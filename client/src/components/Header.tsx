@@ -20,7 +20,7 @@ export default function Header() {
   };
 
   const moreItems = [
-    { icon: Award, title: 'Rewards Hub', desc: 'Claim generous rewards', href: '/rewards' },
+    { icon: Award, title: 'Rewards & Points', desc: 'Earn points and claim rewards', href: '/rewards' },
     { icon: MessageSquare, title: 'Feedback', desc: 'Share your ideas and suggestions', href: '/feedback' },
     { icon: Shield, title: 'VIP', desc: 'Enjoy lower trading fees', href: '/vip' },
     { icon: FileText, title: 'API', desc: 'Apply for access to the API', href: '/api' },
