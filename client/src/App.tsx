@@ -17,6 +17,8 @@ import VIP from "./pages/VIP";
 import API from "./pages/API";
 import Docs from "./pages/Docs";
 import Blog from "./pages/Blog";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 function Router() {
   return (
@@ -33,6 +35,8 @@ function Router() {
       <Route path={"/api"} component={API} />
       <Route path={"/docs"} component={Docs} />
       <Route path={"/blog"} component={Blog} />
+      <Route path={"/privacy-policy"} component={PrivacyPolicy} />
+      <Route path={"/terms-of-service"} component={TermsOfService} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -336,6 +336,81 @@ export default function Trade() {
               </div>
             </div>
           </div>
+
+          {/* Mobile Order Panel - Only visible on small screens */}
+          <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-card border-t-2 border-white/10 z-50 max-h-[60vh] overflow-y-auto">
+            <div className="p-3 space-y-3">
+              {/* Margin Type & Leverage */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="h-7 text-xs">{marginType}</Button>
+                  <Button variant="outline" size="sm" className="h-7 text-xs">{leverage}</Button>
+                </div>
+              </div>
+
+              {/* Order Type Tabs */}
+              <Tabs defaultValue="market" className="w-full">
+                <TabsList className="w-full bg-transparent border border-white/10 p-0">
+                  <TabsTrigger value="market" className="flex-1 text-xs">Market</TabsTrigger>
+                  <TabsTrigger value="limit" className="flex-1 text-xs">Limit</TabsTrigger>
+                  <TabsTrigger value="stop-limit" className="flex-1 text-xs">Stop Limit</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Price Input */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Price (USDT)</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    value="111073.6"
+                    className="flex-1 bg-background border-white/10 text-sm h-9"
+                  />
+                  <span className="text-xs text-white/60">Mid</span>
+                </div>
+              </div>
+
+              {/* Size Input */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Size</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="0.00"
+                    className="flex-1 bg-background border-white/10 text-sm h-9"
+                  />
+                  <span className="text-xs text-white/60">USDT</span>
+                </div>
+              </div>
+
+              {/* Percentage Slider */}
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">0%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">25%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">50%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">75%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">100%</Button>
+              </div>
+
+              {/* Info */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-white/60">Margin</span>
+                  <span className="text-white">0.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/60">Max</span>
+                  <span className="text-white">0.0 USDT</span>
+                </div>
+              </div>
+
+              {/* Buy/Sell Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button className="bg-green-500 hover:bg-green-600 text-white h-10">Buy/Long</Button>
+                <Button className="bg-red-500 hover:bg-red-600 text-white h-10">Sell/Short</Button>
+              </div>
+            </div>
+          </div>
         </>
       ) : (
         <>
@@ -569,6 +644,80 @@ export default function Trade() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile Order Panel for Spot - Only visible on small screens */}
+          <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-card border-t-2 border-white/10 z-50 max-h-[60vh] overflow-y-auto">
+            <div className="p-3 space-y-3">
+              {/* Buy/Sell Tabs */}
+              <Tabs defaultValue="buy" className="w-full">
+                <TabsList className="w-full bg-transparent border border-white/10 p-0">
+                  <TabsTrigger value="buy" className="flex-1 text-xs data-[state=active]:bg-green-500/20">Buy</TabsTrigger>
+                  <TabsTrigger value="sell" className="flex-1 text-xs data-[state=active]:bg-red-500/20">Sell</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Order Type */}
+              <Tabs defaultValue="limit" className="w-full">
+                <TabsList className="w-full bg-transparent border border-white/10 p-0">
+                  <TabsTrigger value="limit" className="flex-1 text-xs">Limit</TabsTrigger>
+                  <TabsTrigger value="market" className="flex-1 text-xs">Market</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Price */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Price</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    value="111073.6"
+                    className="flex-1 bg-background border-white/10 text-sm h-9"
+                  />
+                  <span className="text-xs text-white/60">USDT</span>
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Amount</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="0.00"
+                    className="flex-1 bg-background border-white/10 text-sm h-9"
+                  />
+                  <span className="text-xs text-white/60">BTC</span>
+                </div>
+              </div>
+
+              {/* Percentage Slider */}
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">0%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">25%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">50%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">75%</Button>
+                <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs">100%</Button>
+              </div>
+
+              {/* Total */}
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">Total</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="0.00"
+                    className="flex-1 bg-background border-white/10 text-sm h-9"
+                  />
+                  <span className="text-xs text-white/60">USDT</span>
+                </div>
+              </div>
+
+              {/* Buy Button */}
+              <Button className="w-full bg-green-500 hover:bg-green-600 text-white h-10">
+                Buy BTC
+              </Button>
             </div>
           </div>
         </>

@@ -192,6 +192,122 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Roadmap Section with Vertical Scroll Animation */}
+      <section className="py-12 sm:py-16 lg:py-24 relative bg-card/20">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="text-center mb-12 sm:mb-16 apple-fade-in">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+              {t('home.roadmapTitle')}
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-white/70 max-w-2xl mx-auto">
+              {t('home.roadmapDesc')}
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+            {/* Q1 2026 */}
+            <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#0ABAB5] apple-fade-in hover-reveal" style={{transitionDelay: '0.1s'}}>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#0ABAB5] mb-4 sm:mb-6">
+                Q1 2026 - Foundation
+              </h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
+                  <span>Development Kickoff</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
+                  <span>Core Infrastructure Setup</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
+                  <span>Smart Contract Security Audit</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
+                  <span>Testnet Launch</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Q2 2026 */}
+            <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#A855F7] apple-fade-in hover-reveal" style={{transitionDelay: '0.2s'}}>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#A855F7] mb-4 sm:mb-6">
+                Q2 2026 - Platform Launch
+              </h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
+                  <span>Mainnet Launch</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
+                  <span>First Airdrop Round</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
+                  <span>Community Building</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
+                  <span>Marketing Campaign</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Q3 2026 */}
+            <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#FFD700] apple-fade-in hover-reveal" style={{transitionDelay: '0.3s'}}>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#FFD700] mb-4 sm:mb-6">
+                Q3 2026 - Expansion
+              </h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
+                  <span>Second Airdrop Round</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
+                  <span>Advanced Trading Features</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
+                  <span>Multi-chain Support</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
+                  <span>Mobile App Beta</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Q4 2026 */}
+            <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#10B981] apple-fade-in hover-reveal" style={{transitionDelay: '0.4s'}}>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4 sm:mb-6">
+                Q4 2026 - Innovation
+              </h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
+                  <span>NFT Trading Achievements</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
+                  <span>VISA Card Integration</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
+                  <span>Global Expansion</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
+                  <span>Governance Launch</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section with Apple-style reveal */}
       <section 
         ref={ctaRef}
@@ -225,48 +341,11 @@ export default function Home() {
       {/* Footer with Glassmorphism */}
       <footer className="border-t border-white/10 py-8 sm:py-12 glass-menu">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="apple-fade-in" style={{transitionDelay: '0.1s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Product</h3>
-              <ul className="space-y-2">
-                <li><Link href="/trade"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Trade</a></Link></li>
-                <li><Link href="/dashboard"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Dashboard</a></Link></li>
-                <li><Link href="/points"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Points</a></Link></li>
-                <li><Link href="/referral"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Referral</a></Link></li>
-              </ul>
-            </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.2s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Documentation</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">API</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Tutorials</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Blog</a></li>
-              </ul>
-            </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.3s'}}>
-              <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4">Community</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Twitter</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Discord</a></li>
-                <li><a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Telegram</a></li>
-              </ul>
-            </div>
-            <div className="apple-fade-in" style={{transitionDelay: '0.4s'}}>
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
-              </div>
-              <p className="text-xs sm:text-sm text-white/60">
-                Next-generation AI-powered perpetual DEX for Asia and beyond.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 sm:pt-8 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs sm:text-sm text-white/60">© 2025 PerpX. All rights reserved.</p>
             <div className="flex gap-4 sm:gap-6">
-              <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</a>
-              <a href="#" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</a>
+              <Link href="/privacy-policy"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</a></Link>
+              <Link href="/terms-of-service"><a className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</a></Link>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
   const [location] = useLocation();
   const { language, setLanguage, t } = useLanguage();
 
@@ -43,8 +44,7 @@ export default function Header() {
               </button>
               <Link href="/">
                 <a className="flex items-center gap-2">
-                  <img src="/logo-icon.png" alt="PerpX" className="h-6 w-6 sm:h-8 sm:w-8" />
-                  <span className="text-base sm:text-lg font-bold text-white">PerpX</span>
+                  <img src="/perpx-logo.jpg" alt="PerpX" className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg" />
                 </a>
               </Link>
               {!isHomePage && (
@@ -141,15 +141,7 @@ export default function Header() {
                   </div>
                 </div>
               )}
-              {isHomePage && (
-                <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
-                  <a href="#features" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.features')}</a>
-                  <Link href="/stats">
-                    <a className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">Stats</a>
-                  </Link>
-                  <a href="#roadmap" className="text-xs sm:text-sm text-white/60 hover:text-white transition-colors">{t('nav.roadmap')}</a>
-                </div>
-              )}
+
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Language Selector */}
@@ -213,8 +205,7 @@ export default function Header() {
             <div className="flex items-center justify-between mb-6">
               <Link href="/">
                 <a className="flex items-center gap-2">
-                  <img src="/logo-icon.png" alt="PerpX" className="h-8 w-8" />
-                  <span className="text-lg font-bold text-white">PerpX</span>
+                  <img src="/perpx-logo.jpg" alt="PerpX" className="h-10 w-10 rounded-lg" />
                 </a>
               </Link>
               <button onClick={() => setMobileMenuOpen(false)}>
@@ -250,58 +241,54 @@ export default function Header() {
                     </a>
                   </Link>
                 </>
-              ) : (
-                <>
-                  <a href="#features" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.features')}
-                  </a>
-                  <Link href="/stats">
-                    <a className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                      Stats
-                    </a>
-                  </Link>
-                  <a href="#roadmap" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                    {t('nav.roadmap')}
-                  </a>
-                </>
-              )}
+              ) : null}
               <div className="pt-4 border-t border-white/10">
-                <div className="text-sm font-medium text-white/60 px-4 mb-2">More</div>
-                {moreItems.map((item, index) => (
-                  item.external ? (
-                    <a
-                      key={index}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <item.icon className="h-5 w-5 text-primary" />
-                        <div>
-                          <div className="text-sm font-medium text-white">{item.title}</div>
-                          <div className="text-xs text-white/60">{item.desc}</div>
-                        </div>
-                      </div>
-                    </a>
-                  ) : (
-                    <Link key={index} href={item.href}>
-                      <a
-                        className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <item.icon className="h-5 w-5 text-primary" />
-                          <div>
-                            <div className="text-sm font-medium text-white">{item.title}</div>
-                            <div className="text-xs text-white/60">{item.desc}</div>
+                <button
+                  onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white"
+                >
+                  <span className="text-sm font-medium">More</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isMobileMoreOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isMobileMoreOpen && (
+                  <div className="mt-2 space-y-1">
+                    {moreItems.map((item, index) => (
+                      item.external ? (
+                        <a
+                          key={index}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-5 w-5 text-primary" />
+                            <div>
+                              <div className="text-sm font-medium text-white">{item.title}</div>
+                              <div className="text-xs text-white/60">{item.desc}</div>
+                            </div>
                           </div>
-                        </div>
-                      </a>
-                    </Link>
-                  )
-                ))}
+                        </a>
+                      ) : (
+                        <Link key={index} href={item.href}>
+                          <a
+                            className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <item.icon className="h-5 w-5 text-primary" />
+                              <div>
+                                <div className="text-sm font-medium text-white">{item.title}</div>
+                                <div className="text-xs text-white/60">{item.desc}</div>
+                              </div>
+                            </div>
+                          </a>
+                        </Link>
+                      )
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
