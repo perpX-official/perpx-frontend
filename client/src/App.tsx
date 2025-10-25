@@ -7,8 +7,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
 import Home from "./pages/Home";
 import Trade from "./pages/Trade";
@@ -56,19 +54,17 @@ function App() {
     <ErrorBoundary>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            <ThemeProvider
-              defaultTheme="dark"
-              // switchable
-            >
-              <LanguageProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Router />
-                </TooltipProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </RainbowKitProvider>
+          <ThemeProvider
+            defaultTheme="dark"
+            // switchable
+          >
+            <LanguageProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ErrorBoundary>

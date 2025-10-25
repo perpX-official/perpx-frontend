@@ -2,15 +2,18 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import WalletConnect from './WalletConnect';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [location] = useLocation();
   const { language, setLanguage, t } = useLanguage();
+  const { address, isConnected } = useAccount();
 
   const isHomePage = location === "/";
 
@@ -179,7 +182,12 @@ export default function Header() {
                   {t('button.launchApp')}
                 </Link>
               ) : (
-                <ConnectButton />
+                <button
+                  onClick={() => setWalletModalOpen(true)}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                >
+                  {isConnected && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                </button>
               )}
             </div>
           </div>
@@ -265,6 +273,7 @@ export default function Header() {
           </div>
         </div>
       )}
+      <WalletConnect open={walletModalOpen} onOpenChange={setWalletModalOpen} />
     </>
   );
 }
