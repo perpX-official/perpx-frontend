@@ -248,14 +248,14 @@ export default function Header() {
                 {t('nav.rewards')}
               </Link>
               <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                Stats
+                {t('nav.stats')}
               </Link>
               <div className="pt-4 border-t border-white/10">
                 <button
                   onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white"
                 >
-                  <span className="text-sm font-medium">More</span>
+                  <span className="text-sm font-medium">{t('more')}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${isMobileMoreOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isMobileMoreOpen && (

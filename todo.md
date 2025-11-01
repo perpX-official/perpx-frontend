@@ -1,6 +1,9 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Fix mobile menu - translate Stats and More menu items
+
+## Recently Completed
 - [x] Make percentage buttons (25%, 50%, 75%, 100%) clickable to auto-fill amount
 
 ## Recently Completed
