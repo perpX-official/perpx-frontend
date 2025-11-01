@@ -104,6 +104,45 @@ const translations = {
     "trade.noData": "No {type} yet",
     "trade.mid": "Mid",
     
+    // Referral
+    "referral.title": "Invite friends, Earn together",
+    "referral.subtitle": "Invite friends to trade on PerpX and earn commission on their trading fees.",
+    "referral.learnMore": "Learn more about our referral program",
+    "referral.inviteNow": "Invite now",
+    "referral.youReceive": "You receive",
+    "referral.inviteeReceive": "Your invitee receive",
+    "referral.code": "Referral code",
+    "referral.link": "Referral link",
+    "referral.summary": "Summary",
+    "referral.totalVolume": "Total Volume",
+    "referral.rewards": "Referral rewards",
+    "referral.friends": "Referred friends",
+    "referral.tiers": "Referral tiers",
+    "referral.list": "Referral list",
+    "referral.tier": "Tier",
+    "referral.commission": "Commission",
+    "referral.tradingVolume": "Trading Volume",
+    "referral.noReferrals": "No referrals yet",
+    
+    // Dashboard
+    "dashboard.stage": "Stage",
+    "dashboard.dawn": "Dawn",
+    "dashboard.subtitle": "Track your trading performance and rewards",
+    "dashboard.totalVolume": "Total Volume",
+    "dashboard.pnl": "Total PnL",
+    "dashboard.points": "Points Earned",
+    "dashboard.rank": "Global Rank",
+    
+    // Stats
+    "stats.title": "Platform Statistics",
+    "stats.subtitle": "Real-time trading metrics and platform performance",
+    "stats.volume24h": "24h Trading Volume",
+    "stats.totalVolume": "Total Volume",
+    "stats.totalTrades": "Total Trades",
+    "stats.activeTraders": "Active Traders",
+    "stats.topPairs": "Top Trading Pairs",
+    "stats.recentTrades": "Recent Trades",
+    
     // Rewards
     "rewards.dailyTasks": "Daily Tasks",
     "rewards.weeklyTasks": "Weekly Tasks",
@@ -229,6 +268,45 @@ const translations = {
     "trade.noData": "{type}はまだありません",
     "trade.mid": "中値",
     
+    // Referral
+    "referral.title": "友達を招待して、一緒に稼ごう",
+    "referral.subtitle": "友達をPerpXに招待して、取引手数料のコミッションを獲得しましょう。",
+    "referral.learnMore": "紹介プログラムの詳細を見る",
+    "referral.inviteNow": "今すぐ招待",
+    "referral.youReceive": "あなたが受け取る",
+    "referral.inviteeReceive": "招待された人が受け取る",
+    "referral.code": "紹介コード",
+    "referral.link": "紹介リンク",
+    "referral.summary": "概要",
+    "referral.totalVolume": "合計取引高",
+    "referral.rewards": "紹介報酬",
+    "referral.friends": "紹介した友達",
+    "referral.tiers": "紹介ティア",
+    "referral.list": "紹介リスト",
+    "referral.tier": "ティア",
+    "referral.commission": "コミッション",
+    "referral.tradingVolume": "取引高",
+    "referral.noReferrals": "まだ紹介がありません",
+    
+    // Dashboard
+    "dashboard.stage": "ステージ",
+    "dashboard.dawn": "夜明け",
+    "dashboard.subtitle": "取引パフォーマンスと報酬を追跡",
+    "dashboard.totalVolume": "合計取引高",
+    "dashboard.pnl": "合計損益",
+    "dashboard.points": "獲得ポイント",
+    "dashboard.rank": "グローバルランク",
+    
+    // Stats
+    "stats.title": "プラットフォーム統計",
+    "stats.subtitle": "リアルタイム取引メトリクスとプラットフォームパフォーマンス",
+    "stats.volume24h": "24時間取引高",
+    "stats.totalVolume": "合計取引高",
+    "stats.totalTrades": "合計取引数",
+    "stats.activeTraders": "アクティブトレーダー",
+    "stats.topPairs": "トップ取引ペア",
+    "stats.recentTrades": "最近の取引",
+    
     // Rewards
     "rewards.dailyTasks": "デイリータスク",
     "rewards.weeklyTasks": "ウィークリータスク",
@@ -353,6 +431,45 @@ const translations = {
     "trade.tradeHistory": "成交历史",
     "trade.noData": "暂无{type}",
     "trade.mid": "中间价",
+    
+    // Referral
+    "referral.title": "邀请好友，共同赚取",
+    "referral.subtitle": "邀请好友在PerpX上交易，赚取他们交易手续费的佣金。",
+    "referral.learnMore": "了解更多关于我们的推荐计划",
+    "referral.inviteNow": "立即邀请",
+    "referral.youReceive": "您将获得",
+    "referral.inviteeReceive": "您的被邀请人将获得",
+    "referral.code": "推荐码",
+    "referral.link": "推荐链接",
+    "referral.summary": "概要",
+    "referral.totalVolume": "总交易量",
+    "referral.rewards": "推荐奖励",
+    "referral.friends": "推荐好友",
+    "referral.tiers": "推荐等级",
+    "referral.list": "推荐列表",
+    "referral.tier": "等级",
+    "referral.commission": "佣金",
+    "referral.tradingVolume": "交易量",
+    "referral.noReferrals": "暂无推荐",
+    
+    // Dashboard
+    "dashboard.stage": "阶段",
+    "dashboard.dawn": "黎明",
+    "dashboard.subtitle": "追踪您的交易表现和奖励",
+    "dashboard.totalVolume": "总交易量",
+    "dashboard.pnl": "总盈亏",
+    "dashboard.points": "获得积分",
+    "dashboard.rank": "全球排名",
+    
+    // Stats
+    "stats.title": "平台统计",
+    "stats.subtitle": "实时交易指标和平台性能",
+    "stats.volume24h": "24小时交易量",
+    "stats.totalVolume": "总交易量",
+    "stats.totalTrades": "总交易数",
+    "stats.activeTraders": "活跃交易者",
+    "stats.topPairs": "热门交易对",
+    "stats.recentTrades": "最近交易",
     
     // Rewards
     "rewards.dailyTasks": "每日任务",

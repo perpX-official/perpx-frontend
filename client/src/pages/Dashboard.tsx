@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   TrendingUp,
   DollarSign,
@@ -8,6 +9,7 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -19,10 +21,10 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
-                Stage 3 • <span className="text-primary">Dawn</span>
+                {t('dashboard.stage')} 3 • <span className="text-primary">{t('dashboard.dawn')}</span>
               </h1>
               <p className="text-sm sm:text-base text-white/70">
-                Track your trading performance and rewards
+                {t('dashboard.subtitle')}
               </p>
             </div>
           </div>
@@ -37,7 +39,7 @@ export default function Dashboard() {
                   <DollarSign className="h-5 w-5 text-primary" />
                 </div>
               </div>
-              <div className="text-xs sm:text-sm text-white/60 mb-1">Total Volume</div>
+              <div className="text-xs sm:text-sm text-white/60 mb-1">{t('dashboard.totalVolume')}</div>
               <div className="text-lg sm:text-2xl font-bold text-white">$0</div>
             </CardContent>
           </Card>
@@ -49,7 +51,7 @@ export default function Dashboard() {
                   <TrendingUp className="h-5 w-5 text-green-500" />
                 </div>
               </div>
-              <div className="text-xs sm:text-sm text-white/60 mb-1">Total PnL</div>
+              <div className="text-xs sm:text-sm text-white/60 mb-1">{t('dashboard.pnl')}</div>
               <div className="text-lg sm:text-2xl font-bold text-green-500">$0</div>
             </CardContent>
           </Card>
@@ -61,7 +63,7 @@ export default function Dashboard() {
                   <Award className="h-5 w-5 text-primary" />
                 </div>
               </div>
-              <div className="text-xs sm:text-sm text-white/60 mb-1">Points Earned</div>
+              <div className="text-xs sm:text-sm text-white/60 mb-1">{t('dashboard.points')}</div>
               <div className="text-lg sm:text-2xl font-bold text-white">0</div>
             </CardContent>
           </Card>
@@ -73,7 +75,7 @@ export default function Dashboard() {
                   <BarChart3 className="h-5 w-5 text-primary" />
                 </div>
               </div>
-              <div className="text-xs sm:text-sm text-white/60 mb-1">Total Trades</div>
+               <div className="text-xs sm:text-sm text-white/60 mb-1">{t('dashboard.rank')}</div>
               <div className="text-lg sm:text-2xl font-bold text-white">0</div>
             </CardContent>
           </Card>

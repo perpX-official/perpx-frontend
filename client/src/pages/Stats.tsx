@@ -1,7 +1,9 @@
 import Header from "@/components/Header";
 import { TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Activity } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Stats() {
+  const { t } = useLanguage();
   const stats = [
     { label: "24h Volume", value: "$3.37B", change: "+12.5%", trend: "up" },
     { label: "Total Volume", value: "$139.20B", change: "+8.2%", trend: "up" },
@@ -33,8 +35,8 @@ export default function Stats() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Platform Statistics</h1>
-          <p className="text-white/60">Real-time metrics and trading data</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('stats.title')}</h1>
+          <p className="text-white/60">{t('stats.subtitle')}</p>
         </div>
 
         {/* Key Stats Grid */}

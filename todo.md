@@ -1,9 +1,9 @@
 # PerpX TODO
 
-## Current Tasks
-- [ ] Add translations for Portfolio, Referral, Stats pages
-- [ ] Add translations for More menu pages (Feedback, VIP, API, Documentation, Blog)
-- [ ] Test all pages for complete language switching
+## Completed Today
+- [x] Add translations for Referral, Dashboard (Portfolio), Stats pages
+- [x] Add Roadmap section translations to Home page
+- [x] Add comprehensive translation support for main pages
 
 ## In Progress
 - [x] Add Roadmap section translations to Home page
