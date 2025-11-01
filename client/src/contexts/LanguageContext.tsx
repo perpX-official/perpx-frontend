@@ -211,6 +211,20 @@ const translations = {
     "blog.readMore": "Read More",
     "blog.comingSoon": "Coming Soon",
     
+    // More Menu
+    "more.feedback": "Feedback",
+    "more.feedbackDesc": "Share your ideas and suggestions",
+    "more.vip": "VIP",
+    "more.vipDesc": "Enjoy lower trading fees",
+    "more.api": "API",
+    "more.apiDesc": "Apply for access to the API",
+    "more.documentation": "Documentation",
+    "more.documentationDesc": "Explore product features",
+    "more.blog": "Blog",
+    "more.blogDesc": "Stay updated with the latest news",
+    "more.discord": "Discord",
+    "more.discordDesc": "Join the Discord community",
+    
     // Rewards
     "rewards.dailyTasks": "Daily Tasks",
     "rewards.weeklyTasks": "Weekly Tasks",
@@ -443,6 +457,20 @@ const translations = {
     "blog.readMore": "続きを読む",
     "blog.comingSoon": "近日公開",
     
+    // More Menu
+    "more.feedback": "フィードバック",
+    "more.feedbackDesc": "アイデアや提案を共有",
+    "more.vip": "VIP",
+    "more.vipDesc": "低手数料を享受",
+    "more.api": "API",
+    "more.apiDesc": "APIアクセスを申請",
+    "more.documentation": "ドキュメント",
+    "more.documentationDesc": "製品機能を探索",
+    "more.blog": "ブログ",
+    "more.blogDesc": "最新ニュースをチェック",
+    "more.discord": "Discord",
+    "more.discordDesc": "Discordコミュニティに参加",
+    
     // Rewards
     "rewards.dailyTasks": "デイリータスク",
     "rewards.weeklyTasks": "ウィークリータスク",
@@ -674,6 +702,20 @@ const translations = {
     "blog.subtitle": "PerpX的最新新闻和更新",
     "blog.readMore": "阅读更多",
     "blog.comingSoon": "即将推出",
+    
+    // More Menu
+    "more.feedback": "反馈",
+    "more.feedbackDesc": "分享您的想法和建议",
+    "more.vip": "VIP",
+    "more.vipDesc": "享受更低交易费",
+    "more.api": "API",
+    "more.apiDesc": "申请API访问权限",
+    "more.documentation": "文档",
+    "more.documentationDesc": "探索产品功能",
+    "more.blog": "博客",
+    "more.blogDesc": "了解最新新闻",
+    "more.discord": "Discord",
+    "more.discordDesc": "加入Discord社区",
     
     // Rewards
     "rewards.dailyTasks": "每日任务",

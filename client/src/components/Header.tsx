@@ -21,12 +21,12 @@ export default function Header() {
   };
 
   const moreItems = [
-    { icon: MessageSquare, title: 'Feedback', desc: 'Share your ideas and suggestions', href: '/feedback' },
-    { icon: Shield, title: 'VIP', desc: 'Enjoy lower trading fees', href: '/vip' },
-    { icon: FileText, title: 'API', desc: 'Apply for access to the API', href: '/api' },
-    { icon: BookOpen, title: 'Documentation', desc: 'Explore product features', href: '/docs' },
-    { icon: FileText, title: 'Blog', desc: 'Stay updated with the latest news', href: '/blog' },
-    { icon: MessageCircle, title: 'Discord', desc: 'Join the Discord community', href: 'https://discord.gg/perpx', external: true },
+    { icon: MessageSquare, titleKey: 'more.feedback', descKey: 'more.feedbackDesc', href: '/feedback' },
+    { icon: Shield, titleKey: 'more.vip', descKey: 'more.vipDesc', href: '/vip' },
+    { icon: FileText, titleKey: 'more.api', descKey: 'more.apiDesc', href: '/api' },
+    { icon: BookOpen, titleKey: 'more.documentation', descKey: 'more.documentationDesc', href: '/docs' },
+    { icon: FileText, titleKey: 'more.blog', descKey: 'more.blogDesc', href: '/blog' },
+    { icon: MessageCircle, titleKey: 'more.discord', descKey: 'more.discordDesc', href: 'https://discord.gg/perpx', external: true },
   ];
 
   return (
@@ -71,7 +71,7 @@ export default function Header() {
                   <Link href="/stats" className={`text-xs sm:text-sm transition-colors ${
                       location === "/stats" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
-                    Stats
+                    {t('nav.stats')}
                   </Link>
                   
                   {/* More Dropdown */}
@@ -80,7 +80,7 @@ export default function Header() {
                       onClick={() => setIsMoreOpen(!isMoreOpen)}
                       className="flex items-center gap-1 text-xs sm:text-sm text-white/60 hover:text-white transition-colors"
                     >
-                      More
+                      {t('nav.more')}
                       <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} />
                     </button>
                     
@@ -104,8 +104,8 @@ export default function Header() {
                                 >
                                   <item.icon className="h-5 w-5 text-primary mt-0.5" />
                                   <div>
-                                    <div className="text-sm font-medium text-white mb-0.5">{item.title}</div>
-                                    <div className="text-xs text-white/60">{item.desc}</div>
+                                    <div className="text-sm font-medium text-white mb-0.5">{t(item.titleKey)}</div>
+                                    <div className="text-xs text-white/60">{t(item.descKey)}</div>
                                   </div>
                                 </a>
                               ) : (
@@ -115,8 +115,8 @@ export default function Header() {
                                 >
                                   <item.icon className="h-5 w-5 text-primary mt-0.5" />
                                   <div>
-                                    <div className="text-sm font-medium text-white mb-0.5">{item.title}</div>
-                                    <div className="text-xs text-white/60">{item.desc}</div>
+                                    <div className="text-sm font-medium text-white mb-0.5">{t(item.titleKey)}</div>
+                                    <div className="text-xs text-white/60">{t(item.descKey)}</div>
                                   </div>
                                 </Link>
                               )
@@ -273,8 +273,8 @@ export default function Header() {
                           <div className="flex items-center gap-3">
                             <item.icon className="h-5 w-5 text-primary" />
                             <div>
-                              <div className="text-sm font-medium text-white">{item.title}</div>
-                              <div className="text-xs text-white/60">{item.desc}</div>
+                              <div className="text-sm font-medium text-white">{t(item.titleKey)}</div>
+                              <div className="text-xs text-white/60">{t(item.descKey)}</div>
                             </div>
                           </div>
                         </a>
@@ -286,8 +286,8 @@ export default function Header() {
                           <div className="flex items-center gap-3">
                             <item.icon className="h-5 w-5 text-primary" />
                             <div>
-                              <div className="text-sm font-medium text-white">{item.title}</div>
-                              <div className="text-xs text-white/60">{item.desc}</div>
+                              <div className="text-sm font-medium text-white">{t(item.titleKey)}</div>
+                              <div className="text-xs text-white/60">{t(item.descKey)}</div>
                             </div>
                           </div>
                         </Link>

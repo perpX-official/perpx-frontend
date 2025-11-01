@@ -1,6 +1,10 @@
 # PerpX TODO
 
-## All Tasks Completed
+## Current Tasks
+- [x] Fix More menu dropdown items - translate descriptions for Feedback, VIP, API, Documentation, Blog, Discord
+- [x] Fix navigation bar - translate "Stats" label
+
+## Previously Completed
 - [x] Fix Stats page - add missing translations for data labels
 - [x] Add translations for More menu pages (Feedback, VIP, API, Docs, Blog)
 - [x] Complete multi-language support for all pages
