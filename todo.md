@@ -1,10 +1,17 @@
 # PerpX TODO
 
 ## Current Tasks
-- [x] Expand translation dictionary with all page content
-- [x] Update Home page with full translation support
+- [ ] Add translations for Portfolio, Referral, Stats pages
+- [ ] Add translations for More menu pages (Feedback, VIP, API, Documentation, Blog)
+- [ ] Test all pages for complete language switching
+
+## In Progress
+- [x] Add Roadmap section translations to Home page
+
+## Recently Completed (Previous Session)
+- [x] Expand translation dictionary with Home and Trade content
+- [x] Update Home page hero section with full translation support
 - [x] Update Trade page with full translation support
-- [x] Test language switching across all pages
 
 ## Recently Completed
 - [x] Fix PerpX logo size to match text height in header

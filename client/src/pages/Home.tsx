@@ -208,24 +208,24 @@ export default function Home() {
             {/* Q1 2026 */}
             <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#0ABAB5] apple-fade-in hover-reveal" style={{transitionDelay: '0.1s'}}>
               <h3 className="text-2xl sm:text-3xl font-bold text-[#0ABAB5] mb-4 sm:mb-6">
-                Q1 2026 - Foundation
+                {t('roadmap.q1.title')}
               </h3>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
-                  <span>Development Kickoff</span>
+                  <span>{t('roadmap.q1.item1')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
-                  <span>Core Infrastructure Setup</span>
+                  <span>{t('roadmap.q1.item2')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
-                  <span>Smart Contract Security Audit</span>
+                  <span>{t('roadmap.q1.item3')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#0ABAB5] flex-shrink-0"></span>
-                  <span>Testnet Launch</span>
+                  <span>{t('roadmap.q1.item4')}</span>
                 </li>
               </ul>
             </div>
@@ -233,24 +233,24 @@ export default function Home() {
             {/* Q2 2026 */}
             <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#A855F7] apple-fade-in hover-reveal" style={{transitionDelay: '0.2s'}}>
               <h3 className="text-2xl sm:text-3xl font-bold text-[#A855F7] mb-4 sm:mb-6">
-                Q2 2026 - Platform Launch
+                {t('roadmap.q2.title')}
               </h3>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
-                  <span>Mainnet Launch</span>
+                  <span>{t('roadmap.q2.item1')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
-                  <span>First Airdrop Round</span>
+                  <span>{t('roadmap.q2.item2')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
-                  <span>Community Building</span>
+                  <span>{t('roadmap.q2.item3')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#A855F7] flex-shrink-0"></span>
-                  <span>Marketing Campaign</span>
+                  <span>{t('roadmap.q2.item4')}</span>
                 </li>
               </ul>
             </div>
@@ -258,24 +258,24 @@ export default function Home() {
             {/* Q3 2026 */}
             <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#FFD700] apple-fade-in hover-reveal" style={{transitionDelay: '0.3s'}}>
               <h3 className="text-2xl sm:text-3xl font-bold text-[#FFD700] mb-4 sm:mb-6">
-                Q3 2026 - Expansion
+                {t('roadmap.q3.title')}
               </h3>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
-                  <span>Second Airdrop Round</span>
+                  <span>{t('roadmap.q3.item1')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
-                  <span>Advanced Trading Features</span>
+                  <span>{t('roadmap.q3.item2')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
-                  <span>Multi-chain Support</span>
+                  <span>{t('roadmap.q3.item3')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#FFD700] flex-shrink-0"></span>
-                  <span>Mobile App Beta</span>
+                  <span>{t('roadmap.q3.item4')}</span>
                 </li>
               </ul>
             </div>
@@ -283,24 +283,24 @@ export default function Home() {
             {/* Q4 2026 */}
             <div className="glass-card rounded-2xl p-6 sm:p-8 border-l-4 border-[#10B981] apple-fade-in hover-reveal" style={{transitionDelay: '0.4s'}}>
               <h3 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4 sm:mb-6">
-                Q4 2026 - Innovation
+                {t('roadmap.q4.title')}
               </h3>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
-                  <span>NFT Trading Achievements</span>
+                  <span>{t('roadmap.q4.item1')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
-                  <span>VISA Card Integration</span>
+                  <span>{t('roadmap.q4.item2')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
-                  <span>Global Expansion</span>
+                  <span>{t('roadmap.q4.item3')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm sm:text-base text-white/70">
                   <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
-                  <span>Governance Launch</span>
+                  <span>{t('roadmap.q4.item4')}</span>
                 </li>
               </ul>
             </div>
