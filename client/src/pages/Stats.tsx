@@ -5,12 +5,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function Stats() {
   const { t } = useLanguage();
   const stats = [
-    { label: "24h Volume", value: "$3.37B", change: "+12.5%", trend: "up" },
-    { label: "Total Volume", value: "$139.20B", change: "+8.2%", trend: "up" },
-    { label: "Total Users", value: "147,278", change: "+5.3%", trend: "up" },
-    { label: "Open Interest", value: "$892.5M", change: "-2.1%", trend: "down" },
-    { label: "Total Trades", value: "12.5M", change: "+15.8%", trend: "up" },
-    { label: "Active Traders", value: "45,892", change: "+7.4%", trend: "up" },
+    { labelKey: "stats.volume24h", value: "$3.37B", change: "+12.5%", trend: "up" },
+    { labelKey: "stats.totalVolume", value: "$139.20B", change: "+8.2%", trend: "up" },
+    { labelKey: "stats.totalUsers", value: "147,278", change: "+5.3%", trend: "up" },
+    { labelKey: "stats.openInterest", value: "$892.5M", change: "-2.1%", trend: "down" },
+    { labelKey: "stats.totalTrades", value: "12.5M", change: "+15.8%", trend: "up" },
+    { labelKey: "stats.activeTraders", value: "45,892", change: "+7.4%", trend: "up" },
   ];
 
   const topMarkets = [
@@ -44,7 +44,7 @@ export default function Stats() {
           {stats.map((stat, index) => (
             <div key={index} className="glass-card rounded-xl p-6 hover-reveal">
               <div className="flex items-start justify-between mb-4">
-                <div className="text-sm text-white/60">{stat.label}</div>
+                <div className="text-sm text-white/60">{t(stat.labelKey)}</div>
                 {stat.trend === "up" ? (
                   <TrendingUp className="h-5 w-5 text-green-500" />
                 ) : (
@@ -65,16 +65,16 @@ export default function Stats() {
         <div className="glass-card rounded-xl p-6 mb-8">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Top Markets (24h)
+            {t('stats.topMarkets')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">Pair</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">Price</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">24h Volume</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">Change</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">{t('stats.pair')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">{t('stats.price')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">{t('stats.volume24h')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">{t('stats.change')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,17 +101,17 @@ export default function Stats() {
         <div className="glass-card rounded-xl p-6">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
-            Recent Trades
+            {t('stats.recentTrades')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">Time</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">Pair</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">Side</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">Size</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">Price</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">{t('stats.time')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">{t('stats.pair')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-white/60">{t('stats.side')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">{t('stats.size')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-white/60">{t('stats.price')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -125,7 +125,7 @@ export default function Stats() {
                           ? 'bg-green-500/20 text-green-500' 
                           : 'bg-red-500/20 text-red-500'
                       }`}>
-                        {trade.side}
+                        {t(trade.side === 'Long' ? 'stats.long' : 'stats.short')}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right text-white">{trade.size}</td>
@@ -140,7 +140,7 @@ export default function Stats() {
         {/* Additional Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Trading Volume (7 Days)</h3>
+            <h3 className="text-lg font-bold text-white mb-4">{t('stats.tradingVolume7d')}</h3>
             <div className="space-y-3">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => {
                 const volume = Math.random() * 5 + 2;
@@ -162,11 +162,11 @@ export default function Stats() {
           </div>
 
           <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4">User Growth</h3>
+            <h3 className="text-lg font-bold text-white mb-4">{t('stats.userGrowth')}</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-white/60 mb-1">New Users (24h)</div>
+                  <div className="text-sm text-white/60 mb-1">{t('stats.newUsers24h')}</div>
                   <div className="text-2xl font-bold text-white">2,458</div>
                 </div>
                 <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
@@ -175,7 +175,7 @@ export default function Stats() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-white/60 mb-1">Active Users (24h)</div>
+                  <div className="text-sm text-white/60 mb-1">{t('stats.activeUsers24h')}</div>
                   <div className="text-2xl font-bold text-white">45,892</div>
                 </div>
                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
@@ -184,7 +184,7 @@ export default function Stats() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-white/60 mb-1">Total Traders</div>
+                  <div className="text-sm text-white/60 mb-1">{t('stats.totalTraders')}</div>
                   <div className="text-2xl font-bold text-white">147,278</div>
                 </div>
                 <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center">

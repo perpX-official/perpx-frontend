@@ -1,7 +1,9 @@
 import Header from "@/components/Header";
 import { Calendar, User, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Blog() {
+  const { t } = useLanguage();
   const posts = [
     {
       title: "Introducing PerpX: The Future of Perpetual Trading",
@@ -32,8 +34,8 @@ export default function Blog() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Blog</h1>
-          <p className="text-white/60">Stay updated with the latest news and insights</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('blog.title')}</h1>
+          <p className="text-white/60">{t('blog.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -56,7 +58,7 @@ export default function Blog() {
                 <h3 className="text-xl font-bold text-white mb-2">{post.title}</h3>
                 <p className="text-white/60 mb-4">{post.excerpt}</p>
                 <a href="#" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium">
-                  Read More
+                  {t('blog.readMore')}
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </div>

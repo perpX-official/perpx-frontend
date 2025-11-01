@@ -1,16 +1,18 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Code, Key, Book, Terminal } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function API() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">API Access</h1>
-          <p className="text-white/60">Apply for access to the PerpX API</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('api.title')}</h1>
+          <p className="text-white/60">{t('api.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

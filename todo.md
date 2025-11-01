@@ -1,9 +1,14 @@
 # PerpX TODO
 
+## All Tasks Completed
+- [x] Fix Stats page - add missing translations for data labels
+- [x] Add translations for More menu pages (Feedback, VIP, API, Docs, Blog)
+- [x] Complete multi-language support for all pages
+
 ## Completed Today
-- [x] Add translations for Referral, Dashboard (Portfolio), Stats pages
+- [x] Add translations for Referral, Dashboard (Portfolio) pages
 - [x] Add Roadmap section translations to Home page
-- [x] Add comprehensive translation support for main pages
+- [x] Add translation infrastructure for Stats page
 
 ## In Progress
 - [x] Add Roadmap section translations to Home page

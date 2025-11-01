@@ -1,8 +1,10 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Crown, Check, Zap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function VIP() {
+  const { t } = useLanguage();
   const tiers = [
     { 
       name: "Silver", 
@@ -30,8 +32,8 @@ export default function VIP() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">VIP Program</h1>
-          <p className="text-white/60">Enjoy lower trading fees and exclusive benefits</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('vip.title')}</h1>
+          <p className="text-white/60">{t('vip.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -43,10 +45,10 @@ export default function VIP() {
               </div>
               <div className="mb-4">
                 <div className="text-3xl font-bold text-primary mb-1">{tier.fee}</div>
-                <div className="text-sm text-white/60">Trading Fee</div>
+                <div className="text-sm text-white/60">{t('vip.tradingFee')}</div>
               </div>
               <div className="mb-6">
-                <div className="text-sm text-white/60 mb-1">Required Volume (30d)</div>
+                <div className="text-sm text-white/60 mb-1">{t('vip.volumeRequired')}</div>
                 <div className="text-lg font-bold text-white">{tier.volume}</div>
               </div>
               <div className="space-y-2 mb-6">
