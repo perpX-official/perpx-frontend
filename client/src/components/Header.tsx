@@ -80,7 +80,7 @@ export default function Header() {
                       onClick={() => setIsMoreOpen(!isMoreOpen)}
                       className="flex items-center gap-1 text-xs sm:text-sm text-white/60 hover:text-white transition-colors"
                     >
-                      {t('nav.more')}
+                      {t('more')}
                       <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} />
                     </button>
                     

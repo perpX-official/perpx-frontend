@@ -1,6 +1,9 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Change nav.more translation key to just 'more'
+
+## Recently Completed
 - [x] Fix More menu dropdown items - translate descriptions for Feedback, VIP, API, Documentation, Blog, Discord
 - [x] Fix navigation bar - translate "Stats" label
 

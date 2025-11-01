@@ -22,6 +22,7 @@ const translations = {
     "nav.features": "Features",
     "nav.stats": "Stats",
     "nav.roadmap": "Roadmap",
+    "more": "More",
     "button.launchApp": "Launch App",
     "button.connectWallet": "Connect wallet",
     
@@ -268,6 +269,7 @@ const translations = {
     "nav.features": "機能",
     "nav.stats": "統計",
     "nav.roadmap": "ロードマップ",
+    "more": "その他",
     "button.launchApp": "アプリを起動",
     "button.connectWallet": "ウォレット接続",
     
@@ -514,6 +516,7 @@ const translations = {
     "nav.features": "功能",
     "nav.stats": "统计",
     "nav.roadmap": "路线图",
+    "more": "更多",
     "button.launchApp": "启动应用",
     "button.connectWallet": "连接钱包",
     
