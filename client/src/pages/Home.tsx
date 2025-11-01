@@ -67,13 +67,13 @@ export default function Home() {
             >
               <div className="space-y-4 sm:space-y-6">
                 <p className="text-xs sm:text-sm font-medium text-white/60 tracking-wider uppercase">
-                  NEXT-GENERATION PERPETUAL DEX
+                  {t('home.nextGen')}
                 </p>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-                  Trade Perpetuals with Maximum Capital Efficiency
+                  {t('home.heroTitle')}
                 </h1>
                 <p className="text-sm sm:text-base lg:text-lg text-white/70 max-w-xl">
-                  Experience up to 100x leverage on crypto perpetuals with deep liquidity, minimal slippage, and institutional-grade execution. Built for traders who demand performance.
+                  {t('home.heroSubtitle')}
                 </p>
               </div>
 

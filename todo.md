@@ -1,6 +1,12 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Expand translation dictionary with all page content
+- [x] Update Home page with full translation support
+- [x] Update Trade page with full translation support
+- [x] Test language switching across all pages
+
+## Recently Completed
 - [x] Fix PerpX logo size to match text height in header
 - [x] Update hero section with original marketing content based on strategy
 - [x] Add Perpetual/Spot tabs to trading page

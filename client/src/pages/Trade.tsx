@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ChevronDown, Star, TrendingUp, TrendingDown } from "lucide-react";
 import TradingViewChart from "@/components/TradingViewChart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TRADING_PAIRS = [
   { symbol: "BTCUSDT", name: "Bitcoin", price: 111062.6, change: 3.17, volume: "2.5B" },
@@ -15,6 +16,7 @@ const TRADING_PAIRS = [
 ];
 
 export default function Trade() {
+  const { t } = useLanguage();
   const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
@@ -38,7 +40,7 @@ export default function Trade() {
                 : "border-transparent text-white/60"
             }`}
           >
-            Perpetual
+            {t('trade.perpetual')}
           </button>
           <button
             onClick={() => setTradeMode("spot")}
@@ -48,7 +50,7 @@ export default function Trade() {
                 : "border-transparent text-white/60"
             }`}
           >
-            Spot
+            {t('trade.spot')}
           </button>
         </div>
       </div>
@@ -77,11 +79,11 @@ export default function Trade() {
           {/* Mark and Index Prices */}
           <div className="flex gap-4 mt-2 text-xs text-white/60">
             <div>
-              <span>Mark</span>
+              <span>{t('trade.mark')}</span>
               <span className="ml-2 text-white">{selectedPair.price.toLocaleString()}</span>
             </div>
             <div>
-              <span>Index</span>
+              <span>{t('trade.index')}</span>
               <span className="ml-2 text-white">{selectedPair.price.toLocaleString()}</span>
             </div>
           </div>
@@ -132,14 +134,14 @@ export default function Trade() {
                 onClick={() => setMarginMode("cross")}
                 className="flex-1"
               >
-                Cross
+                {t('trade.cross')}
               </Button>
               <Button
                 variant={marginMode === "isolated" ? "default" : "outline"}
                 onClick={() => setMarginMode("isolated")}
                 className="flex-1"
               >
-                Isolated
+                {t('trade.isolated')}
               </Button>
               <Button variant="outline" className="px-4">
                 {leverage}x
@@ -155,7 +157,7 @@ export default function Trade() {
                 orderType === "market" ? "bg-primary text-white" : "text-white/60"
               }`}
             >
-              Market
+              {t('trade.market')}
             </button>
             <button
               onClick={() => setOrderType("limit")}
@@ -163,7 +165,7 @@ export default function Trade() {
                 orderType === "limit" ? "bg-primary text-white" : "text-white/60"
               }`}
             >
-              Limit
+              {t('trade.limit')}
             </button>
             <button
               onClick={() => setOrderType("stop")}
@@ -171,13 +173,13 @@ export default function Trade() {
                 orderType === "stop" ? "bg-primary text-white" : "text-white/60"
               }`}
             >
-              Stop Limit
+              {t('trade.stopLimit')}
             </button>
           </div>
 
           {/* Price Input */}
           <div>
-            <label className="text-sm text-white/60 mb-2 block">Price (USDT)</label>
+            <label className="text-sm text-white/60 mb-2 block">{t('trade.price')}</label>
             <div className="relative">
               <Input
                 type="number"
@@ -186,14 +188,14 @@ export default function Trade() {
                 className="bg-card/50 border-white/10 text-white pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-white/60">
-                Mid
+                {t('trade.mid')}
               </span>
             </div>
           </div>
 
           {/* Size Input */}
           <div>
-            <label className="text-sm text-white/60 mb-2 block">Size</label>
+            <label className="text-sm text-white/60 mb-2 block">{t('trade.size')}</label>
             <div className="relative">
               <Input
                 type="number"
@@ -217,10 +219,10 @@ export default function Trade() {
 
           {/* Margin Info */}
           <div className="flex justify-between text-sm">
-            <span className="text-white/60">Margin</span>
+            <span className="text-white/60">{t('trade.margin')}</span>
             <div className="text-right">
               <span className="text-white">0.00</span>
-              <span className="text-white/60 ml-2">Max</span>
+              <span className="text-white/60 ml-2">{t('trade.max')}</span>
               <span className="text-white ml-2">0.0 USDT</span>
             </div>
           </div>
@@ -228,10 +230,10 @@ export default function Trade() {
           {/* Buy/Sell Buttons */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <Button className="bg-green-500 hover:bg-green-600 text-white py-6 text-lg font-bold">
-              {tradeMode === "perpetual" ? "Buy/Long" : "Buy"}
+              {tradeMode === "perpetual" ? t('trade.buyLong') : t('trade.buy')}
             </Button>
             <Button className="bg-red-500 hover:bg-red-600 text-white py-6 text-lg font-bold">
-              {tradeMode === "perpetual" ? "Sell/Short" : "Sell"}
+              {tradeMode === "perpetual" ? t('trade.sellShort') : t('trade.sell')}
             </Button>
           </div>
         </div>
@@ -240,10 +242,10 @@ export default function Trade() {
         <div className="bg-card/50 border-t border-white/5">
           <div className="flex">
             {[
-              { key: "positions", label: "Positions" },
-              { key: "orders", label: "Open Orders" },
-              { key: "history", label: "Order History" },
-              { key: "trades", label: "Trade History" },
+              { key: "positions", label: t('trade.positions') },
+              { key: "orders", label: t('trade.openOrders') },
+              { key: "history", label: t('trade.orderHistory') },
+              { key: "trades", label: t('trade.tradeHistory') },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -260,7 +262,7 @@ export default function Trade() {
           </div>
           <div className="p-4 min-h-[100px]">
             <div className="text-center text-white/40 py-8">
-              No {activeTab} yet
+              {t('trade.noData').replace('{type}', activeTab)}
             </div>
           </div>
         </div>
