@@ -21,10 +21,37 @@ export default function Trade() {
   const [marginMode, setMarginMode] = useState<"cross" | "isolated">("cross");
   const [leverage, setLeverage] = useState(25);
   const [activeTab, setActiveTab] = useState<"positions" | "orders" | "history" | "trades">("positions");
+  const [tradeMode, setTradeMode] = useState<"perpetual" | "spot">("perpetual");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+
+      {/* Perpetual/Spot Tabs */}
+      <div className="bg-card/50 border-b border-white/5">
+        <div className="flex">
+          <button
+            onClick={() => setTradeMode("perpetual")}
+            className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
+              tradeMode === "perpetual"
+                ? "border-primary text-white"
+                : "border-transparent text-white/60"
+            }`}
+          >
+            Perpetual
+          </button>
+          <button
+            onClick={() => setTradeMode("spot")}
+            className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
+              tradeMode === "spot"
+                ? "border-primary text-white"
+                : "border-transparent text-white/60"
+            }`}
+          >
+            Spot
+          </button>
+        </div>
+      </div>
 
       {/* Mobile Trading Interface */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -97,26 +124,28 @@ export default function Trade() {
 
         {/* Trading Panel */}
         <div className="flex-1 overflow-y-auto bg-background p-4 space-y-4">
-          {/* Margin Mode and Leverage */}
-          <div className="flex gap-2">
-            <Button
-              variant={marginMode === "cross" ? "default" : "outline"}
-              onClick={() => setMarginMode("cross")}
-              className="flex-1"
-            >
-              Cross
-            </Button>
-            <Button
-              variant={marginMode === "isolated" ? "default" : "outline"}
-              onClick={() => setMarginMode("isolated")}
-              className="flex-1"
-            >
-              Isolated
-            </Button>
-            <Button variant="outline" className="px-4">
-              {leverage}x
-            </Button>
-          </div>
+          {/* Margin Mode and Leverage - Only for Perpetual */}
+          {tradeMode === "perpetual" && (
+            <div className="flex gap-2">
+              <Button
+                variant={marginMode === "cross" ? "default" : "outline"}
+                onClick={() => setMarginMode("cross")}
+                className="flex-1"
+              >
+                Cross
+              </Button>
+              <Button
+                variant={marginMode === "isolated" ? "default" : "outline"}
+                onClick={() => setMarginMode("isolated")}
+                className="flex-1"
+              >
+                Isolated
+              </Button>
+              <Button variant="outline" className="px-4">
+                {leverage}x
+              </Button>
+            </div>
+          )}
 
           {/* Order Type Tabs */}
           <div className="flex gap-2 bg-card/30 rounded-lg p-1">
@@ -199,10 +228,10 @@ export default function Trade() {
           {/* Buy/Sell Buttons */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <Button className="bg-green-500 hover:bg-green-600 text-white py-6 text-lg font-bold">
-              Buy/Long
+              {tradeMode === "perpetual" ? "Buy/Long" : "Buy"}
             </Button>
             <Button className="bg-red-500 hover:bg-red-600 text-white py-6 text-lg font-bold">
-              Sell/Short
+              {tradeMode === "perpetual" ? "Sell/Short" : "Sell"}
             </Button>
           </div>
         </div>
