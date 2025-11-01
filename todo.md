@@ -1,6 +1,9 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Make percentage buttons (25%, 50%, 75%, 100%) clickable to auto-fill amount
+
+## Recently Completed
 - [x] Change nav.more translation key to just 'more'
 
 ## Recently Completed

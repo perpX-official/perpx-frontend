@@ -24,6 +24,13 @@ export default function Trade() {
   const [leverage, setLeverage] = useState(25);
   const [activeTab, setActiveTab] = useState<"positions" | "orders" | "history" | "trades">("positions");
   const [tradeMode, setTradeMode] = useState<"perpetual" | "spot">("perpetual");
+  const [amount, setAmount] = useState("");
+  const [availableBalance] = useState(10000); // Mock balance
+
+  const handlePercentageClick = (percent: number) => {
+    const calculatedAmount = (availableBalance * percent) / 100;
+    setAmount(calculatedAmount.toFixed(2));
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -200,6 +207,8 @@ export default function Trade() {
               <Input
                 type="number"
                 placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 className="bg-card/50 border-white/10 text-white pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-white/60">
@@ -211,7 +220,13 @@ export default function Trade() {
           {/* Percentage Buttons */}
           <div className="flex gap-2">
             {[25, 50, 75, 100].map((percent) => (
-              <Button key={percent} variant="outline" size="sm" className="flex-1">
+              <Button 
+                key={percent} 
+                variant="outline" 
+                size="sm" 
+                className="flex-1"
+                onClick={() => handlePercentageClick(percent)}
+              >
                 {percent}%
               </Button>
             ))}
