@@ -1,10 +1,14 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Translate Privacy Policy page full content
+- [x] Translate Terms of Service page full content
+
+## Recently Completed
 - [x] Translate API page content (REST API, WebSocket API, buttons)
 - [x] Translate VIP page content (tier names, features, buttons)
 - [x] Translate Docs page content (section titles, descriptions)
-- [x] Translate footer (Privacy Policy, Terms of Service)
+- [x] Translate footer links (Privacy Policy, Terms of Service)
 
 ## Recently Completed
 - [x] Debug and fix mobile menu translations - Stats and More (server restarted)
