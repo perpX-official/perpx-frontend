@@ -7,22 +7,22 @@ export default function VIP() {
   const { t } = useLanguage();
   const tiers = [
     { 
-      name: "Silver", 
+      nameKey: "vip.silver", 
       fee: "0.08%", 
       volume: "$100K+", 
-      benefits: ["Priority support", "Reduced fees", "Early access"] 
+      benefitKeys: ["vip.prioritySupportBenefit", "vip.reducedFees", "vip.earlyAccess"] 
     },
     { 
-      name: "Gold", 
+      nameKey: "vip.gold", 
       fee: "0.06%", 
       volume: "$1M+", 
-      benefits: ["All Silver benefits", "Dedicated account manager", "Custom API limits"] 
+      benefitKeys: ["vip.allSilverBenefits", "vip.dedicatedAccountManager", "vip.customApiLimits"] 
     },
     { 
-      name: "Platinum", 
+      nameKey: "vip.platinum", 
       fee: "0.04%", 
       volume: "$10M+", 
-      benefits: ["All Gold benefits", "Zero maker fees", "Exclusive events"] 
+      benefitKeys: ["vip.allGoldBenefits", "vip.zeroMakerFees", "vip.exclusiveEvents"] 
     },
   ];
 
@@ -41,7 +41,7 @@ export default function VIP() {
             <div key={index} className="glass-card rounded-xl p-6 hover-reveal">
               <div className="flex items-center gap-2 mb-4">
                 <Crown className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-bold text-white">{tier.name}</h3>
+                <h3 className="text-xl font-bold text-white">{t(tier.nameKey)}</h3>
               </div>
               <div className="mb-4">
                 <div className="text-3xl font-bold text-primary mb-1">{tier.fee}</div>
@@ -52,15 +52,15 @@ export default function VIP() {
                 <div className="text-lg font-bold text-white">{tier.volume}</div>
               </div>
               <div className="space-y-2 mb-6">
-                {tier.benefits.map((benefit, i) => (
+                {tier.benefitKeys.map((benefitKey, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm text-white/80">
                     <Check className="h-4 w-4 text-green-500" />
-                    {benefit}
+                    {t(benefitKey)}
                   </div>
                 ))}
               </div>
               <Button className="w-full neuro-button micro-bounce text-white font-medium">
-                Learn More
+                {t('home.learnMore')}
               </Button>
             </div>
           ))}
@@ -68,8 +68,8 @@ export default function VIP() {
 
         <div className="glass-card rounded-xl p-8 text-center">
           <Zap className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Current Tier: Standard</h2>
-          <p className="text-white/60 mb-6">Trade $100K in the next 30 days to unlock Silver tier</p>
+          <h2 className="text-2xl font-bold text-white mb-2">{t('vip.currentTier')}: {t('vip.standard')}</h2>
+          <p className="text-white/60 mb-6">{t('vip.unlockMessage')}</p>
           <div className="max-w-md mx-auto">
             <div className="flex justify-between text-sm text-white/60 mb-2">
               <span>$45,230 / $100,000</span>

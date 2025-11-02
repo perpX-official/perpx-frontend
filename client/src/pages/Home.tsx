@@ -342,10 +342,10 @@ export default function Home() {
       <footer className="border-t border-white/10 py-8 sm:py-12 glass-menu">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-xs sm:text-sm text-white/60">© 2025 PerpX. All rights reserved.</p>
+            <p className="text-xs sm:text-sm text-white/60">{t('footer.copyright')}</p>
             <div className="flex gap-4 sm:gap-6">
-              <Link href="/privacy-policy" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Privacy Policy</Link>
-              <Link href="/terms-of-service" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">Terms of Service</Link>
+              <Link href="/privacy-policy" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">{t('footer.privacyPolicy')}</Link>
+              <Link href="/terms-of-service" className="text-xs sm:text-sm text-white/60 hover:text-white hover-reveal-text transition-colors">{t('footer.termsOfService')}</Link>
             </div>
           </div>
         </div>

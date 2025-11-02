@@ -1,7 +1,16 @@
 # PerpX TODO
 
 ## Current Tasks
-- [x] Fix mobile menu - translate Stats and More menu items
+- [x] Translate API page content (REST API, WebSocket API, buttons)
+- [x] Translate VIP page content (tier names, features, buttons)
+- [x] Translate Docs page content (section titles, descriptions)
+- [x] Translate footer (Privacy Policy, Terms of Service)
+
+## Recently Completed
+- [x] Debug and fix mobile menu translations - Stats and More (server restarted)
+
+## Previous Attempt (Failed)
+- [x] Fix mobile menu - translate Stats and More menu items (not working)
 
 ## Recently Completed
 - [x] Make percentage buttons (25%, 50%, 75%, 100%) clickable to auto-fill amount
