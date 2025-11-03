@@ -120,7 +120,7 @@ const privacyContent = {
       }
     ]
   },
-  ja: {
+  jp: {
     title: "プライバシーポリシー",
     lastUpdated: "最終更新日：2026年1月21日",
     sections: [
@@ -238,7 +238,7 @@ const privacyContent = {
       }
     ]
   },
-  zh: {
+  cn: {
     title: "隐私政策",
     lastUpdated: "最后更新：2026年1月21日",
     sections: [

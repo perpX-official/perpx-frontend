@@ -1,7 +1,10 @@
 # PerpX TODO
 
 ## Current Tasks
-- [x] Fix TypeError in Privacy Policy and Terms of Service pages when switching languages
+- [x] Debug and fix Privacy Policy and Terms of Service - language switching not working (fixed language key mismatch: ja/zh → jp/cn)
+
+## Previous Attempts
+- [x] Fix TypeError in Privacy Policy and Terms of Service pages when switching languages (incomplete - still not working)
 
 ## Recently Completed
 - [x] Translate Privacy Policy page full content

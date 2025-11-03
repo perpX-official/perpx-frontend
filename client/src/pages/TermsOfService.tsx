@@ -132,7 +132,7 @@ const termsContent = {
       }
     ]
   },
-  ja: {
+  jp: {
     title: "利用規約",
     lastUpdated: "最終更新日：2026年1月21日",
     sections: [
@@ -262,7 +262,7 @@ const termsContent = {
       }
     ]
   },
-  zh: {
+  cn: {
     title: "服务条款",
     lastUpdated: "最后更新：2026年1月21日",
     sections: [
