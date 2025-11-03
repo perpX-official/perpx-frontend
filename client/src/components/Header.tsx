@@ -13,6 +13,7 @@ export default function Header() {
   const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
+  const isLegalPage = location === "/privacy" || location === "/terms";
 
   const languageNames = {
     en: 'English',
@@ -36,17 +37,19 @@ export default function Header() {
         <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                className="lg:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
+              {!isLegalPage && (
+                <button
+                  className="lg:hidden p-2"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
+              )}
               <Link href="/" className="flex items-center gap-2">
                 <img src="/perpx-icon.png" alt="PerpX" className="h-6 w-6" />
                 <span className="text-lg sm:text-xl font-bold text-white">PerpX</span>
               </Link>
-              {!isHomePage && (
+              {!isHomePage && !isLegalPage && (
                 <div className="hidden lg:flex items-center gap-4 sm:gap-6 ml-4 sm:ml-8">
                   <Link href="/trade" className={`text-xs sm:text-sm transition-colors ${
                       location === "/trade" ? "text-white" : "text-white/60 hover:text-white"
@@ -222,7 +225,7 @@ export default function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && !isLegalPage && (
         <div className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
           <div className="p-4">
             <div className="flex items-center justify-between mb-6">

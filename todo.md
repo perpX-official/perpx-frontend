@@ -1,6 +1,10 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Add scroll to top on page load for Privacy Policy and Terms of Service pages
+- [x] Show minimal header (logo, language selector, Launch App only) on Privacy and Terms pages
+
+## Recently Completed
 - [x] Debug and fix Privacy Policy and Terms of Service - language switching not working (fixed language key mismatch: ja/zh → jp/cn)
 
 ## Previous Attempts

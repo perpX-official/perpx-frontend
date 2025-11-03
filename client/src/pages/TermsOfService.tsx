@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
 
 const termsContent = {
   en: {
@@ -396,6 +397,10 @@ const termsContent = {
 
 export default function TermsOfService() {
   const { language } = useLanguage();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const content = termsContent[language as keyof typeof termsContent] || termsContent.en;
 
   return (

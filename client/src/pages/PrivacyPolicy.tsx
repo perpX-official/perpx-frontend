@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
 
 const privacyContent = {
   en: {
@@ -360,6 +361,10 @@ const privacyContent = {
 
 export default function PrivacyPolicy() {
   const { language } = useLanguage();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const content = privacyContent[language as keyof typeof privacyContent] || privacyContent.en;
 
   return (
