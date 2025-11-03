@@ -360,7 +360,7 @@ const privacyContent = {
 
 export default function PrivacyPolicy() {
   const { language } = useLanguage();
-  const content = privacyContent[language as keyof typeof privacyContent];
+  const content = privacyContent[language as keyof typeof privacyContent] || privacyContent.en;
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,6 +1,9 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Fix TypeError in Privacy Policy and Terms of Service pages when switching languages
+
+## Recently Completed
 - [x] Translate Privacy Policy page full content
 - [x] Translate Terms of Service page full content
 

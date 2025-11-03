@@ -396,7 +396,7 @@ const termsContent = {
 
 export default function TermsOfService() {
   const { language } = useLanguage();
-  const content = termsContent[language as keyof typeof termsContent];
+  const content = termsContent[language as keyof typeof termsContent] || termsContent.en;
 
   return (
     <div className="min-h-screen bg-background">
