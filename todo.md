@@ -1,6 +1,9 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Fix mobile header button on Privacy/Terms pages - show Launch App instead of Connect Wallet
+
+## Recently Completed
 - [x] Fix header navigation - still showing Perpetual/Portfolio/etc menu on Privacy and Terms pages (fixed route mismatch: /privacy → /privacy-policy, /terms → /terms-of-service)
 
 ## Previous Attempts

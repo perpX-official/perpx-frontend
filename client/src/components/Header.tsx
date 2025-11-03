@@ -177,7 +177,7 @@ export default function Header() {
                 )}
               </div>
 
-              {isHomePage ? (
+              {(isHomePage || isLegalPage) ? (
                 <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                   {t('button.launchApp')}
                 </Link>
