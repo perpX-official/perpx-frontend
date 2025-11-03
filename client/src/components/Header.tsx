@@ -13,7 +13,7 @@ export default function Header() {
   const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
-  const isLegalPage = location === "/privacy" || location === "/terms";
+  const isLegalPage = location === "/privacy-policy" || location === "/terms-of-service";
 
   const languageNames = {
     en: 'English',

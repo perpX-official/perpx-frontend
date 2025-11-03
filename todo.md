@@ -1,8 +1,11 @@
 # PerpX TODO
 
 ## Current Tasks
+- [x] Fix header navigation - still showing Perpetual/Portfolio/etc menu on Privacy and Terms pages (fixed route mismatch: /privacy → /privacy-policy, /terms → /terms-of-service)
+
+## Previous Attempts
 - [x] Add scroll to top on page load for Privacy Policy and Terms of Service pages
-- [x] Show minimal header (logo, language selector, Launch App only) on Privacy and Terms pages
+- [x] Show minimal header (logo, language selector, Launch App only) on Privacy and Terms pages (incomplete - navigation still showing)
 
 ## Recently Completed
 - [x] Debug and fix Privacy Policy and Terms of Service - language switching not working (fixed language key mismatch: ja/zh → jp/cn)
