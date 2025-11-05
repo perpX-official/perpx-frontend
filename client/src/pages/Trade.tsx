@@ -128,7 +128,7 @@ export default function Trade() {
 
         {/* Chart Section */}
         <div className="flex-shrink-0 bg-card/30 border-b border-white/5" style={{ height: '300px' }}>
-          <TradingViewChart symbol={selectedPair.symbol} />
+          <TradingViewChart symbol={selectedPair.symbol} mode={tradeMode} />
         </div>
 
         {/* Trading Panel */}

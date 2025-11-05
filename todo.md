@@ -1,6 +1,13 @@
 # PerpX TODO
 
 ## Current Tasks
+
+## Recently Completed
+- [x] Integrate real TradingView widget for live market data on Trade page
+- [x] Configure TradingView widget for multiple trading pairs (BTC, ETH, SOL, BNB, XRP)
+- [x] Support both Perpetual and Spot trading modes with appropriate chart configurations
+
+## Recently Completed
 - [x] Fix mobile header button on Privacy/Terms pages - show Launch App instead of Connect Wallet
 
 ## Recently Completed
