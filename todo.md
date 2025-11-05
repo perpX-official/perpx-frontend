@@ -3,6 +3,14 @@
 ## Current Tasks
 
 ## Recently Completed
+- [x] Implement demo account system with virtual balance (10,000 USDT)
+- [x] Add order execution logic (Market/Limit/Stop orders)
+- [x] Implement position management with Long/Short support
+- [x] Add PnL (Profit/Loss) calculation based on real-time prices
+- [x] Create order history and trade history tracking
+- [x] Display positions, open orders, and completed trades
+
+## Recently Completed
 - [x] Integrate real TradingView widget for live market data on Trade page
 - [x] Configure TradingView widget for multiple trading pairs (BTC, ETH, SOL, BNB, XRP)
 - [x] Support both Perpetual and Spot trading modes with appropriate chart configurations
