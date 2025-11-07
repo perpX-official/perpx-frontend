@@ -1,28 +1,73 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Crown, Check, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
+
+interface TierDetails {
+  nameKey: string;
+  fee: string;
+  volume: string;
+  benefitKeys: string[];
+  allBenefits: string[];
+}
 
 export default function VIP() {
   const { t } = useLanguage();
-  const tiers = [
+  const [selectedTier, setSelectedTier] = useState<TierDetails | null>(null);
+
+  const tiers: TierDetails[] = [
     { 
       nameKey: "vip.silver", 
       fee: "0.08%", 
       volume: "$100K+", 
-      benefitKeys: ["vip.prioritySupportBenefit", "vip.reducedFees", "vip.earlyAccess"] 
+      benefitKeys: ["vip.prioritySupportBenefit", "vip.reducedFees", "vip.earlyAccess"],
+      allBenefits: [
+        "vip.prioritySupportBenefit",
+        "vip.reducedFees",
+        "vip.earlyAccess",
+        "vip.silverBadge",
+        "vip.monthlyReports",
+        "vip.tradingInsights"
+      ]
     },
     { 
       nameKey: "vip.gold", 
       fee: "0.06%", 
       volume: "$1M+", 
-      benefitKeys: ["vip.allSilverBenefits", "vip.dedicatedAccountManager", "vip.customApiLimits"] 
+      benefitKeys: ["vip.allSilverBenefits", "vip.dedicatedAccountManager", "vip.customApiLimits"],
+      allBenefits: [
+        "vip.allSilverBenefits",
+        "vip.dedicatedAccountManager",
+        "vip.customApiLimits",
+        "vip.goldBadge",
+        "vip.priorityWithdrawals",
+        "vip.advancedAnalytics",
+        "vip.customTradingTools"
+      ]
     },
     { 
       nameKey: "vip.platinum", 
       fee: "0.04%", 
       volume: "$10M+", 
-      benefitKeys: ["vip.allGoldBenefits", "vip.zeroMakerFees", "vip.exclusiveEvents"] 
+      benefitKeys: ["vip.allGoldBenefits", "vip.zeroMakerFees", "vip.exclusiveEvents"],
+      allBenefits: [
+        "vip.allGoldBenefits",
+        "vip.zeroMakerFees",
+        "vip.exclusiveEvents",
+        "vip.platinumBadge",
+        "vip.personalizedSupport",
+        "vip.earlyProductAccess",
+        "vip.customLiquidity",
+        "vip.directTeamAccess"
+      ]
     },
   ];
 
@@ -59,7 +104,10 @@ export default function VIP() {
                   </div>
                 ))}
               </div>
-              <Button className="w-full neuro-button micro-bounce text-white font-medium">
+              <Button 
+                className="w-full neuro-button micro-bounce text-white font-medium"
+                onClick={() => setSelectedTier(tier)}
+              >
                 {t('home.learnMore')}
               </Button>
             </div>
@@ -81,6 +129,46 @@ export default function VIP() {
           </div>
         </div>
       </div>
+
+      {/* VIP Tier Details Modal */}
+      <Dialog open={!!selectedTier} onOpenChange={() => setSelectedTier(null)}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Crown className="h-6 w-6 text-primary" />
+              {selectedTier && t(selectedTier.nameKey)}
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              {selectedTier && (
+                <div className="mt-2">
+                  <div className="text-3xl font-bold text-primary mb-1">{selectedTier.fee}</div>
+                  <div className="text-sm">{t('vip.tradingFee')}</div>
+                  <div className="mt-2 text-sm">{t('vip.volumeRequired')}: <span className="font-bold text-white">{selectedTier.volume}</span></div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4 text-white">{t('vip.allBenefits')}</h3>
+            <div className="space-y-3">
+              {selectedTier?.allBenefits.map((benefit, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-white/90">{t(benefit)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 rounded-lg bg-primary/10 border border-primary/20">
+            <p className="text-sm text-white/80">
+              {t('vip.upgradeMessage')}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
