@@ -129,3 +129,11 @@
 ## Current Tasks
 - [x] Create Stake page with assets table showing APY (Annual Percentage Yield)
 - [x] Add multi-language support for Stake page
+
+
+## New Tasks
+- [x] Restore Airdrop page
+- [x] Fix demo functionality to ensure it works properly
+- [x] Research official Perp DEX GitHub repositories (dYdX, GMX, Hyperliquid, etc.)
+- [x] Document architecture, smart contract integration, and deployment requirements
+- [x] Create implementation roadmap for real trading functionality
