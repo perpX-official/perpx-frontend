@@ -124,3 +124,8 @@
 ## Current Tasks
 - [x] Add Earn and Stake menu items back to header navigation
 - [x] Adjust background image size and position to fit properly in hero section (right-aligned)
+
+
+## Current Tasks
+- [x] Create Stake page with assets table showing APY (Annual Percentage Yield)
+- [x] Add multi-language support for Stake page

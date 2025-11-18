@@ -18,6 +18,7 @@ import Points from "./pages/Points";
 import Referral from "./pages/Referral";
 import Stats from "./pages/Stats";
 import Rewards from "./pages/Rewards";
+import Stake from "./pages/Stake";
 import Feedback from "./pages/Feedback";
 import VIP from "./pages/VIP";
 import API from "./pages/API";
@@ -36,6 +37,7 @@ function Router() {
       <Route path={"/referral"} component={Referral} />
       <Route path={"/stats"} component={Stats} />
       <Route path={"/rewards"} component={Rewards} />
+      <Route path={"/stake"} component={Stake} />
       <Route path={"/feedback"} component={Feedback} />
       <Route path={"/vip"} component={VIP} />
       <Route path={"/api"} component={API} />
