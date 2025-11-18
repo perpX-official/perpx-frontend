@@ -71,6 +71,16 @@ export default function Header() {
                     }`}>
                     {t('nav.rewards')}
                   </Link>
+                  <Link href="/earn" className={`text-xs sm:text-sm transition-colors ${
+                      location === "/earn" ? "text-white" : "text-white/60 hover:text-white"
+                    }`}>
+                    {t('nav.earn')}
+                  </Link>
+                  <Link href="/stake" className={`text-xs sm:text-sm transition-colors ${
+                      location === "/stake" ? "text-white" : "text-white/60 hover:text-white"
+                    }`}>
+                    {t('nav.stake')}
+                  </Link>
                   <Link href="/stats" className={`text-xs sm:text-sm transition-colors ${
                       location === "/stats" ? "text-white" : "text-white/60 hover:text-white"
                     }`}>
@@ -268,6 +278,12 @@ export default function Header() {
               </Link>
               <Link href="/rewards" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.rewards')}
+              </Link>
+              <Link href="/earn" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.earn')}
+              </Link>
+              <Link href="/stake" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.stake')}
               </Link>
               <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.stats')}

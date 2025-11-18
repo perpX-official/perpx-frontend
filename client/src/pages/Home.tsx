@@ -105,9 +105,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Background Image - Behind Text */}
+            {/* Background Image - Behind Text, Right-Aligned */}
             <div 
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
+              className="absolute right-0 top-0 bottom-0 flex items-center justify-end pointer-events-none z-0 lg:w-1/2"
               style={{ 
                 transform: `translateY(${imageParallax}px)`,
               }}
@@ -115,9 +115,10 @@ export default function Home() {
               <img 
                 src="/argr.jpg" 
                 alt="Background" 
-                className="w-full max-w-2xl opacity-40 lg:opacity-50"
+                className="h-full w-auto max-w-none opacity-30 lg:opacity-40"
                 style={{
                   filter: 'blur(0px)',
+                  objectFit: 'contain',
                 }}
               />
             </div>

@@ -118,4 +118,9 @@
 - [x] Add demo button to Header.tsx (PC & mobile)
 - [x] Optimize vite.config.ts for build memory usage
 - [x] Test all changes in browser
-- [ ] Create checkpoint if build succeeds
+- [x] Create checkpoint if build succeeds
+
+
+## Current Tasks
+- [x] Add Earn and Stake menu items back to header navigation
+- [x] Adjust background image size and position to fit properly in hero section (right-aligned)
