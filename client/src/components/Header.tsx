@@ -177,6 +177,25 @@ export default function Header() {
                 )}
               </div>
 
+              {/* Demo Button */}
+              <button
+                onClick={() => {
+                  const isDemoMode = localStorage.getItem('demoMode') === 'true';
+                  localStorage.setItem('demoMode', (!isDemoMode).toString());
+                  window.location.reload();
+                }}
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg glass-card hover:bg-white/5 transition-colors text-xs sm:text-sm font-medium"
+              >
+                {localStorage.getItem('demoMode') === 'true' ? (
+                  <>
+                    <span className="text-purple-400">DEMO</span>
+                    <span className="hidden sm:inline text-white/60">Exit</span>
+                  </>
+                ) : (
+                  <span className="text-white/80">Demo</span>
+                )}
+              </button>
+
               {(isHomePage || isLegalPage) ? (
                 <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                   {t('button.launchApp')}

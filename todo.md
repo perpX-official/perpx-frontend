@@ -110,3 +110,12 @@
 - [x] Implement "詳細を見る" button click handler
 - [x] Display all tier-specific features in modal
 
+
+
+## Restore Changes After Sandbox Reset
+- [x] Copy argr.jpg to client/public/
+- [x] Update Home.tsx to add background image behind text
+- [x] Add demo button to Header.tsx (PC & mobile)
+- [x] Optimize vite.config.ts for build memory usage
+- [x] Test all changes in browser
+- [ ] Create checkpoint if build succeeds

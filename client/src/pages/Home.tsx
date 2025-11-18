@@ -105,20 +105,21 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Content - Screenshot with Parallax */}
+            {/* Background Image - Behind Text */}
             <div 
-              className="relative apple-fade-in"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
               style={{ 
                 transform: `translateY(${imageParallax}px)`,
-                transitionDelay: '0.2s'
               }}
             >
-              <div className="relative rounded-3xl overflow-hidden glass-card pulse-glow">
-                <div className="absolute inset-0 gradient-motion opacity-30"></div>
-                <div className="relative bg-card/50 backdrop-blur-sm p-8 sm:p-12 lg:p-16 aspect-[4/3] flex items-center justify-center hover-reveal-image">
-                  <img src="/logo-horizontal.png" alt="PerpX" className="w-full max-w-md opacity-90" />
-                </div>
-              </div>
+              <img 
+                src="/argr.jpg" 
+                alt="Background" 
+                className="w-full max-w-2xl opacity-40 lg:opacity-50"
+                style={{
+                  filter: 'blur(0px)',
+                }}
+              />
             </div>
           </div>
         </div>
