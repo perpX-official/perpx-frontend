@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import {
   TrendingUp,
   DollarSign,
@@ -24,29 +24,10 @@ export default function Dashboard() {
 
       {/* Connect Wallet Screen when Demo Mode is OFF */}
       {!isDemoMode && (
-        <div className="container mx-auto px-4 py-20">
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-3xl font-bold text-white">{t('dashboard.connectWallet') || 'Connect Wallet'}</h2>
-              <p className="text-white/60 max-w-md">
-                Connect your wallet to view your portfolio, trading history, and performance metrics.
-              </p>
-            </div>
-            <ConnectButton />
-            <div className="text-center">
-              <p className="text-sm text-white/40 mb-2">Or try demo mode first</p>
-              <button
-                onClick={() => {
-                  localStorage.setItem('demoMode', 'true');
-                  window.location.reload();
-                }}
-                className="px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm font-medium transition-colors"
-              >
-                Enter Demo Mode
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConnectWalletScreen
+          title="Connect Wallet"
+          description="Connect your wallet to view your portfolio, trading history, and performance metrics."
+        />
       )}
 
       {/* Main Content - Only show when Demo Mode is ON */}

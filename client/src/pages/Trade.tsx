@@ -50,6 +50,12 @@ export default function Trade() {
   };
 
   const handleTrade = (side: 'buy' | 'sell') => {
+    // Check if demo mode is enabled or wallet is connected
+    if (!isDemoMode) {
+      toast.error('Please connect your wallet or enable demo mode to trade');
+      return;
+    }
+
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Please enter a valid amount');
       return;
@@ -188,34 +194,6 @@ export default function Trade() {
 
         {/* Trading Panel */}
         <div className="flex-1 overflow-y-auto bg-background p-4 space-y-4">
-          {/* Connect Wallet Screen when Demo Mode is OFF */}
-          {!isDemoMode && (
-            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
-              <div className="text-center space-y-3">
-                <h2 className="text-2xl font-bold text-white">{t('trade.connectWallet')}</h2>
-                <p className="text-white/60 max-w-md">
-                  Connect your wallet to start trading perpetual contracts with up to 100x leverage.
-                </p>
-              </div>
-              <ConnectButton />
-              <div className="text-center">
-                <p className="text-sm text-white/40 mb-2">Or try demo mode first</p>
-                <button
-                  onClick={() => {
-                    localStorage.setItem('demoMode', 'true');
-                    window.location.reload();
-                  }}
-                  className="px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Enter Demo Mode
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Trading Form - Only show when Demo Mode is ON */}
-          {isDemoMode && (
-          <>
           {/* Margin Mode and Leverage - Only for Perpetual */}
           {tradeMode === "perpetual" && (
             <div className="flex gap-2">
@@ -363,8 +341,6 @@ export default function Trade() {
               {tradeMode === "perpetual" ? t('trade.sellShort') : t('trade.sell')}
             </Button>
           </div>
-          </>
-          )}
         </div>
 
         {/* Bottom Tabs */}

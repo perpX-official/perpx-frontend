@@ -167,3 +167,8 @@
 - [x] Add Connect Wallet screen to Rewards page when demo mode is OFF
 - [x] Add Connect Wallet screen to Earn page when demo mode is OFF
 - [x] Add Connect Wallet screen to Stake page when demo mode is OFF
+
+
+## UI Improvements
+- [x] Improve Connect Wallet screen UI design (make it more attractive)
+- [x] Modify Trade page to show chart and trading panel normally, only show connect modal when Buy/Sell is clicked
