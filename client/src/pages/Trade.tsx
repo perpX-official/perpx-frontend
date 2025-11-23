@@ -20,8 +20,14 @@ const TRADING_PAIRS = [
 export default function Trade() {
   const { t } = useLanguage();
   const { balance, positions, orders, trades, placeOrder, closePosition, cancelOrder, updatePositionPrices } = useDemoTrading();
+  const [isDemoMode, setIsDemoMode] = useState(false);
   
   const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
+
+  // Check demo mode on mount
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
+  }, []);
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
   const [marginMode, setMarginMode] = useState<"cross" | "isolated">("cross");
@@ -130,16 +136,18 @@ export default function Trade() {
           </div>
           
           {/* Balance Display */}
-          <div className="flex gap-4 mt-2 text-xs">
-            <div>
-              <span className="text-white/60">Balance: </span>
-              <span className="text-white font-medium">{balance.toFixed(2)} USDT</span>
+          {isDemoMode && (
+            <div className="flex gap-4 mt-2 text-xs">
+              <div>
+                <span className="text-white/60">Balance: </span>
+                <span className="text-white font-medium">{balance.toFixed(2)} USDT</span>
+              </div>
+              <div>
+                <span className="text-white/60">{t('trade.mark')}: </span>
+                <span className="text-white">{selectedPair.price.toLocaleString()}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-white/60">{t('trade.mark')}: </span>
-              <span className="text-white">{selectedPair.price.toLocaleString()}</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Pair Selector Dropdown */}
@@ -301,13 +309,15 @@ export default function Trade() {
           </div>
 
           {/* Margin Info */}
-          <div className="flex justify-between text-sm">
-            <span className="text-white/60">{t('trade.margin')}</span>
-            <div className="text-right">
-              <span className="text-white">{balance.toFixed(2)}</span>
-              <span className="text-white/60 ml-2">USDT</span>
+          {isDemoMode && (
+            <div className="flex justify-between text-sm">
+              <span className="text-white/60">{t('trade.margin')}</span>
+              <div className="text-right">
+                <span className="text-white">{balance.toFixed(2)}</span>
+                <span className="text-white/60 ml-2">USDT</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Buy/Sell Buttons */}
           <div className="grid grid-cols-2 gap-3 pt-2">

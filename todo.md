@@ -137,3 +137,10 @@
 - [x] Research official Perp DEX GitHub repositories (dYdX, GMX, Hyperliquid, etc.)
 - [x] Document architecture, smart contract integration, and deployment requirements
 - [x] Create implementation roadmap for real trading functionality
+
+
+## Urgent Tasks (Before Publishing)
+- [x] Identify and fix pages with errors
+- [x] Fix demo mode - show wallet connect screen after clicking "DEMO Exit"
+- [x] Test all pages to ensure no errors
+- [x] Create checkpoint for publishing to production URL
