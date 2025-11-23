@@ -159,3 +159,11 @@
 ## URGENT - DEMO Exit Fix
 - [x] Fix DEMO Exit to show Connect Wallet screen when demo mode is turned off
 - [x] Ensure page reloads and displays Connect Wallet button prominently when demo is OFF
+
+
+## Connect Wallet Screen for All Pages
+- [x] Add Connect Wallet screen to Portfolio page when demo mode is OFF
+- [x] Add Connect Wallet screen to Referral page when demo mode is OFF
+- [x] Add Connect Wallet screen to Rewards page when demo mode is OFF
+- [x] Add Connect Wallet screen to Earn page when demo mode is OFF
+- [x] Add Connect Wallet screen to Stake page when demo mode is OFF

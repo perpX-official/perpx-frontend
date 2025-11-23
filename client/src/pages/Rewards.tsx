@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { 
   Gift, 
   Trophy, 
@@ -18,6 +19,11 @@ import {
 export default function Rewards() {
   const { t } = useLanguage();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
+  }, []);
 
   const handleTaskComplete = (taskId: string) => {
     setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
@@ -201,6 +207,35 @@ export default function Rewards() {
     <div className="min-h-screen bg-background">
       <Header />
 
+      {/* Connect Wallet Screen when Demo Mode is OFF */}
+      {!isDemoMode && (
+        <div className="container mx-auto px-4 py-20">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl font-bold text-white">{t('rewards.connectWallet') || 'Connect Wallet'}</h2>
+              <p className="text-white/60 max-w-md">
+                Connect your wallet to access rewards, complete tasks, and earn points.
+              </p>
+            </div>
+            <ConnectButton />
+            <div className="text-center">
+              <p className="text-sm text-white/40 mb-2">Or try demo mode first</p>
+              <button
+                onClick={() => {
+                  localStorage.setItem('demoMode', 'true');
+                  window.location.reload();
+                }}
+                className="px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm font-medium transition-colors"
+              >
+                Enter Demo Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - Only show when Demo Mode is ON */}
+      {isDemoMode && (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('nav.rewards')}</h1>
@@ -282,6 +317,7 @@ export default function Rewards() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

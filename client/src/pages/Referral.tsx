@@ -12,14 +12,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Copy, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Referral() {
   const { t } = useLanguage();
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Main Content */}
+      {/* Connect Wallet Screen when Demo Mode is OFF */}
+      {!isDemoMode && (
+        <div className="container mx-auto px-4 py-20">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl font-bold text-white">{t('referral.connectWallet') || 'Connect Wallet'}</h2>
+              <p className="text-white/60 max-w-md">
+                Connect your wallet to access your referral dashboard and start earning commissions.
+              </p>
+            </div>
+            <ConnectButton />
+            <div className="text-center">
+              <p className="text-sm text-white/40 mb-2">Or try demo mode first</p>
+              <button
+                onClick={() => {
+                  localStorage.setItem('demoMode', 'true');
+                  window.location.reload();
+                }}
+                className="px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm font-medium transition-colors"
+              >
+                Enter Demo Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - Only show when Demo Mode is ON */}
+      {isDemoMode && (
       <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12">
@@ -219,6 +255,7 @@ export default function Referral() {
           </CardContent>
         </Card>
       </main>
+      )}
     </div>
   );
 }
