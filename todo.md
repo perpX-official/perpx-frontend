@@ -144,3 +144,8 @@
 - [x] Fix demo mode - show wallet connect screen after clicking "DEMO Exit"
 - [x] Test all pages to ensure no errors
 - [x] Create checkpoint for publishing to production URL
+
+
+## Urgent Fix
+- [x] Create Earn page to fix 404 error
+- [x] Add multi-language support for Earn page

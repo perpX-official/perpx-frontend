@@ -19,6 +19,7 @@ import Referral from "./pages/Referral";
 import Stats from "./pages/Stats";
 import Rewards from "./pages/Rewards";
 import Stake from "./pages/Stake";
+import Earn from "./pages/Earn";
 import Airdrop from "./pages/Airdrop";
 import Feedback from "./pages/Feedback";
 import VIP from "./pages/VIP";
@@ -39,6 +40,7 @@ function Router() {
       <Route path={"/stats"} component={Stats} />
       <Route path={"/rewards"} component={Rewards} />
       <Route path={"/stake"} component={Stake} />
+      <Route path={"/earn"} component={Earn} />
       <Route path={"/airdrop"} component={Airdrop} />
       <Route path={"/feedback"} component={Feedback} />
       <Route path={"/vip"} component={VIP} />
