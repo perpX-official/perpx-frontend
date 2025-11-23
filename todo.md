@@ -154,3 +154,8 @@
 ## Critical Fix
 - [x] Fix Earn page to display header
 - [x] Ensure demo mode works on Earn page
+
+
+## URGENT - DEMO Exit Fix
+- [x] Fix DEMO Exit to show Connect Wallet screen when demo mode is turned off
+- [x] Ensure page reloads and displays Connect Wallet button prominently when demo is OFF
