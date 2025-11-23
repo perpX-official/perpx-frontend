@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,6 +22,7 @@ export default function Earn() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       <div className="container py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
