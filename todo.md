@@ -172,3 +172,31 @@
 ## UI Improvements
 - [x] Improve Connect Wallet screen UI design (make it more attractive)
 - [x] Modify Trade page to show chart and trading panel normally, only show connect modal when Buy/Sell is clicked
+
+
+## X/Twitter Header Redesign
+- [x] Remove "Next-Gen Perpetual Trading" tagline (similar to Aster)
+- [x] Remove right side 3-column text (100x Leverage, Zero Fees, 24/7 Trading)
+- [x] Change PerpDEX X symbol to regular letter X
+- [x] Confirm new tagline with user: "Perpetual Trading Reimagined"
+- [x] Generate new header image
+- [x] Rewrite markdown document: Japanese explanations + English X posts
+
+
+## X/Twitter Header Image v3
+- [x] Create header image with right-aligned text (PerpX + Perpetual Trading Reimagined on the right side)
+
+## X/Twitter Calendar Revisions
+- [x] Remove all emojis from post content
+- [x] Add X bio/profile description section
+- [x] Generate announcement image for first post
+
+## X/Twitter Posting Calendar
+- [x] Create posting calendar from Jan 27 to Dec 31
+- [x] Add Japanese explanations for each post (intent and strategy)
+- [x] Remove emojis and add bio section
+
+## Deployment
+- [ ] Create checkpoint for custom domain deployment
+- [ ] Configure custom domain in Management UI
+- [ ] Publish to production
