@@ -196,7 +196,22 @@
 - [x] Add Japanese explanations for each post (intent and strategy)
 - [x] Remove emojis and add bio section
 
+## Bug Fixes
+- [x] Fix dark screen issue on custom domain (dev server works, need to republish)
+- [ ] Remove Manus watermark (need to find and remove)
+- [ ] Create new checkpoint and republish
+
+## X Bio Revision
+- [ ] Create abstract, innovative bio options (no feature details)
+
+## Launch Roadmap
+- [ ] Research PerpDEX infrastructure and deployment strategies
+- [ ] Create comprehensive launch roadmap document
+- [ ] Document server/infrastructure decisions (Alibaba Cloud vs others)
+- [ ] Clarify DNS/domain management (Netim, Cloudflare, Manus)
+- [ ] Plan X posting automation with Google Sheets
+
 ## Deployment
-- [ ] Create checkpoint for custom domain deployment
+- [x] Create checkpoint for custom domain deployment
 - [ ] Configure custom domain in Management UI
 - [ ] Publish to production
