@@ -211,7 +211,60 @@
 - [ ] Clarify DNS/domain management (Netim, Cloudflare, Manus)
 - [ ] Plan X posting automation with Google Sheets
 
+## Deployment Issues
+- [ ] Fix perpx.fi domain access issue
+- [ ] Verify dev server is working
+- [ ] Create new checkpoint with latest code
+- [ ] Test deployment on perpx.fi
+- [ ] Prepare GitHub export
+
 ## Deployment
 - [x] Create checkpoint for custom domain deployment
 - [ ] Configure custom domain in Management UI
 - [ ] Publish to production
+
+
+## Alibaba Cloud Setup (Optional)
+- [x] Research Alibaba Cloud registration process
+- [x] Create detailed setup guide with domain connection
+- [x] Evaluate timing for cloud infrastructure (currently not needed for UI/UX phase)
+
+
+## Blockchain Platform Selection
+- [x] Research EVM-compatible chains for PerpDEX development
+- [x] Compare ease of development, tooling, and ecosystem
+- [x] Evaluate gas costs, speed, and security
+- [x] Create recommendation for PerpX smart contract deployment (Base recommended)
+
+
+## Base Development Environment Setup
+- [x] Install Hardhat and dependencies
+- [x] Create Base project structure
+- [x] Configure Base Sepolia testnet connection
+- [x] Create comprehensive setup guide
+- [x] Create sample PerpX demo contract
+- [x] Create deployment and interaction scripts
+
+
+## PerpDEX Model Selection
+- [x] Research AMM-based Perpetual DEX model (Perpetual Protocol, Drift, GMX)
+- [x] Research Order Book-based model (Hyperliquid, Zeta, LogX)
+- [x] Research Hybrid model (dYdX, Aevo, ParaDEX)
+- [x] Research Oracle-based model (GMX, Gains Network)
+- [x] Compare implementation complexity, liquidity requirements, and user experience
+- [x] Create comprehensive PerpDEX model comparison guide
+- [x] Recommendation: Oracle型 (GMX方式) - lowest cost, fastest launch, no market makers needed
+
+
+## GMX-Style Implementation (Oracle + Liquidity Pool)
+- [x] Create detailed GMX-style implementation guide
+- [x] Document smart contract architecture (Liquidity Pool, Position Manager, Oracle Integration)
+- [x] Create cost breakdown and timeline ($85K-$180K, 5-8 months)
+- [x] Explain development complexity vs other models (easiest option)
+
+## GitHub Migration & Infrastructure
+- [x] Explain GitHub migration process from Manus
+- [x] Document backend infrastructure requirements (currently not needed)
+- [x] Clarify smart contract vs backend server roles
+- [x] Create scalability guide for high user volume (Base handles it)
+- [x] Explain Alibaba Cloud / AWS integration strategy (not needed now, AWS recommended for future)
