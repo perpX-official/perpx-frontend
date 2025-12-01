@@ -212,11 +212,23 @@
 - [ ] Plan X posting automation with Google Sheets
 
 ## Deployment Issues
-- [ ] Fix perpx.fi domain access issue
-- [ ] Verify dev server is working
-- [ ] Create new checkpoint with latest code
-- [ ] Test deployment on perpx.fi
-- [ ] Prepare GitHub export
+- [x] Fix perpx.fi domain access issue (checkpoint created)
+- [x] Verify dev server is working
+- [x] Create new checkpoint with latest code (version: 59147634)
+- [x] User clicked Publish button (confirmed published)
+- [x] Diagnose perpx.fi blank screen issue (React not loading in production)
+- [ ] Contact Manus support about production build issue
+- [x] Prepare GitHub export (workaround solution)
+
+## GitHub Export & Vercel Deployment
+- [x] Create GitHub export guide
+- [x] Prepare .gitignore and repository files (.gitignore already exists)
+- [x] Create README.md for GitHub repository
+- [x] Create clean export archive
+- [ ] User: Create GitHub repository
+- [ ] User: Push code to GitHub
+- [ ] User: Deploy on Vercel
+- [ ] User: Connect perpx.fi domain to Vercel
 
 ## Deployment
 - [x] Create checkpoint for custom domain deployment
@@ -268,3 +280,11 @@
 - [x] Clarify smart contract vs backend server roles
 - [x] Create scalability guide for high user volume (Base handles it)
 - [x] Explain Alibaba Cloud / AWS integration strategy (not needed now, AWS recommended for future)
+
+
+## UI/UX Updates
+- [x] Remove demo mode button from header
+- [x] Ensure wallet connection is required
+- [x] Add proper error handling for wallet connection
+- [ ] Test updated UI
+- [ ] Create checkpoint with changes

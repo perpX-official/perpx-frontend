@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, Star, TrendingUp, TrendingDown, X } from "lucide-react";
 import TradingViewChart from "@/components/TradingViewChart";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useDemoTrading } from "@/contexts/DemoTradingContext";
+// import { useDemoTrading } from "@/contexts/DemoTradingContext";
 import { toast } from "sonner";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
@@ -20,15 +20,16 @@ const TRADING_PAIRS = [
 
 export default function Trade() {
   const { t } = useLanguage();
-  const { balance, positions, orders, trades, placeOrder, closePosition, cancelOrder, updatePositionPrices } = useDemoTrading();
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  // const { balance, positions, orders, trades, placeOrder, closePosition, cancelOrder, updatePositionPrices } = useDemoTrading();
+  // Demo mode removed - wallet connection required
+  const balance = 0;
+  const positions: any[] = [];
+  const orders: any[] = [];
+  const trades: any[] = [];
   
   const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
 
-  // Check demo mode on mount
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
-  }, []);
+  // Demo mode removed - wallet connection required
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
   const [marginMode, setMarginMode] = useState<"cross" | "isolated">("cross");
@@ -40,9 +41,9 @@ export default function Trade() {
   const [stopPrice, setStopPrice] = useState("");
 
   // Update position prices when pair changes
-  useEffect(() => {
-    updatePositionPrices(selectedPair.symbol, selectedPair.price);
-  }, [selectedPair.price]);
+  // useEffect(() => {
+  //   updatePositionPrices(selectedPair.symbol, selectedPair.price);
+  // }, [selectedPair.price]);
 
   const handlePercentageClick = (percent: number) => {
     const calculatedAmount = (balance * percent) / 100;
@@ -50,45 +51,43 @@ export default function Trade() {
   };
 
   const handleTrade = (side: 'buy' | 'sell') => {
-    // Check if demo mode is enabled or wallet is connected
-    if (!isDemoMode) {
-      toast.error('Please connect your wallet or enable demo mode to trade');
-      return;
-    }
+    // Wallet connection required
+    toast.error('Please connect your wallet to trade');
+    return;
 
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
 
-    const size = parseFloat(amount) / selectedPair.price;
-    const price = orderType === 'market' 
-      ? selectedPair.price 
-      : parseFloat(limitPrice) || selectedPair.price;
+    // const size = parseFloat(amount) / selectedPair.price;
+    // const price = orderType === 'market' 
+    //   ? selectedPair.price 
+    //   : parseFloat(limitPrice) || selectedPair.price;
 
-    placeOrder({
-      symbol: selectedPair.symbol,
-      side,
-      type: orderType,
-      size,
-      price,
-      stopPrice: orderType === 'stop' ? parseFloat(stopPrice) : undefined,
-    });
+    // placeOrder({
+    //   symbol: selectedPair.symbol,
+    //   side,
+    //   type: orderType,
+    //   size,
+    //   price,
+    //   stopPrice: orderType === 'stop' ? parseFloat(stopPrice) : undefined,
+    // });
 
-    toast.success(`${side === 'buy' ? 'Buy' : 'Sell'} order placed successfully`);
-    setAmount("");
-    setLimitPrice("");
-    setStopPrice("");
+    // toast.success(`${side === 'buy' ? 'Buy' : 'Sell'} order placed successfully`);
+    // setAmount("");
+    // setLimitPrice("");
+    // setStopPrice("");
   };
 
   const handleClosePosition = (positionId: string) => {
-    closePosition(positionId, selectedPair.price);
-    toast.success('Position closed successfully');
+    // closePosition(positionId, selectedPair.price);
+    toast.error('Please connect your wallet to close positions');
   };
 
   const handleCancelOrder = (orderId: string) => {
-    cancelOrder(orderId);
-    toast.success('Order cancelled');
+    // cancelOrder(orderId);
+    toast.error('Please connect your wallet to cancel orders');
   };
 
   return (
@@ -143,7 +142,7 @@ export default function Trade() {
           </div>
           
           {/* Balance Display */}
-          {isDemoMode && (
+          {false && (
             <div className="flex gap-4 mt-2 text-xs">
               <div>
                 <span className="text-white/60">Balance: </span>
@@ -316,7 +315,7 @@ export default function Trade() {
           </div>
 
           {/* Margin Info */}
-          {isDemoMode && (
+          {false && (
             <div className="flex justify-between text-sm">
               <span className="text-white/60">{t('trade.margin')}</span>
               <div className="text-right">
