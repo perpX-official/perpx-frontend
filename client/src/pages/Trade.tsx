@@ -2,8 +2,8 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
-import { ChevronDown, Star, TrendingUp, TrendingDown, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, Star } from "lucide-react";
 import TradingViewChart from "@/components/TradingViewChart";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/contexts/WalletContext";
@@ -30,12 +30,14 @@ export default function Trade() {
   
   const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
 
-  // ✅ ADD: Real-time price state management
+  // ✅ Real-time price state management
   const [currentPrice, setCurrentPrice] = useState(selectedPair.price);
   const [priceChange, setPriceChange] = useState(selectedPair.change);
   const [previousPrice, setPreviousPrice] = useState(selectedPair.price);
+  
+  // WebSocket reference
+  const wsRef = useRef<WebSocket | null>(null);
 
-  // Demo mode removed - wallet connection required
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
   const [marginMode, setMarginMode] = useState<"cross" | "isolated">("cross");
@@ -46,10 +48,57 @@ export default function Trade() {
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
-  // Update position prices when pair changes
-  // useEffect(() => {
-  //   updatePositionPrices(selectedPair.symbol, selectedPair.price);
-  // }, [selectedPair.price]);
+  // ✅ NEW: Connect to Binance WebSocket for real-time price updates
+  useEffect(() => {
+    const symbol = selectedPair.symbol.toLowerCase();
+    const wsUrl = `wss://stream.binance.com:9443/ws/${symbol}@ticker`;
+    
+    console.log('Connecting to Binance WebSocket:', wsUrl);
+    
+    // Close existing connection
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+    
+    // Create new WebSocket connection
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+    
+    ws.onopen = () => {
+      console.log('WebSocket connected for', selectedPair.symbol);
+    };
+    
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const newPrice = parseFloat(data.c); // 'c' is the last price
+        const priceChangePercent = parseFloat(data.P); // 'P' is the price change percent
+        
+        console.log('Price update:', newPrice, 'Change:', priceChangePercent + '%');
+        
+        setPreviousPrice(currentPrice);
+        setCurrentPrice(newPrice);
+        setPriceChange(priceChangePercent);
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+    
+    // Cleanup on unmount or symbol change
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    };
+  }, [selectedPair.symbol]);
 
   const handlePercentageClick = (percent: number) => {
     const calculatedAmount = (balance * percent) / 100;
@@ -67,25 +116,6 @@ export default function Trade() {
       toast.error('Please enter a valid amount');
       return;
     }
-
-    // const size = parseFloat(amount) / selectedPair.price;
-    // const price = orderType === 'market' 
-    //   ? selectedPair.price 
-    //   : parseFloat(limitPrice) || selectedPair.price;
-
-    // placeOrder({
-    //   symbol: selectedPair.symbol,
-    //   side,
-    //   type: orderType,
-    //   size,
-    //   price,
-    //   stopPrice: orderType === 'stop' ? parseFloat(stopPrice) : undefined,
-    // });
-
-    // toast.success(`${side === 'buy' ? 'Buy' : 'Sell'} order placed successfully`);
-    // setAmount("");
-    // setLimitPrice("");
-    // setStopPrice("");
   };
 
   const handleClosePosition = (positionId: string) => {
@@ -104,16 +134,6 @@ export default function Trade() {
       return;
     }
     toast.success('Order cancelled successfully');
-  };
-
-  // ✅ ADD: Price update callback handler
-  const handlePriceUpdate = (newPrice: number) => {
-    setPreviousPrice(currentPrice);
-    setCurrentPrice(newPrice);
-    
-    // Calculate price change percentage
-    const change = ((newPrice - selectedPair.price) / selectedPair.price) * 100;
-    setPriceChange(change);
   };
 
   return (
@@ -160,27 +180,13 @@ export default function Trade() {
               <ChevronDown className="h-4 w-4 text-white/60" />
             </button>
             <div className="text-right">
-              {/* ✅ MODIFY: Use currentPrice state instead of selectedPair.price */}
-              <div className="text-2xl font-bold text-white">{currentPrice.toLocaleString()}</div>
+              {/* ✅ Use real-time price from Binance WebSocket */}
+              <div className="text-2xl font-bold text-white">{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               <div className={`text-sm ${priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
               </div>
             </div>
           </div>
-          
-          {/* Balance Display */}
-          {false && (
-            <div className="flex gap-4 mt-2 text-xs">
-              <div>
-                <span className="text-white/60">Balance: </span>
-                <span className="text-white font-medium">{balance.toFixed(2)} USDT</span>
-              </div>
-              <div>
-                <span className="text-white/60">{t('trade.mark')}: </span>
-                <span className="text-white">{currentPrice.toLocaleString()}</span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Pair Selector Dropdown */}
@@ -218,12 +224,7 @@ export default function Trade() {
 
         {/* Chart Section */}
         <div className="flex-shrink-0 bg-card/30 border-b border-white/5" style={{ height: '300px' }}>
-          {/* ✅ MODIFY: Add onPriceUpdate callback */}
-          <TradingViewChart 
-            symbol={selectedPair.symbol} 
-            mode={tradeMode}
-            onPriceUpdate={handlePriceUpdate}
-          />
+          <TradingViewChart symbol={selectedPair.symbol} mode={tradeMode} />
         </div>
 
         {/* Trading Panel */}
@@ -348,17 +349,6 @@ export default function Trade() {
               </Button>
             ))}
           </div>
-
-          {/* Margin Info */}
-          {false && (
-            <div className="flex justify-between text-sm">
-              <span className="text-white/60">{t('trade.margin')}</span>
-              <div className="text-right">
-                <span className="text-white">{balance.toFixed(2)}</span>
-                <span className="text-white/60 ml-2">USDT</span>
-              </div>
-            </div>
-          )}
 
           {/* Buy/Sell Buttons */}
           <div className="grid grid-cols-2 gap-3 pt-2">
