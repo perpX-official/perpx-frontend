@@ -10,6 +10,7 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual', onPriceUpdat
   const container = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<any>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
+  const priceIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!container.current) return;
@@ -79,13 +80,13 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual', onPriceUpdat
             },
           });
 
-          // Subscribe to price updates
+          // ✅ NEW: Poll for price updates every 2 seconds
           if (widgetRef.current && onPriceUpdate) {
             widgetRef.current.onChartReady(() => {
               const chart = widgetRef.current.activeChart();
               
-              // Get initial price
-              chart.onDataLoaded().subscribe(null, () => {
+              // Function to get latest price
+              const updatePrice = () => {
                 try {
                   const bars = chart.getSeries().data();
                   if (bars && bars.length > 0) {
@@ -95,24 +96,15 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual', onPriceUpdat
                     }
                   }
                 } catch (error) {
-                  console.warn('Failed to get initial price:', error);
+                  console.warn('Failed to get price:', error);
                 }
-              });
+              };
 
-              // Subscribe to real-time updates
-              chart.onIntervalChanged().subscribe(null, () => {
-                try {
-                  const bars = chart.getSeries().data();
-                  if (bars && bars.length > 0) {
-                    const latestBar = bars[bars.length - 1];
-                    if (latestBar && latestBar.close) {
-                      onPriceUpdate(latestBar.close);
-                    }
-                  }
-                } catch (error) {
-                  console.warn('Failed to get updated price:', error);
-                }
-              });
+              // Get initial price
+              updatePrice();
+
+              // Poll for price updates every 2 seconds
+              priceIntervalRef.current = setInterval(updatePrice, 2000);
             });
           }
         } catch (error) {
@@ -125,6 +117,12 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual', onPriceUpdat
 
     return () => {
       isMounted = false;
+      
+      // Clear price polling interval
+      if (priceIntervalRef.current) {
+        clearInterval(priceIntervalRef.current);
+        priceIntervalRef.current = null;
+      }
       
       // Safely remove widget
       if (widgetRef.current) {
