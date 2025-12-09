@@ -30,6 +30,29 @@ export default function Trade() {
   
   const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
 
+  
+  // Add real-time price state
+  const [currentPrice, setCurrentPrice] = useState(selectedPair.price);
+  const [priceChange, setPriceChange] = useState(selectedPair.change);
+  const [previousPrice, setPreviousPrice] = useState(selectedPair.price);
+
+  // Handle price updates from TradingView
+  const handlePriceUpdate = (newPrice: number) => {
+    setPreviousPrice(currentPrice);
+    setCurrentPrice(newPrice);
+    
+    // Calculate price change percentage
+    const change = ((newPrice - previousPrice) / previousPrice) * 100;
+    setPriceChange(change);
+  };
+
+  // Update selected pair when switching symbols
+  useEffect(() => {
+    setCurrentPrice(selectedPair.price);
+    setPreviousPrice(selectedPair.price);
+    setPriceChange(selectedPair.change);
+  }, [selectedPair]);
+
   // Demo mode removed - wallet connection required
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
@@ -145,9 +168,11 @@ export default function Trade() {
               <ChevronDown className="h-4 w-4 text-white/60" />
             </button>
             <div className="text-right">
-              <div className="text-2xl font-bold text-white">{selectedPair.price.toLocaleString()}</div>
-              <div className={`text-sm ${selectedPair.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {selectedPair.change >= 0 ? '+' : ''}{selectedPair.change}%
+              <div className="text-2xl font-bold text-white">{currentPrice.toLocaleString()}</div>
+              <div className={`text-sm ${priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+
+          　　 {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+
               </div>
             </div>
           </div>
