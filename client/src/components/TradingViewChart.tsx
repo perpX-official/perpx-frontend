@@ -3,9 +3,10 @@ import { useEffect, useRef, memo } from 'react';
 interface TradingViewChartProps {
   symbol?: string;
   mode?: 'perpetual' | 'spot';
+  onPriceUpdate?: (price: number) => void;
 }
 
-function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingViewChartProps) {
+function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual', onPriceUpdate }: TradingViewChartProps) {
   const container = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<any>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
@@ -30,8 +31,6 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
       if (!isMounted) return;
       if (typeof (window as any).TradingView !== 'undefined' && container.current) {
         // Format symbol for TradingView
-        // For perpetual: BINANCE:BTCUSDTPERP or BINANCE:BTCUSDT
-        // For spot: BINANCE:BTCUSDT
         const formattedSymbol = mode === 'perpetual' 
           ? `BINANCE:${symbol}`
           : `BINANCE:${symbol}`;
@@ -79,6 +78,43 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
               'mainSeriesProperties.candleStyle.wickDownColor': '#ef4444',
             },
           });
+
+          // Subscribe to price updates
+          if (widgetRef.current && onPriceUpdate) {
+            widgetRef.current.onChartReady(() => {
+              const chart = widgetRef.current.activeChart();
+              
+              // Get initial price
+              chart.onDataLoaded().subscribe(null, () => {
+                try {
+                  const bars = chart.getSeries().data();
+                  if (bars && bars.length > 0) {
+                    const latestBar = bars[bars.length - 1];
+                    if (latestBar && latestBar.close) {
+                      onPriceUpdate(latestBar.close);
+                    }
+                  }
+                } catch (error) {
+                  console.warn('Failed to get initial price:', error);
+                }
+              });
+
+              // Subscribe to real-time updates
+              chart.onIntervalChanged().subscribe(null, () => {
+                try {
+                  const bars = chart.getSeries().data();
+                  if (bars && bars.length > 0) {
+                    const latestBar = bars[bars.length - 1];
+                    if (latestBar && latestBar.close) {
+                      onPriceUpdate(latestBar.close);
+                    }
+                  }
+                } catch (error) {
+                  console.warn('Failed to get updated price:', error);
+                }
+              });
+            });
+          }
         } catch (error) {
           console.error('TradingView widget creation error:', error);
         }
@@ -93,13 +129,11 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
       // Safely remove widget
       if (widgetRef.current) {
         try {
-          // Check if the container still exists in DOM before removing
           const widgetContainer = document.getElementById('tradingview_widget');
           if (widgetContainer && widgetContainer.parentNode && typeof widgetRef.current.remove === 'function') {
             widgetRef.current.remove();
           }
         } catch (error) {
-          // Silently ignore cleanup errors
           console.warn('TradingView widget cleanup warning:', error);
         }
         widgetRef.current = null;
@@ -114,7 +148,7 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
         }
       }
     };
-  }, [symbol, mode]);
+  }, [symbol, mode, onPriceUpdate]);
 
   return (
     <div
