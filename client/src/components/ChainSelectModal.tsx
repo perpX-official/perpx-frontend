@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChainKind } from "../lib/rewardsStorage";
+import type { ChainKind } from "@/lib/rewardsStorage";
 
 export function ChainSelectModal(props: {
   open: boolean;

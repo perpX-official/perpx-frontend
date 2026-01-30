@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, TrendingUp, DollarSign, BarChart3 } from "lucide-react";
-import type { ChainKind } from "../lib/rewardsStorage";
+import type { ChainKind } from "@/lib/rewardsStorage";
 
 interface RewardsDashboardProps {
   chain: ChainKind | null;

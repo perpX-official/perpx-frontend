@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ChainSelectModal } from "./ChainSelectModal";
-import { rewardsStorage, type ChainKind } from "../lib/rewardsStorage";
+import { rewardsStorage, type ChainKind } from "@/lib/rewardsStorage";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
