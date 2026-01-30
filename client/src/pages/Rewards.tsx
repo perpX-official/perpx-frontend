@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { 
   Gift, 
@@ -19,8 +19,7 @@ import {
 
 export default function Rewards() {
   const { t } = useLanguage();
-  // const { isConnected } = useWallet();
-  const isConnected = true; // Force connected state for preview
+  const { isConnected } = useRewardsState();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
 
   const handleTaskComplete = (taskId: string) => {

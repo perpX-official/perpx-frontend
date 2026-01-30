@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
 import {
   Table,
   TableBody,
@@ -17,8 +17,7 @@ import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 
 export default function Referral() {
   const { t } = useLanguage();
-  // const { isConnected } = useWallet();
-  const isConnected = true; // Force connected state for preview
+  const { isConnected } = useRewardsState();
 
   return (
     <div className="min-h-screen bg-background">

@@ -3,7 +3,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Gift, Check, X, Wallet } from "lucide-react";
 import { useState } from "react";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
+import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 
 interface AirdropRound {
   round: number;
@@ -25,8 +26,7 @@ interface EligibilityCheck {
 
 export default function Airdrop() {
   const { t } = useLanguage();
-  // const { address, isConnected } = useWallet();
-  const isConnected = true; // Force connected state for preview
+  const { isConnected } = useRewardsState();
   const address = "0x1234...5678";
   const [checking, setChecking] = useState(false);
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);
@@ -83,7 +83,17 @@ export default function Airdrop() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
+        <ConnectWalletScreen
+          title="Connect Wallet"
+          description="Connect your wallet to check your airdrop eligibility and claim rewards."
+        />
+      )}
       
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container mx-auto px-4 py-8 lg:py-12">
         {/* Hero Section */}
         <div className="mb-8 lg:mb-12 text-center">
@@ -250,6 +260,7 @@ export default function Airdrop() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

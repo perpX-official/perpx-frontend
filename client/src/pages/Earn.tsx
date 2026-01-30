@@ -2,14 +2,13 @@ import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { TrendingUp, Droplet, Coins, Shield, Zap, Users } from "lucide-react";
 
 export default function Earn() {
   const { t } = useLanguage();
-  // const { isConnected } = useWallet();
-  const isConnected = true; // Force connected state for preview
+  const { isConnected } = useRewardsState();
 
   const liquidityPools = [
     { pair: "BTC/USDT", apy: "18.5%", tvl: "$125.3M", volume24h: "$45.2M", rewards: "PERPX + Fees" },

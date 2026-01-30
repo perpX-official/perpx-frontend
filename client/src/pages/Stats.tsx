@@ -1,9 +1,12 @@
 import Header from "@/components/Header";
 import { TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Activity } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
+import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 
 export default function Stats() {
   const { t } = useLanguage();
+  const { isConnected } = useRewardsState();
   const stats = [
     { labelKey: "stats.volume24h", value: "$3.37B", change: "+12.5%", trend: "up" },
     { labelKey: "stats.totalVolume", value: "$139.20B", change: "+8.2%", trend: "up" },
@@ -33,6 +36,16 @@ export default function Stats() {
     <div className="min-h-screen bg-background">
       <Header />
 
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
+        <ConnectWalletScreen
+          title="Connect Wallet"
+          description="Connect your wallet to view detailed platform statistics and market analysis."
+        />
+      )}
+
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('stats.title')}</h1>
@@ -195,6 +208,7 @@ export default function Stats() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

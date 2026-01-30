@@ -1,5 +1,7 @@
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRewardsState } from "@/hooks/useRewardsState";
+import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import {
   Award,
   TrendingUp,
@@ -14,11 +16,22 @@ const activities = [
 ];
 
 export default function Points() {
+  const { isConnected } = useRewardsState();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Main Content */}
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
+        <ConnectWalletScreen
+          title="Connect Wallet"
+          description="Connect your wallet to view your points, tier status, and rewards history."
+        />
+      )}
+
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12">
@@ -167,6 +180,7 @@ export default function Points() {
           </CardContent>
         </Card>
       </main>
+      )}
     </div>
   );
 }

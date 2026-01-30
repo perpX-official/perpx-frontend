@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
 import { Button } from "@/components/ui/button";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { TrendingUp, Lock, Unlock } from "lucide-react";
@@ -17,8 +17,7 @@ interface StakingAsset {
 
 export default function Stake() {
   const { t } = useLanguage();
-  // const { isConnected } = useWallet();
-  const isConnected = true; // Force connected state for preview
+  const { isConnected } = useRewardsState();
 
   const stakingAssets: StakingAsset[] = [
     {

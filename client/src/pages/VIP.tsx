@@ -1,5 +1,7 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { useRewardsState } from "@/hooks/useRewardsState";
+import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +23,7 @@ interface TierDetails {
 
 export default function VIP() {
   const { t } = useLanguage();
+  const { isConnected } = useRewardsState();
   const [selectedTier, setSelectedTier] = useState<TierDetails | null>(null);
 
   const tiers: TierDetails[] = [
@@ -75,6 +78,16 @@ export default function VIP() {
     <div className="min-h-screen bg-background">
       <Header />
 
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
+        <ConnectWalletScreen
+          title="Connect Wallet"
+          description="Connect your wallet to view your VIP status and exclusive benefits."
+        />
+      )}
+
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('vip.title')}</h1>
@@ -129,6 +142,7 @@ export default function VIP() {
           </div>
         </div>
       </div>
+      )}
 
       {/* VIP Tier Details Modal */}
       <Dialog open={!!selectedTier} onOpenChange={() => setSelectedTier(null)}>

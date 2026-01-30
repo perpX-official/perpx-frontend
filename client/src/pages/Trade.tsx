@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronDown, Star } from "lucide-react";
 import TradingViewChart from "@/components/TradingViewChart";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWallet } from "@/contexts/WalletContext";
+import { useRewardsState } from "@/hooks/useRewardsState";
 import { toast } from "sonner";
 
 
@@ -20,9 +20,12 @@ const TRADING_PAIRS = [
 
 export default function Trade() {
   const { t } = useLanguage();
-  // const { isConnected, connect } = useWallet();
-  const isConnected = true; // Force connected state for preview
-  const connect = () => {};
+  const { isConnected } = useRewardsState();
+  const connect = () => {
+    // Trigger wallet connection modal via event or context if needed
+    // For now, we rely on the Header's connect button
+    toast.info("Please connect your wallet using the button in the header");
+  };
   
   // Mock data for display
   const balance = 10000; // Mock balance for display
