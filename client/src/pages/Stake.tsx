@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { TrendingUp, Lock, Unlock } from "lucide-react";
 
@@ -17,11 +17,8 @@ interface StakingAsset {
 
 export default function Stake() {
   const { t } = useLanguage();
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
-  }, []);
+  // const { isConnected } = useWallet();
+  const isConnected = true; // Force connected state for preview
 
   const stakingAssets: StakingAsset[] = [
     {
@@ -84,16 +81,16 @@ export default function Stake() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Connect Wallet Screen when Demo Mode is OFF */}
-      {!isDemoMode && (
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
         <ConnectWalletScreen
           title="Connect Wallet"
           description="Connect your wallet to stake assets and earn passive income with competitive APY rates."
         />
       )}
       
-      {/* Main Content - Only show when Demo Mode is ON */}
-      {isDemoMode && (
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container mx-auto px-4 py-8 lg:py-12">
         {/* Hero Section */}
         <div className="mb-8 lg:mb-12">

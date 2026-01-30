@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { DemoTradingProvider } from "./contexts/DemoTradingContext";
+import { WalletProvider } from "./contexts/WalletContext";
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
@@ -70,11 +71,13 @@ function App() {
             >
               <LanguageProvider>
                 <DemoTradingProvider>
+<WalletProvider>
                   <TooltipProvider>
                     <Toaster />
                     <Router />
                   </TooltipProvider>
-                </DemoTradingProvider>
+                </WalletProvider>
+</DemoTradingProvider>
               </LanguageProvider>
             </ThemeProvider>
           </RainbowKitProvider>

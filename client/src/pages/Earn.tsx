@@ -2,17 +2,14 @@ import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState, useEffect } from "react";
+import { useWallet } from "@/contexts/WalletContext";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { TrendingUp, Droplet, Coins, Shield, Zap, Users } from "lucide-react";
 
 export default function Earn() {
   const { t } = useLanguage();
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
-  }, []);
+  // const { isConnected } = useWallet();
+  const isConnected = true; // Force connected state for preview
 
   const liquidityPools = [
     { pair: "BTC/USDT", apy: "18.5%", tvl: "$125.3M", volume24h: "$45.2M", rewards: "PERPX + Fees" },
@@ -31,16 +28,16 @@ export default function Earn() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Connect Wallet Screen when Demo Mode is OFF */}
-      {!isDemoMode && (
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
         <ConnectWalletScreen
           title="Connect Wallet"
           description="Connect your wallet to provide liquidity, lend assets, and earn rewards."
         />
       )}
 
-      {/* Main Content - Only show when Demo Mode is ON */}
-      {isDemoMode && (
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useWallet } from "@/contexts/WalletContext";
 import {
   Table,
   TableBody,
@@ -12,31 +13,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Copy, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 
 export default function Referral() {
   const { t } = useLanguage();
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
-  }, []);
+  // const { isConnected } = useWallet();
+  const isConnected = true; // Force connected state for preview
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Connect Wallet Screen when Demo Mode is OFF */}
-      {!isDemoMode && (
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
         <ConnectWalletScreen
           title="Connect Wallet"
           description="Connect your wallet to access your referral dashboard and start earning commissions."
         />
       )}
 
-      {/* Main Content - Only show when Demo Mode is ON */}
-      {isDemoMode && (
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12">

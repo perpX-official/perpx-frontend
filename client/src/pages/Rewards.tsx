@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useWallet } from "@/contexts/WalletContext";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { 
   Gift, 
@@ -18,12 +19,9 @@ import {
 
 export default function Rewards() {
   const { t } = useLanguage();
+  // const { isConnected } = useWallet();
+  const isConnected = true; // Force connected state for preview
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demoMode') === 'true');
-  }, []);
 
   const handleTaskComplete = (taskId: string) => {
     setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
@@ -207,16 +205,16 @@ export default function Rewards() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Connect Wallet Screen when Demo Mode is OFF */}
-      {!isDemoMode && (
+      {/* Connect Wallet Screen when wallet is not connected */}
+      {!isConnected && (
         <ConnectWalletScreen
           title="Connect Wallet"
           description="Connect your wallet to access rewards, complete tasks, and earn points."
         />
       )}
 
-      {/* Main Content - Only show when Demo Mode is ON */}
-      {isDemoMode && (
+      {/* Main Content - Only show when wallet is connected */}
+      {isConnected && (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('nav.rewards')}</h1>

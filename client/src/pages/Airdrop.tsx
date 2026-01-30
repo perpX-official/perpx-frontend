@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Gift, Check, X, Wallet } from "lucide-react";
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/contexts/WalletContext";
 
 interface AirdropRound {
   round: number;
@@ -25,7 +25,9 @@ interface EligibilityCheck {
 
 export default function Airdrop() {
   const { t } = useLanguage();
-  const { address, isConnected } = useAccount();
+  // const { address, isConnected } = useWallet();
+  const isConnected = true; // Force connected state for preview
+  const address = "0x1234...5678";
   const [checking, setChecking] = useState(false);
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);
 
