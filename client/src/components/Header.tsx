@@ -3,12 +3,34 @@ import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileT
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ChainSelectModal } from "./ChainSelectModal";
+import { rewardsStorage, type ChainKind } from "../lib/rewardsStorage";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
+  const [chainModalOpen, setChainModalOpen] = useState(false);
+  const [rewardsState, setRewardsState] = useState(rewardsStorage.get());
+
+  const handleChainSelect = (chain: ChainKind) => {
+    // Temporary connection logic
+    const newState = {
+      chain,
+      address: "0x1234...5678", // Mock address
+      isConnected: true
+    };
+    rewardsStorage.set(newState);
+    setRewardsState(newState);
+    setChainModalOpen(false);
+  };
+
+  const handleDisconnect = () => {
+    const newState = { chain: null, address: null, isConnected: false };
+    rewardsStorage.set(newState);
+    setRewardsState(newState);
+  };
   const [location] = useLocation();
   const { language, setLanguage, t } = useLanguage();
 
@@ -211,12 +233,12 @@ export default function Header() {
                         {(() => {
                           if (!connected) {
                             return (
-                              <button
-                                onClick={openConnectModal}
-                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
-                              >
-                                {t('button.connectWallet')}
-                              </button>
+                                <button
+                                  onClick={() => setChainModalOpen(true)}
+                                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                                >
+                                  {t('button.connectWallet')}
+                                </button>
                             );
                           }
 
@@ -233,6 +255,12 @@ export default function Header() {
           </div>
         </div>
       </nav>
+
+      <ChainSelectModal
+        open={chainModalOpen}
+        onClose={() => setChainModalOpen(false)}
+        onSelect={handleChainSelect}
+      />
 
       {/* Mobile Menu */}
       {mobileMenuOpen && !isLegalPage && (
