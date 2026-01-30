@@ -1,5 +1,7 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Wallet, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { ChainSelectModal } from './ChainSelectModal';
+import { rewardsStorage, type ChainKind } from '@/lib/rewardsStorage';
 
 interface ConnectWalletScreenProps {
   title: string;
@@ -7,6 +9,21 @@ interface ConnectWalletScreenProps {
 }
 
 export default function ConnectWalletScreen({ title, description }: ConnectWalletScreenProps) {
+  const [chainModalOpen, setChainModalOpen] = useState(false);
+
+  const handleChainSelect = (chain: ChainKind) => {
+    // Temporary connection logic
+    const newState = {
+      chain,
+      address: "0x1234...5678", // Mock address
+      isConnected: true
+    };
+    rewardsStorage.set(newState);
+    setChainModalOpen(false);
+    // Force reload to update state across components if needed, 
+    // though Dashboard polling should catch it.
+  };
+
   return (
     <div className="container mx-auto px-4 py-20">
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -29,9 +46,20 @@ export default function ConnectWalletScreen({ title, description }: ConnectWalle
           {/* Connect Button */}
           <div className="flex justify-center">
             <div className="scale-110">
-              <ConnectButton />
+              <button
+                onClick={() => setChainModalOpen(true)}
+                className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105"
+              >
+                Connect Wallet
+              </button>
             </div>
           </div>
+
+          <ChainSelectModal
+            open={chainModalOpen}
+            onClose={() => setChainModalOpen(false)}
+            onSelect={handleChainSelect}
+          />
 
           {/* Divider */}
           <div className="relative">
