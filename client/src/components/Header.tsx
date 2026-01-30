@@ -217,7 +217,9 @@ export default function Header() {
                 <ConnectButton.Custom>
                   {({ account, chain, openConnectModal, mounted }) => {
                     const ready = mounted;
-                    const connected = ready && account && chain;
+                    // Use our custom rewardsState for connection status
+                    const isCustomConnected = rewardsState.isConnected;
+                    const displayAddress = rewardsState.address ? `${rewardsState.address.slice(0, 6)}...${rewardsState.address.slice(-4)}` : "";
 
                     return (
                       <div
@@ -231,19 +233,27 @@ export default function Header() {
                         })}
                       >
                         {(() => {
-                          if (!connected) {
+                          // If connected via our custom modal
+                          if (isCustomConnected) {
                             return (
-                                <button
-                                  onClick={() => setChainModalOpen(true)}
-                                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
-                                >
-                                  {t('button.connectWallet')}
-                                </button>
+                              <button
+                                onClick={handleDisconnect}
+                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2"
+                              >
+                                <div className="w-2 h-2 rounded-full bg-green-500" />
+                                {displayAddress}
+                              </button>
                             );
                           }
 
+                          // Default state (not connected)
                           return (
-                            <ConnectButton />
+                            <button
+                              onClick={() => setChainModalOpen(true)}
+                              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                            >
+                              {t('button.connectWallet')}
+                            </button>
                           );
                         })()}
                       </div>
