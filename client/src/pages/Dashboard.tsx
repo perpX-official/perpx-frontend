@@ -5,6 +5,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { RewardsDashboard } from "@/components/RewardsDashboard";
 import { rewardsStorage } from "@/lib/rewardsStorage";
+import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 import { useState, useEffect } from "react";
 import {
   TrendingUp,
@@ -43,12 +44,16 @@ export default function Dashboard() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-        <RewardsDashboard
-          chain={chain}
-          address={address}
-        />
+        <div className="relative">
+          <ComingSoonOverlay />
+          <div className="pointer-events-none filter grayscale-[0.3]">
+            <RewardsDashboard
+              chain={chain}
+              address={address}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
 }
-
