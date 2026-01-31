@@ -15,6 +15,10 @@ import {
   isDailyPostCompleted,
   getPointsHistory,
   getJSTDateString,
+  getAllWalletProfiles,
+  getAdminStats,
+  searchWalletProfiles,
+  adjustUserPoints,
 } from "./db";
 
 export const appRouter = router({
@@ -118,6 +122,89 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         return await getPointsHistory(input.walletAddress, input.limit);
+      }),
+
+    // Get OAuth configuration status
+    getOAuthStatus: publicProcedure
+      .query(() => {
+        const X_CLIENT_ID = process.env.X_CLIENT_ID || "";
+        const X_CLIENT_SECRET = process.env.X_CLIENT_SECRET || "";
+        const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
+        const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
+        
+        return {
+          x: {
+            configured: !!X_CLIENT_ID && !!X_CLIENT_SECRET,
+            clientIdSet: !!X_CLIENT_ID,
+          },
+          discord: {
+            configured: !!DISCORD_CLIENT_ID && !!DISCORD_CLIENT_SECRET,
+            clientIdSet: !!DISCORD_CLIENT_ID,
+          },
+        };
+      }),
+  }),
+
+  // Admin API (protected by admin password)
+  admin: router({
+    // Verify admin password
+    verifyPassword: publicProcedure
+      .input(z.object({
+        password: z.string().min(1),
+      }))
+      .mutation(({ input }) => {
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "perpdex_admin_2026";
+        return {
+          valid: input.password === ADMIN_PASSWORD,
+        };
+      }),
+
+    // Get dashboard statistics
+    getStats: publicProcedure
+      .query(async () => {
+        return await getAdminStats();
+      }),
+
+    // Get all users with pagination
+    getUsers: publicProcedure
+      .input(z.object({
+        page: z.number().min(1).optional().default(1),
+        limit: z.number().min(1).max(100).optional().default(50),
+        sortBy: z.enum(["totalPoints", "createdAt"]).optional().default("createdAt"),
+        sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+      }))
+      .query(async ({ input }) => {
+        return await getAllWalletProfiles(
+          input.page,
+          input.limit,
+          input.sortBy,
+          input.sortOrder
+        );
+      }),
+
+    // Search users
+    searchUsers: publicProcedure
+      .input(z.object({
+        query: z.string().min(1),
+        limit: z.number().min(1).max(100).optional().default(20),
+      }))
+      .query(async ({ input }) => {
+        return await searchWalletProfiles(input.query, input.limit);
+      }),
+
+    // Adjust user points
+    adjustPoints: publicProcedure
+      .input(z.object({
+        walletAddress: z.string().min(1),
+        pointsChange: z.number(),
+        reason: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        return await adjustUserPoints(
+          input.walletAddress,
+          input.pointsChange,
+          input.reason
+        );
       }),
   }),
 });

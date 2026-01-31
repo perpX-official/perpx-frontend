@@ -299,3 +299,17 @@
 - [x] Add persistent user data storage (points, social connections, task history)
 - [ ] Test full rewards flow end-to-end
 - [ ] Create checkpoint with full-stack implementation
+
+
+## OAuth & Admin Dashboard Implementation
+- [x] Implement X (Twitter) OAuth 2.0 authentication flow
+- [x] Implement Discord OAuth 2.0 authentication flow
+- [x] Create Admin Dashboard page for user management
+- [x] Add user list view with points and connection status
+- [x] Add admin-only route protection
+- [x] Configure OAuth environment variables (X_CLIENT_ID, X_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET)
+- [x] Configure ADMIN_PASSWORD for admin dashboard
+- [ ] Clean up Manus-related code traces from codebase
+- [ ] Remove/replace Manus comments and references
+- [ ] Update package names and environment variable references
+- [ ] Test OAuth flow on published site

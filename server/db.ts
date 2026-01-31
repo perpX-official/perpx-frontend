@@ -475,3 +475,187 @@ export async function getTaskCompletions(walletAddress: string) {
 
   return result;
 }
+
+
+// ============================================
+// Admin Functions
+// ============================================
+
+/**
+ * Get all wallet profiles with pagination
+ */
+export async function getAllWalletProfiles(
+  page = 1,
+  limit = 50,
+  sortBy: "totalPoints" | "createdAt" = "createdAt",
+  sortOrder: "asc" | "desc" = "desc"
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const countResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(walletProfiles);
+  const totalCount = countResult[0]?.count || 0;
+
+  // Get profiles with sorting
+  const orderColumn = sortBy === "totalPoints" 
+    ? walletProfiles.totalPoints 
+    : walletProfiles.createdAt;
+  
+  const profiles = await db
+    .select()
+    .from(walletProfiles)
+    .orderBy(sortOrder === "desc" ? sql`${orderColumn} DESC` : sql`${orderColumn} ASC`)
+    .limit(limit)
+    .offset(offset);
+
+  return {
+    profiles,
+    pagination: {
+      page,
+      limit,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+    },
+  };
+}
+
+/**
+ * Get admin dashboard statistics
+ */
+export async function getAdminStats() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  // Total users
+  const userCountResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(walletProfiles);
+  const totalUsers = userCountResult[0]?.count || 0;
+
+  // Total points distributed
+  const pointsResult = await db
+    .select({ total: sql<number>`SUM(totalPoints)` })
+    .from(walletProfiles);
+  const totalPointsDistributed = pointsResult[0]?.total || 0;
+
+  // X connected count
+  const xConnectedResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(walletProfiles)
+    .where(eq(walletProfiles.xConnected, true));
+  const xConnectedCount = xConnectedResult[0]?.count || 0;
+
+  // Discord connected count
+  const discordConnectedResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(walletProfiles)
+    .where(eq(walletProfiles.discordConnected, true));
+  const discordConnectedCount = discordConnectedResult[0]?.count || 0;
+
+  // Today's task completions (JST)
+  const todayJST = getJSTDateString();
+  const todayTasksResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(taskCompletions)
+    .where(eq(taskCompletions.completionDate, todayJST));
+  const todayTaskCompletions = todayTasksResult[0]?.count || 0;
+
+  // Users by chain type
+  const chainStatsResult = await db
+    .select({
+      chainType: walletProfiles.chainType,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(walletProfiles)
+    .groupBy(walletProfiles.chainType);
+
+  const chainStats = chainStatsResult.reduce((acc, row) => {
+    acc[row.chainType] = row.count;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return {
+    totalUsers,
+    totalPointsDistributed,
+    xConnectedCount,
+    discordConnectedCount,
+    todayTaskCompletions,
+    chainStats,
+    todayJST,
+  };
+}
+
+/**
+ * Search wallet profiles by address or username
+ */
+export async function searchWalletProfiles(query: string, limit = 20) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const searchPattern = `%${query}%`;
+
+  const profiles = await db
+    .select()
+    .from(walletProfiles)
+    .where(
+      sql`${walletProfiles.walletAddress} LIKE ${searchPattern} 
+          OR ${walletProfiles.xUsername} LIKE ${searchPattern} 
+          OR ${walletProfiles.discordUsername} LIKE ${searchPattern}`
+    )
+    .limit(limit);
+
+  return profiles;
+}
+
+/**
+ * Manually adjust user points (admin only)
+ */
+export async function adjustUserPoints(
+  walletAddress: string,
+  pointsChange: number,
+  reason: string
+): Promise<{ success: boolean; newTotal: number; message: string }> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const profile = await getWalletProfile(walletAddress);
+  if (!profile) {
+    return { success: false, newTotal: 0, message: "Wallet profile not found" };
+  }
+
+  const newTotal = Math.max(0, profile.totalPoints + pointsChange);
+
+  // Update profile
+  await db
+    .update(walletProfiles)
+    .set({ totalPoints: newTotal })
+    .where(eq(walletProfiles.walletAddress, walletAddress));
+
+  // Record in history
+  await db.insert(pointsHistory).values({
+    walletAddress,
+    transactionType: "admin_adjustment",
+    pointsChange,
+    balanceAfter: newTotal,
+    description: `Admin adjustment: ${reason}`,
+  });
+
+  return { 
+    success: true, 
+    newTotal, 
+    message: `Points adjusted by ${pointsChange}. New total: ${newTotal}` 
+  };
+}

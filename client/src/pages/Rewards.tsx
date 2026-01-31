@@ -108,12 +108,35 @@ export default function Rewards() {
     }
   }, [profile?.connectBonusClaimed, address]);
 
+  // Check OAuth status on mount
+  const { data: oauthStatus } = trpc.rewards.getOAuthStatus.useQuery();
+
   const handleSocialConnect = (platform: 'twitter' | 'discord') => {
     if (!address) return;
     
-    // Simulate OAuth flow with redirect
-    const width = 600;
-    const height = 600;
+    // Check if OAuth is configured
+    if (platform === 'twitter' && !oauthStatus?.x?.configured) {
+      // Fallback to manual input if OAuth not configured
+      handleManualSocialConnect(platform);
+      return;
+    }
+    if (platform === 'discord' && !oauthStatus?.discord?.configured) {
+      handleManualSocialConnect(platform);
+      return;
+    }
+    
+    // Redirect to OAuth endpoint
+    const endpoint = platform === 'twitter' 
+      ? `/api/social/x/auth?wallet=${encodeURIComponent(address)}`
+      : `/api/social/discord/auth?wallet=${encodeURIComponent(address)}`;
+    
+    window.location.href = endpoint;
+  };
+
+  // Fallback manual connection (when OAuth is not configured)
+  const handleManualSocialConnect = (platform: 'twitter' | 'discord') => {
+    const width = 500;
+    const height = 400;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
     
@@ -124,31 +147,33 @@ export default function Rewards() {
     );
     
     if (popup) {
-      // Simulate a real OAuth page
       popup.document.write(`
         <html>
           <head>
-            <title>Authorize ${platform}</title>
+            <title>Connect ${platform === 'twitter' ? 'X' : 'Discord'}</title>
             <style>
-              body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-              .btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
-              .btn:hover { background: #2563eb; }
-              input { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #333; color: white; width: 200px; margin-top: 10px; }
+              body { background: #0a0a0a; color: white; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+              h2 { margin-bottom: 8px; }
+              p { color: #888; margin-bottom: 16px; }
+              .btn { background: #0ABAB5; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
+              .btn:hover { background: #08a5a0; }
+              input { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; width: 250px; margin-bottom: 16px; font-size: 14px; }
+              input:focus { outline: none; border-color: #0ABAB5; }
             </style>
           </head>
           <body>
-            <h2>Authorize PerpDEX to access your ${platform} account?</h2>
-            <p>Enter your ${platform === 'twitter' ? 'X' : 'Discord'} username:</p>
-            <input type="text" id="username" placeholder="@username" />
+            <h2>Connect ${platform === 'twitter' ? 'X (Twitter)' : 'Discord'}</h2>
+            <p>Enter your username to link your account</p>
+            <input type="text" id="username" placeholder="${platform === 'twitter' ? '@username' : 'username#0000'}" autofocus />
             <button class="btn" onclick="
-              const username = document.getElementById('username').value;
+              const username = document.getElementById('username').value.trim();
               if (username) {
                 window.opener.postMessage({ type: 'SOCIAL_CONNECTED', platform: '${platform}', username: username }, '*');
                 window.close();
               } else {
                 alert('Please enter your username');
               }
-            ">Authorize App</button>
+            ">Connect Account</button>
           </body>
         </html>
       `);

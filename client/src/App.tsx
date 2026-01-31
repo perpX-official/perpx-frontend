@@ -29,6 +29,7 @@ import Docs from "./pages/Docs";
 import Blog from "./pages/Blog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Admin from "./pages/Admin";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -50,6 +51,7 @@ function Router() {
       <Route path={"/blog"} component={Blog} />
       <Route path={"/privacy-policy"} component={PrivacyPolicy} />
       <Route path={"/terms-of-service"} component={TermsOfService} />
+      <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
