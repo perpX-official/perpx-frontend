@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
-import { rewardsStorage } from "@/lib/rewardsStorage";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import { 
   Gift, 
   Trophy, 
@@ -16,46 +17,100 @@ import {
   MessageCircle,
   Users,
   Wallet,
-  Unplug
+  Unplug,
+  Loader2
 } from "lucide-react";
 
 export default function Rewards() {
   const { t } = useLanguage();
-  const { isConnected, address } = useRewardsState();
-  const [userData, setUserData] = useState(address ? rewardsStorage.getUserData(address) : null);
-  const [loading, setLoading] = useState(false);
+  const { isConnected, address, chainType } = useRewardsState();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  // Sync user data
+  // Get profile from backend
+  const { data: profile, refetch: refetchProfile, isLoading: profileLoading } = trpc.rewards.getProfile.useQuery(
+    { walletAddress: address || "", chainType: chainType || "evm" },
+    { enabled: !!address && !!chainType }
+  );
+
+  // Mutations
+  const claimConnectBonus = trpc.rewards.claimConnectBonus.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      } else {
+        toast.info(data.message);
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const connectX = trpc.rewards.connectX.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      } else {
+        toast.info(data.message);
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const disconnectX = trpc.rewards.disconnectX.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const connectDiscord = trpc.rewards.connectDiscord.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      } else {
+        toast.info(data.message);
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const disconnectDiscord = trpc.rewards.disconnectDiscord.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const completeDailyPost = trpc.rewards.completeDailyPost.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        refetchProfile();
+      } else {
+        toast.info(data.message);
+      }
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  // Auto-claim connect bonus when profile is loaded and not yet claimed
   useEffect(() => {
-    if (address) {
-      const data = rewardsStorage.getUserData(address);
-      setUserData(data);
+    if (profile && !profile.connectBonusClaimed && address) {
+      claimConnectBonus.mutate({ walletAddress: address });
     }
-  }, [address]);
-
-  const handleTaskComplete = (taskId: string, points: number) => {
-    if (!address || !userData) return;
-
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const newCompletedTasks = [...userData.completedTasks, taskId];
-      const newPoints = userData.points + points;
-      
-      const updatedUser = {
-        ...userData,
-        points: newPoints,
-        completedTasks: newCompletedTasks
-      };
-      
-      rewardsStorage.saveUserData(address, updatedUser);
-      setUserData(updatedUser);
-      setLoading(false);
-    }, 1000);
-  };
+  }, [profile?.connectBonusClaimed, address]);
 
   const handleSocialConnect = (platform: 'twitter' | 'discord') => {
+    if (!address) return;
+    
     // Simulate OAuth flow with redirect
     const width = 600;
     const height = 600;
@@ -78,13 +133,22 @@ export default function Rewards() {
               body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
               .btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
               .btn:hover { background: #2563eb; }
-              .logo { width: 64px; height: 64px; margin-bottom: 20px; }
+              input { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #333; color: white; width: 200px; margin-top: 10px; }
             </style>
           </head>
           <body>
             <h2>Authorize PerpDEX to access your ${platform} account?</h2>
-            <p>This will allow PerpDEX to verify your username.</p>
-            <button class="btn" onclick="window.opener.postMessage({ type: 'SOCIAL_CONNECTED', platform: '${platform}' }, '*'); window.close();">Authorize App</button>
+            <p>Enter your ${platform === 'twitter' ? 'X' : 'Discord'} username:</p>
+            <input type="text" id="username" placeholder="@username" />
+            <button class="btn" onclick="
+              const username = document.getElementById('username').value;
+              if (username) {
+                window.opener.postMessage({ type: 'SOCIAL_CONNECTED', platform: '${platform}', username: username }, '*');
+                window.close();
+              } else {
+                alert('Please enter your username');
+              }
+            ">Authorize App</button>
           </body>
         </html>
       `);
@@ -94,70 +158,43 @@ export default function Rewards() {
   // Listen for social connection messages
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'SOCIAL_CONNECTED' && address && userData) {
+      if (event.data?.type === 'SOCIAL_CONNECTED' && address) {
         const platform = event.data.platform;
-        const taskId = `connect-${platform}`;
+        const username = event.data.username;
         
-        if (!userData.completedTasks.includes(taskId)) {
-          handleTaskComplete(taskId, 100);
-          
-          // Update social connection state
-          const updatedUser = {
-            ...userData,
-            socialConnections: {
-              ...userData.socialConnections,
-              [platform]: true
-            }
-          };
-          rewardsStorage.saveUserData(address, updatedUser);
-          setUserData(updatedUser);
+        if (platform === 'twitter') {
+          connectX.mutate({ walletAddress: address, xUsername: username });
+        } else if (platform === 'discord') {
+          connectDiscord.mutate({ walletAddress: address, discordUsername: username });
         }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [address, userData]);
+  }, [address]);
 
   const handleDisconnectSocial = (platform: 'twitter' | 'discord') => {
-    if (!address || !userData) return;
+    if (!address) return;
     
     if (confirm(`Are you sure you want to disconnect your ${platform} account?`)) {
-      const taskId = `connect-${platform}`;
-      const newCompletedTasks = userData.completedTasks.filter(id => id !== taskId);
-      // Optional: Deduct points? Usually we don't deduct points for disconnecting, but we reset the task status
-      // For this requirement, we just reset the connection status so they can connect again (but maybe not earn points again if that's the rule, or earn again?)
-      // Assuming "reset" means they can connect again. If points should be deducted, we subtract.
-      // Let's keep points but allow re-connection flow.
-      
-      const updatedUser = {
-        ...userData,
-        socialConnections: {
-          ...userData.socialConnections,
-          [platform]: false
-        },
-        completedTasks: newCompletedTasks // Remove from completed tasks so button shows "Connect" again
-      };
-      
-      rewardsStorage.saveUserData(address, updatedUser);
-      setUserData(updatedUser);
+      if (platform === 'twitter') {
+        disconnectX.mutate({ walletAddress: address });
+      } else {
+        disconnectDiscord.mutate({ walletAddress: address });
+      }
     }
   };
 
   const handleSocialPost = () => {
-    // JST 00:00 Reset Logic
-    const jstDate = rewardsStorage.getJSTDateString();
-    const taskId = `post-twitter-${jstDate}`;
+    if (!address) return;
     
+    // Open tweet intent
     window.open('https://twitter.com/intent/tweet?text=Trading%20on%20PerpX!%20%23PerpX&url=https://perpx.com', '_blank');
     
-    // In production, verify via API
+    // In production, verify via API - for now we just mark as complete after a delay
     setTimeout(() => {
-      if (!userData?.completedTasks.includes(taskId)) {
-        handleTaskComplete(taskId, 100);
-      } else {
-        alert("You have already claimed today's post reward! Resets at 00:00 JST.");
-      }
+      completeDailyPost.mutate({ walletAddress: address });
     }, 5000);
   };
 
@@ -171,7 +208,8 @@ export default function Rewards() {
       action: () => {}, 
       buttonText: 'Connected',
       category: 'onboarding',
-      isSocial: false
+      isSocial: false,
+      isCompleted: profile?.connectBonusClaimed || false,
     },
     {
       id: 'connect-twitter',
@@ -184,7 +222,9 @@ export default function Rewards() {
       buttonText: 'Connect X',
       category: 'social',
       isSocial: true,
-      platform: 'twitter'
+      platform: 'twitter',
+      isCompleted: profile?.xConnected || false,
+      connectedUsername: profile?.xUsername,
     },
     {
       id: 'connect-discord',
@@ -197,24 +237,32 @@ export default function Rewards() {
       buttonText: 'Connect Discord',
       category: 'social',
       isSocial: true,
-      platform: 'discord'
+      platform: 'discord',
+      isCompleted: profile?.discordConnected || false,
+      connectedUsername: profile?.discordUsername,
     },
     {
-      id: `post-twitter-${rewardsStorage.getJSTDateString()}`, // Daily dynamic ID based on JST
+      id: 'post-twitter-daily',
       title: 'Post on X',
-      description: 'Share your trading journey on X (Daily)',
+      description: `Share your trading journey on X (Daily - Resets at 00:00 JST)`,
       points: 100,
       icon: Twitter,
       action: handleSocialPost,
       buttonText: 'Post Now',
       category: 'daily',
-      isSocial: false
+      isSocial: false,
+      isCompleted: profile?.dailyPostCompleted || false,
+      requiresXConnection: true,
     }
   ];
 
   const renderTask = (task: any) => {
-    const isCompleted = userData?.completedTasks.includes(task.id);
+    const isCompleted = task.isCompleted;
     const TaskIcon = task.icon || Star;
+    const isDisabled = task.requiresXConnection && !profile?.xConnected;
+    const isMutating = connectX.isPending || disconnectX.isPending || 
+                       connectDiscord.isPending || disconnectDiscord.isPending ||
+                       completeDailyPost.isPending || claimConnectBonus.isPending;
 
     return (
       <Card key={task.id} className="glass-card p-6 hover-reveal relative group">
@@ -229,6 +277,9 @@ export default function Rewards() {
                 {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
               </div>
               <p className="text-sm text-white/60 mb-2">{task.description}</p>
+              {task.connectedUsername && isCompleted && (
+                <p className="text-xs text-primary mb-2">@{task.connectedUsername}</p>
+              )}
               <div className="text-primary font-bold">+{task.points} Points</div>
             </div>
           </div>
@@ -237,20 +288,26 @@ export default function Rewards() {
         <div className="flex gap-2">
           <Button
             onClick={task.action}
-            disabled={isCompleted || loading || (task.id === 'connect-wallet')}
+            disabled={isCompleted || isMutating || (task.id === 'connect-wallet') || isDisabled}
             className={`flex-1 ${
               isCompleted
                 ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
+                : isDisabled
+                ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed'
                 : 'neuro-button micro-bounce'
             }`}
           >
-            {loading ? 'Processing...' : isCompleted ? 'Connected' : task.buttonText}
+            {isMutating ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            {isCompleted ? 'Completed' : isDisabled ? 'Connect X First' : task.buttonText}
           </Button>
           
           {/* Disconnect Button for Social Tasks */}
           {task.isSocial && isCompleted && (
             <Button
               onClick={task.disconnectAction}
+              disabled={isMutating}
               variant="outline"
               className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
               title="Disconnect"
@@ -274,11 +331,18 @@ export default function Rewards() {
         />
       )}
 
-      {isConnected && userData && (
+      {isConnected && profileLoading && (
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      )}
+
+      {isConnected && profile && !profileLoading && (
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Rewards Center</h1>
             <p className="text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
+            <p className="text-xs text-white/40 mt-1">Today (JST): {profile.todayJST}</p>
           </div>
 
           {/* Total Points */}
@@ -287,7 +351,7 @@ export default function Rewards() {
             <div className="relative z-10">
               <div className="text-sm text-white/60 mb-2">Total Points</div>
               <div className="text-5xl sm:text-6xl font-bold text-white mb-4 tracking-tight">
-                {userData.points.toLocaleString()} <span className="text-2xl text-primary">PTS</span>
+                {profile.totalPoints.toLocaleString()} <span className="text-2xl text-primary">PTS</span>
               </div>
               <div className="text-sm text-green-500 mb-2">
                 100 PTS = 1 Token (Estimated)

@@ -15,6 +15,7 @@ export interface UserData {
 
 export interface RewardsState {
   chain: ChainKind | null;
+  chainType: "evm" | "tron" | "solana" | null; // API-compatible alias
   address: string | null;
   isConnected: boolean;
 }
@@ -27,9 +28,22 @@ export const rewardsStorage = {
   get: (): RewardsState => {
     try {
       const data = localStorage.getItem("perpx_rewards_state");
-      return data ? JSON.parse(data) : { chain: null, address: null, isConnected: false };
+      if (data) {
+        const parsed = JSON.parse(data);
+        // Map chain to chainType for API compatibility
+        const chainTypeMap: Record<string, "evm" | "tron" | "solana"> = {
+          evm: "evm",
+          sol: "solana",
+          tron: "tron"
+        };
+        return {
+          ...parsed,
+          chainType: parsed.chain ? chainTypeMap[parsed.chain] || "evm" : null
+        };
+      }
+      return { chain: null, chainType: null, address: null, isConnected: false };
     } catch {
-      return { chain: null, address: null, isConnected: false };
+      return { chain: null, chainType: null, address: null, isConnected: false };
     }
   },
   set: (state: RewardsState) => {

@@ -288,3 +288,14 @@
 - [x] Add proper error handling for wallet connection
 - [ ] Test updated UI
 - [ ] Create checkpoint with changes
+
+
+## Full-Stack Upgrade (Backend + Database)
+- [x] Upgrade project to full-stack with database and user management
+- [x] Create database schema for rewards system (walletUsers, taskCompletions tables)
+- [x] Implement backend API for rewards (getProfile, claimConnectBonus, connectX, disconnectX, connectDiscord, disconnectDiscord, completeDailyPost)
+- [x] Connect frontend to backend APIs via tRPC
+- [x] Implement JST 00:00 daily task reset logic on server side
+- [x] Add persistent user data storage (points, social connections, task history)
+- [ ] Test full rewards flow end-to-end
+- [ ] Create checkpoint with full-stack implementation
