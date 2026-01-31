@@ -53,7 +53,7 @@ export default function Rewards() {
       setLoading(false);
       
       // Show success message (could be a toast)
-      alert(`Task completed! +${points} Points`);
+      // alert(`Task completed! +${points} Points`);
     }, 1000);
   };
 
