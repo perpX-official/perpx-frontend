@@ -1,6 +1,6 @@
 import React from "react";
 import type { ChainKind } from "@/lib/rewardsStorage";
-import { Wallet, Zap, Globe } from "lucide-react";
+import { Wallet, Zap, Globe, Smartphone } from "lucide-react";
 
 export function ChainSelectModal(props: {
   open: boolean;
@@ -25,8 +25,14 @@ export function ChainSelectModal(props: {
         <div className="space-y-3">
           <ChainButton 
             label="EVM Wallets" 
-            subLabel="MetaMask, WalletConnect, etc."
+            subLabel="MetaMask, Rabbit, etc."
             icon={<Globe className="w-6 h-6 text-blue-400" />}
+            onClick={() => props.onSelect("evm")} 
+          />
+          <ChainButton 
+            label="WalletConnect" 
+            subLabel="Mobile Wallets & QR Code"
+            icon={<Smartphone className="w-6 h-6 text-blue-400" />}
             onClick={() => props.onSelect("evm")} 
           />
           <ChainButton 

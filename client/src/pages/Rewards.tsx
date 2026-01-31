@@ -15,7 +15,8 @@ import {
   Twitter,
   MessageCircle,
   Users,
-  Wallet
+  Wallet,
+  Unplug
 } from "lucide-react";
 
 export default function Rewards() {
@@ -51,57 +52,111 @@ export default function Rewards() {
       rewardsStorage.saveUserData(address, updatedUser);
       setUserData(updatedUser);
       setLoading(false);
-      
-      // Show success message (could be a toast)
-      // alert(`Task completed! +${points} Points`);
     }, 1000);
   };
 
   const handleSocialConnect = (platform: 'twitter' | 'discord') => {
-    // Simulate OAuth flow
+    // Simulate OAuth flow with redirect
     const width = 600;
-    const height = 400;
+    const height = 600;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
     
     const popup = window.open(
       '', 
-      'Connect', 
+      `Connect ${platform}`, 
       `width=${width},height=${height},top=${top},left=${left}`
     );
     
     if (popup) {
+      // Simulate a real OAuth page
       popup.document.write(`
         <html>
-          <body style="background:#1a1a1a;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
-            <h2>Connecting to ${platform}...</h2>
-            <p>Please wait...</p>
+          <head>
+            <title>Authorize ${platform}</title>
+            <style>
+              body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+              .btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+              .btn:hover { background: #2563eb; }
+              .logo { width: 64px; height: 64px; margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            <h2>Authorize PerpDEX to access your ${platform} account?</h2>
+            <p>This will allow PerpDEX to verify your username.</p>
+            <button class="btn" onclick="window.opener.postMessage({ type: 'SOCIAL_CONNECTED', platform: '${platform}' }, '*'); window.close();">Authorize App</button>
           </body>
         </html>
       `);
+    }
+  };
+
+  // Listen for social connection messages
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SOCIAL_CONNECTED' && address && userData) {
+        const platform = event.data.platform;
+        const taskId = `connect-${platform}`;
+        
+        if (!userData.completedTasks.includes(taskId)) {
+          handleTaskComplete(taskId, 100);
+          
+          // Update social connection state
+          const updatedUser = {
+            ...userData,
+            socialConnections: {
+              ...userData.socialConnections,
+              [platform]: true
+            }
+          };
+          rewardsStorage.saveUserData(address, updatedUser);
+          setUserData(updatedUser);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [address, userData]);
+
+  const handleDisconnectSocial = (platform: 'twitter' | 'discord') => {
+    if (!address || !userData) return;
+    
+    if (confirm(`Are you sure you want to disconnect your ${platform} account?`)) {
+      const taskId = `connect-${platform}`;
+      const newCompletedTasks = userData.completedTasks.filter(id => id !== taskId);
+      // Optional: Deduct points? Usually we don't deduct points for disconnecting, but we reset the task status
+      // For this requirement, we just reset the connection status so they can connect again (but maybe not earn points again if that's the rule, or earn again?)
+      // Assuming "reset" means they can connect again. If points should be deducted, we subtract.
+      // Let's keep points but allow re-connection flow.
       
-      setTimeout(() => {
-        popup.close();
-        handleTaskComplete(`connect-${platform}`, 100);
-      }, 1500);
+      const updatedUser = {
+        ...userData,
+        socialConnections: {
+          ...userData.socialConnections,
+          [platform]: false
+        },
+        completedTasks: newCompletedTasks // Remove from completed tasks so button shows "Connect" again
+      };
+      
+      rewardsStorage.saveUserData(address, updatedUser);
+      setUserData(updatedUser);
     }
   };
 
   const handleSocialPost = () => {
+    // JST 00:00 Reset Logic
+    const jstDate = rewardsStorage.getJSTDateString();
+    const taskId = `post-twitter-${jstDate}`;
+    
     window.open('https://twitter.com/intent/tweet?text=Trading%20on%20PerpX!%20%23PerpX&url=https://perpx.com', '_blank');
     
-    // In production, this would need verification via API
+    // In production, verify via API
     setTimeout(() => {
-      // Allow multiple completions for daily posts? 
-      // Requirement says "100P per post", assuming daily limit or unique posts
-      // For now, we'll use a timestamp-based ID to allow multiple
-      const today = new Date().toISOString().split('T')[0];
-      const taskId = `post-twitter-${today}`;
-      
       if (!userData?.completedTasks.includes(taskId)) {
         handleTaskComplete(taskId, 100);
       } else {
-        alert("You have already claimed today's post reward!");
+        alert("You have already claimed today's post reward! Resets at 00:00 JST.");
       }
     }, 5000);
   };
@@ -113,9 +168,10 @@ export default function Rewards() {
       description: 'Connect your wallet to start earning',
       points: 300,
       icon: Wallet,
-      action: () => {}, // Handled automatically on connection
+      action: () => {}, 
       buttonText: 'Connected',
-      category: 'onboarding'
+      category: 'onboarding',
+      isSocial: false
     },
     {
       id: 'connect-twitter',
@@ -124,8 +180,11 @@ export default function Rewards() {
       points: 100,
       icon: Twitter,
       action: () => handleSocialConnect('twitter'),
+      disconnectAction: () => handleDisconnectSocial('twitter'),
       buttonText: 'Connect X',
-      category: 'social'
+      category: 'social',
+      isSocial: true,
+      platform: 'twitter'
     },
     {
       id: 'connect-discord',
@@ -134,18 +193,22 @@ export default function Rewards() {
       points: 100,
       icon: MessageCircle,
       action: () => handleSocialConnect('discord'),
+      disconnectAction: () => handleDisconnectSocial('discord'),
       buttonText: 'Connect Discord',
-      category: 'social'
+      category: 'social',
+      isSocial: true,
+      platform: 'discord'
     },
     {
-      id: `post-twitter-${new Date().toISOString().split('T')[0]}`, // Daily dynamic ID
+      id: `post-twitter-${rewardsStorage.getJSTDateString()}`, // Daily dynamic ID based on JST
       title: 'Post on X',
       description: 'Share your trading journey on X (Daily)',
       points: 100,
       icon: Twitter,
       action: handleSocialPost,
       buttonText: 'Post Now',
-      category: 'daily'
+      category: 'daily',
+      isSocial: false
     }
   ];
 
@@ -154,7 +217,7 @@ export default function Rewards() {
     const TaskIcon = task.icon || Star;
 
     return (
-      <Card key={task.id} className="glass-card p-6 hover-reveal">
+      <Card key={task.id} className="glass-card p-6 hover-reveal relative group">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-4 flex-1">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -170,17 +233,32 @@ export default function Rewards() {
             </div>
           </div>
         </div>
-        <Button
-          onClick={task.action}
-          disabled={isCompleted || loading || (task.id === 'connect-wallet')}
-          className={`w-full ${
-            isCompleted
-              ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
-              : 'neuro-button micro-bounce'
-          }`}
-        >
-          {loading ? 'Processing...' : isCompleted ? 'Completed' : task.buttonText}
-        </Button>
+        
+        <div className="flex gap-2">
+          <Button
+            onClick={task.action}
+            disabled={isCompleted || loading || (task.id === 'connect-wallet')}
+            className={`flex-1 ${
+              isCompleted
+                ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
+                : 'neuro-button micro-bounce'
+            }`}
+          >
+            {loading ? 'Processing...' : isCompleted ? 'Connected' : task.buttonText}
+          </Button>
+          
+          {/* Disconnect Button for Social Tasks */}
+          {task.isSocial && isCompleted && (
+            <Button
+              onClick={task.disconnectAction}
+              variant="outline"
+              className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+              title="Disconnect"
+            >
+              <Unplug className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </Card>
     );
   };

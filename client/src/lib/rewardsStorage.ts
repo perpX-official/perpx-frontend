@@ -7,6 +7,10 @@ export interface UserData {
   completedTasks: string[];
   lastLogin: string; // ISO date string
   consecutiveLogins: number;
+  socialConnections: {
+    twitter: boolean;
+    discord: boolean;
+  };
 }
 
 export interface RewardsState {
@@ -63,9 +67,23 @@ export const rewardsStorage = {
       points: 300, // Initial connection bonus
       completedTasks: ['connect-wallet'],
       lastLogin: new Date().toISOString(),
-      consecutiveLogins: 1
+      consecutiveLogins: 1,
+      socialConnections: {
+        twitter: false,
+        discord: false
+      }
     };
     rewardsStorage.saveUserData(address, newUser);
     return newUser;
+  },
+
+  // Helper to get JST date string (YYYY-MM-DD)
+  getJSTDateString: (): string => {
+    // Create date object for current time
+    const now = new Date();
+    // Convert to JST (UTC+9)
+    const jstOffset = 9 * 60;
+    const jstTime = new Date(now.getTime() + (jstOffset + now.getTimezoneOffset()) * 60000);
+    return jstTime.toISOString().split('T')[0];
   }
 };
