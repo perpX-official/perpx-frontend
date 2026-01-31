@@ -1,6 +1,6 @@
-import { Link, useLocation, useLocation as useRouter } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ChainSelectModal } from "./ChainSelectModal";
@@ -10,23 +10,41 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
   const [chainModalOpen, setChainModalOpen] = useState(false);
   const [rewardsState, setRewardsState] = useState(rewardsStorage.get());
   const [location, setLocation] = useLocation();
   
+  // Sync state with storage
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = rewardsStorage.get();
+      if (JSON.stringify(current) !== JSON.stringify(rewardsState)) {
+        setRewardsState(current);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [rewardsState]);
+
   const handleChainSelect = (chain: ChainKind) => {
-    // Temporary connection logic
+    // Mock address generation based on chain
+    const mockAddress = chain === 'evm' ? "0x71C...9A21" : 
+                       chain === 'tron' ? "T9yD...k3jL" : 
+                       "Sol...8k92";
+    
     const newState = {
       chain,
-      address: "0x1234...5678", // Mock address
+      address: mockAddress,
       isConnected: true
     };
+    
+    // Initialize user data if new
+    rewardsStorage.initUser(mockAddress, chain);
+    
     rewardsStorage.set(newState);
     setRewardsState(newState);
     setChainModalOpen(false);
 
-    // Redirect to dashboard if connected from home page
+    // Redirect logic: Only redirect to dashboard if on home page
     if (location === "/") {
       setLocation("/dashboard");
     }
@@ -36,8 +54,10 @@ export default function Header() {
     const newState = { chain: null, address: null, isConnected: false };
     rewardsStorage.set(newState);
     setRewardsState(newState);
+    // Reload to reset states
+    window.location.reload();
   };
-  // const [location] = useLocation(); // Already declared above
+
   const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
@@ -203,7 +223,7 @@ export default function Header() {
                             }}
                             className="w-full px-3 py-2 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between"
                           >
-                            <span className={language === code ? 'text-white font-medium' : 'text-white/70'}>
+                            <span className={language === code ? 'text-white font-medium' : 'text-white/70'} >
                               {name}
                             </span>
                             {language === code && <Check className="h-4 w-4 text-primary" />}
@@ -220,150 +240,80 @@ export default function Header() {
                   {t('button.launchApp')}
                 </Link>
               ) : (
-                <ConnectButton.Custom>
-                  {({ account, chain, openConnectModal, mounted }) => {
-                    const ready = mounted;
-                    // Use our custom rewardsState for connection status
-                    const isCustomConnected = rewardsState.isConnected;
-                    const displayAddress = rewardsState.address ? `${rewardsState.address.slice(0, 6)}...${rewardsState.address.slice(-4)}` : "";
-
-                    return (
-                      <div
-                        {...(!ready && {
-                          'aria-hidden': true,
-                          'style': {
-                            opacity: 0,
-                            pointerEvents: 'none',
-                            userSelect: 'none',
-                          },
-                        })}
-                      >
-                        {(() => {
-                          // If connected via our custom modal
-                          if (isCustomConnected) {
-                            return (
-                              <button
-                                onClick={handleDisconnect}
-                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2"
-                              >
-                                <div className="w-2 h-2 rounded-full bg-green-500" />
-                                {displayAddress}
-                              </button>
-                            );
-                          }
-
-                          // Default state (not connected)
-                          return (
-                            <button
-                              onClick={() => setChainModalOpen(true)}
-                              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
-                            >
-                              {t('button.connectWallet')}
-                            </button>
-                          );
-                        })()}
+                <>
+                  {!rewardsState.isConnected ? (
+                    <button
+                      onClick={() => setChainModalOpen(true)}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 whitespace-nowrap"
+                    >
+                      Connect Wallet
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="hidden sm:block px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80">
+                        {rewardsState.chain === 'evm' ? 'Ethereum' : rewardsState.chain === 'tron' ? 'Tron' : 'Solana'}
                       </div>
-                    );
-                  }}
-                </ConnectButton.Custom>
+                      <button
+                        onClick={handleDisconnect}
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        {rewardsState.address}
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
         </div>
       </nav>
 
-      <ChainSelectModal
-        open={chainModalOpen}
-        onClose={() => setChainModalOpen(false)}
-        onSelect={handleChainSelect}
-      />
-
       {/* Mobile Menu */}
-      {mobileMenuOpen && !isLegalPage && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-6">
-              <Link href="/" className="flex items-center gap-2">
-                <img src="/perpx-icon.png" alt="PerpX" className="h-6 w-6" />
-                <span className="text-xl font-bold text-white">PerpX</span>
-              </Link>
-              <button onClick={() => setMobileMenuOpen(false)}>
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="space-y-2">
-              <Link href="/trade" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.perpetual')}
-              </Link>
-              <Link href="/dashboard" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.portfolio')}
-              </Link>
-              <Link href="/referral" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.referral')}
-              </Link>
-              <Link href="/rewards" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.rewards')}
-              </Link>
-              <Link href="/earn" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.earn')}
-              </Link>
-              <Link href="/stake" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.stake')}
-              </Link>
-              <Link href="/stats" className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.stats')}
-              </Link>
-              <div className="pt-4 border-t border-white/10">
-                <button
-                  onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white"
-                >
-                  <span className="text-sm font-medium">{t('more')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isMobileMoreOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isMobileMoreOpen && (
-                  <div className="mt-2 space-y-1">
-                    {moreItems.map((item, index) => (
-                      item.external ? (
-                        <a
-                          key={index}
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="h-5 w-5 text-primary" />
-                            <div>
-                              <div className="text-sm font-medium text-white">{t(item.titleKey)}</div>
-                              <div className="text-xs text-white/60">{t(item.descKey)}</div>
-                            </div>
-                          </div>
-                        </a>
-                      ) : (
-                        <Link key={index} href={item.href}
-                          className="block px-4 py-3 rounded-lg hover:bg-white/5 transition-colors ml-4"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="h-5 w-5 text-primary" />
-                            <div>
-                              <div className="text-sm font-medium text-white">{t(item.titleKey)}</div>
-                              <div className="text-xs text-white/60">{t(item.descKey)}</div>
-                            </div>
-                          </div>
-                        </Link>
-                      )
-                    ))}
-                  </div>
-                )}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-20 px-6">
+          <div className="flex flex-col gap-4">
+            <Link href="/trade" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.perpetual')}
+            </Link>
+            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.portfolio')}
+            </Link>
+            <Link href="/referral" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.referral')}
+            </Link>
+            <Link href="/rewards" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.rewards')}
+            </Link>
+            <Link href="/earn" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.earn')}
+            </Link>
+            <Link href="/stake" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.stake')}
+            </Link>
+            <Link href="/stats" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
+              {t('nav.stats')}
+            </Link>
+            <div className="py-2">
+              <div className="text-sm font-medium text-white/60 mb-2">{t('more')}</div>
+              <div className="grid grid-cols-2 gap-2">
+                {moreItems.map((item, index) => (
+                  <Link key={index} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 text-sm text-white">
+                    <item.icon className="h-4 w-4 text-primary" />
+                    {t(item.titleKey)}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <ChainSelectModal
+        open={chainModalOpen}
+        onClose={() => setChainModalOpen(false)}
+        onSelect={handleChainSelect}
+      />
     </>
   );
 }
-

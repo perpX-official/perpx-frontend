@@ -1,171 +1,156 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
+import { rewardsStorage } from "@/lib/rewardsStorage";
 import { 
   Gift, 
   Trophy, 
   Star, 
   Zap, 
   CheckCircle2, 
-  Circle,
   Twitter,
   MessageCircle,
-  Users
+  Users,
+  Wallet
 } from "lucide-react";
 
 export default function Rewards() {
   const { t } = useLanguage();
-  const { isConnected } = useRewardsState();
-  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const { isConnected, address } = useRewardsState();
+  const [userData, setUserData] = useState(address ? rewardsStorage.getUserData(address) : null);
+  const [loading, setLoading] = useState(false);
 
-  const handleTaskComplete = (taskId: string) => {
-    setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
-  };
+  // Sync user data
+  useEffect(() => {
+    if (address) {
+      const data = rewardsStorage.getUserData(address);
+      setUserData(data);
+    }
+  }, [address]);
 
-  const handleLogin = () => {
-    handleTaskComplete('daily-login');
-    alert(t('rewards.loginSuccess'));
-  };
+  const handleTaskComplete = (taskId: string, points: number) => {
+    if (!address || !userData) return;
 
-  const handleDemoTrade = () => {
-    handleTaskComplete('daily-demo');
-    alert(t('rewards.demoSuccess'));
-  };
-
-  const handleSocialPost = (platform: string) => {
-    const urls: Record<string, string> = {
-      twitter: 'https://twitter.com/intent/tweet?text=PerpXで取引を始めました！&url=https://perpx.com',
-      telegram: 'https://t.me/share/url?url=https://perpx.com&text=PerpXで取引を始めました！',
-    };
+    setLoading(true);
     
-    window.open(urls[platform], '_blank');
-    
-    // 投稿後にタスク完了とする（実際にはバックエンドで確認が必要）
+    // Simulate API call
     setTimeout(() => {
-      handleTaskComplete(`daily-sns-${platform}`);
-      alert(t('rewards.snsSuccess'));
-    }, 2000);
+      const newCompletedTasks = [...userData.completedTasks, taskId];
+      const newPoints = userData.points + points;
+      
+      const updatedUser = {
+        ...userData,
+        points: newPoints,
+        completedTasks: newCompletedTasks
+      };
+      
+      rewardsStorage.saveUserData(address, updatedUser);
+      setUserData(updatedUser);
+      setLoading(false);
+      
+      // Show success message (could be a toast)
+      alert(`Task completed! +${points} Points`);
+    }, 1000);
   };
 
-  const handleWeeklyLogin = () => {
-    handleTaskComplete('weekly-login');
-    alert(t('rewards.weeklyLoginSuccess'));
+  const handleSocialConnect = (platform: 'twitter' | 'discord') => {
+    // Simulate OAuth flow
+    const width = 600;
+    const height = 400;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    const popup = window.open(
+      '', 
+      'Connect', 
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+    
+    if (popup) {
+      popup.document.write(`
+        <html>
+          <body style="background:#1a1a1a;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+            <h2>Connecting to ${platform}...</h2>
+            <p>Please wait...</p>
+          </body>
+        </html>
+      `);
+      
+      setTimeout(() => {
+        popup.close();
+        handleTaskComplete(`connect-${platform}`, 100);
+      }, 1500);
+    }
   };
 
-  const handleCommunityJoin = (platform: string) => {
-    const urls: Record<string, string> = {
-      discord: 'https://discord.gg/perpx',
-      telegram: 'https://t.me/perpx',
-    };
+  const handleSocialPost = () => {
+    window.open('https://twitter.com/intent/tweet?text=Trading%20on%20PerpX!%20%23PerpX&url=https://perpx.com', '_blank');
     
-    window.open(urls[platform], '_blank');
-    
+    // In production, this would need verification via API
     setTimeout(() => {
-      handleTaskComplete(`weekly-community-${platform}`);
-      alert(t('rewards.communitySuccess'));
-    }, 2000);
+      // Allow multiple completions for daily posts? 
+      // Requirement says "100P per post", assuming daily limit or unique posts
+      // For now, we'll use a timestamp-based ID to allow multiple
+      const today = new Date().toISOString().split('T')[0];
+      const taskId = `post-twitter-${today}`;
+      
+      if (!userData?.completedTasks.includes(taskId)) {
+        handleTaskComplete(taskId, 100);
+      } else {
+        alert("You have already claimed today's post reward!");
+      }
+    }, 5000);
   };
 
-  const handleGuildJoin = () => {
-    handleTaskComplete('special-guild');
-    alert(t('rewards.guildSuccess'));
-  };
-
-  const dailyTasks = [
+  const tasks = [
     {
-      id: 'daily-login',
-      title: t('rewards.loginBonus'),
-      description: t('rewards.loginBonusDesc'),
-      points: 1,
-      action: handleLogin,
-      buttonText: t('rewards.login'),
+      id: 'connect-wallet',
+      title: 'Connect Wallet',
+      description: 'Connect your wallet to start earning',
+      points: 300,
+      icon: Wallet,
+      action: () => {}, // Handled automatically on connection
+      buttonText: 'Connected',
+      category: 'onboarding'
     },
     {
-      id: 'daily-demo',
-      title: t('rewards.demoTrade'),
-      description: t('rewards.demoTradeDesc'),
-      points: 5,
-      action: handleDemoTrade,
-      buttonText: t('rewards.trade'),
-    },
-    {
-      id: 'daily-sns-twitter',
-      title: t('rewards.twitterPost'),
-      description: t('rewards.twitterPostDesc'),
-      points: 5,
-      action: () => handleSocialPost('twitter'),
-      buttonText: t('rewards.post'),
+      id: 'connect-twitter',
+      title: 'Connect X (Twitter)',
+      description: 'Link your X account to earn points',
+      points: 100,
       icon: Twitter,
-    },
-  ];
-
-  const weeklyTasks = [
-    {
-      id: 'weekly-login',
-      title: t('rewards.weeklyLogin'),
-      description: t('rewards.weeklyLoginDesc'),
-      points: 10,
-      action: handleWeeklyLogin,
-      buttonText: t('rewards.claim'),
+      action: () => handleSocialConnect('twitter'),
+      buttonText: 'Connect X',
+      category: 'social'
     },
     {
-      id: 'weekly-community-discord',
-      title: t('rewards.joinDiscord'),
-      description: t('rewards.joinDiscordDesc'),
-      points: 30,
-      action: () => handleCommunityJoin('discord'),
-      buttonText: t('rewards.join'),
+      id: 'connect-discord',
+      title: 'Connect Discord',
+      description: 'Link your Discord account to earn points',
+      points: 100,
       icon: MessageCircle,
+      action: () => handleSocialConnect('discord'),
+      buttonText: 'Connect Discord',
+      category: 'social'
     },
     {
-      id: 'weekly-community-telegram',
-      title: t('rewards.joinTelegram'),
-      description: t('rewards.joinTelegramDesc'),
-      points: 30,
-      action: () => handleCommunityJoin('telegram'),
-      buttonText: t('rewards.join'),
-      icon: MessageCircle,
-    },
+      id: `post-twitter-${new Date().toISOString().split('T')[0]}`, // Daily dynamic ID
+      title: 'Post on X',
+      description: 'Share your trading journey on X (Daily)',
+      points: 100,
+      icon: Twitter,
+      action: handleSocialPost,
+      buttonText: 'Post Now',
+      category: 'daily'
+    }
   ];
-
-  const specialTasks = [
-    {
-      id: 'special-guild',
-      title: t('rewards.joinGuild'),
-      description: t('rewards.joinGuildDesc'),
-      points: 50,
-      action: handleGuildJoin,
-      buttonText: t('rewards.join'),
-      icon: Users,
-    },
-  ];
-
-  const calculateDailyPoints = () => {
-    return dailyTasks.reduce((sum, task) => {
-      return sum + (completedTasks.has(task.id) ? task.points : 0);
-    }, 0);
-  };
-
-  const calculateWeeklyPoints = () => {
-    return weeklyTasks.reduce((sum, task) => {
-      return sum + (completedTasks.has(task.id) ? task.points : 0);
-    }, 0);
-  };
-
-  const calculateSpecialPoints = () => {
-    return specialTasks.reduce((sum, task) => {
-      return sum + (completedTasks.has(task.id) ? task.points : 0);
-    }, 0);
-  };
-
-  const totalPoints = calculateDailyPoints() + calculateWeeklyPoints() + calculateSpecialPoints();
 
   const renderTask = (task: any) => {
-    const isCompleted = completedTasks.has(task.id);
+    const isCompleted = userData?.completedTasks.includes(task.id);
     const TaskIcon = task.icon || Star;
 
     return (
@@ -181,20 +166,20 @@ export default function Rewards() {
                 {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
               </div>
               <p className="text-sm text-white/60 mb-2">{task.description}</p>
-              <div className="text-primary font-bold">+{task.points} {t('rewards.points')}</div>
+              <div className="text-primary font-bold">+{task.points} Points</div>
             </div>
           </div>
         </div>
         <Button
           onClick={task.action}
-          disabled={isCompleted}
+          disabled={isCompleted || loading || (task.id === 'connect-wallet')}
           className={`w-full ${
             isCompleted
               ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
               : 'neuro-button micro-bounce'
           }`}
         >
-          {isCompleted ? t('rewards.completed') : task.buttonText}
+          {loading ? 'Processing...' : isCompleted ? 'Completed' : task.buttonText}
         </Button>
       </Card>
     );
@@ -204,99 +189,93 @@ export default function Rewards() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Connect Wallet Screen when wallet is not connected */}
       {!isConnected && (
         <ConnectWalletScreen
-          title="Connect Wallet"
-          description="Connect your wallet to access rewards, complete tasks, and earn points."
+          title="Rewards Program"
+          description="Connect your wallet to view your points and available tasks."
         />
       )}
 
-      {/* Main Content - Only show when wallet is connected */}
-      {isConnected && (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('nav.rewards')}</h1>
-          <p className="text-white/60">{t('rewards.dailyTasks')} & {t('rewards.weeklyTasks')}</p>
-        </div>
+      {isConnected && userData && (
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Rewards Center</h1>
+            <p className="text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
+          </div>
 
-        {/* Total Points */}
-        <div className="glass-card rounded-xl p-8 mb-8 text-center">
-          <div className="text-sm text-white/60 mb-2">Total Points</div>
-          <div className="text-4xl sm:text-5xl font-bold text-white mb-4">{totalPoints} pt</div>
-          <div className="text-sm text-green-500 mb-2">≈ ${totalPoints} USD</div>
-          <div className="text-xs text-white/60">
-            {t('rewards.dailyTasks')}: {calculateDailyPoints()}pt | {t('rewards.weeklyTasks')}: {calculateWeeklyPoints()}pt | {t('rewards.specialTasks')}: {calculateSpecialPoints()}pt
-          </div>
-        </div>
-
-        {/* Daily Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">{t('rewards.dailyTasks')}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dailyTasks.map(renderTask)}
-          </div>
-          <div className="mt-4 text-sm text-white/60">
-            Monthly: {dailyTasks.reduce((sum, t) => sum + t.points, 0) * 30} {t('rewards.points')}
-          </div>
-        </div>
-
-        {/* Weekly Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Trophy className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">{t('rewards.weeklyTasks')}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {weeklyTasks.map(renderTask)}
-          </div>
-          <div className="mt-4 text-sm text-white/60">
-            Monthly: {weeklyTasks.reduce((sum, t) => sum + t.points, 0) * 4} {t('rewards.points')}
-          </div>
-        </div>
-
-        {/* Special Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Gift className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-white">{t('rewards.specialTasks')}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {specialTasks.map(renderTask)}
-          </div>
-        </div>
-
-        {/* Reward History */}
-        <div className="glass-card rounded-xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">獲得履歴</h2>
-          <div className="space-y-4">
-            {Array.from(completedTasks).map((taskId, index) => {
-              const task = [...dailyTasks, ...weeklyTasks, ...specialTasks].find(t => t.id === taskId);
-              if (!task) return null;
-              
-              return (
-                <div key={index} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                  <div>
-                    <div className="text-white font-medium">{task.title}</div>
-                    <div className="text-sm text-white/60">{new Date().toLocaleDateString('ja-JP')}</div>
-                  </div>
-                  <div className="text-green-500 font-bold">+{task.points} pt</div>
-                </div>
-              );
-            })}
-            {completedTasks.size === 0 && (
-              <div className="text-sm text-white/60 text-center py-8">
-                まだタスクを完了していません
+          {/* Total Points */}
+          <div className="glass-card rounded-xl p-8 mb-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 animate-pulse-slow"></div>
+            <div className="relative z-10">
+              <div className="text-sm text-white/60 mb-2">Total Points</div>
+              <div className="text-5xl sm:text-6xl font-bold text-white mb-4 tracking-tight">
+                {userData.points.toLocaleString()} <span className="text-2xl text-primary">PTS</span>
               </div>
-            )}
+              <div className="text-sm text-green-500 mb-2">
+                100 PTS = 1 Token (Estimated)
+              </div>
+            </div>
+          </div>
+
+          {/* Task Categories */}
+          <div className="space-y-8">
+            {/* Onboarding */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold text-white">Onboarding</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.filter(t => t.category === 'onboarding').map(renderTask)}
+              </div>
+            </div>
+
+            {/* Social */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold text-white">Social Tasks</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.filter(t => t.category === 'social').map(renderTask)}
+              </div>
+            </div>
+
+            {/* Daily */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold text-white">Daily Tasks</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.filter(t => t.category === 'daily').map(renderTask)}
+              </div>
+            </div>
+          </div>
+
+          {/* Coming Soon Section */}
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <h2 className="text-xl font-bold text-white mb-6 text-center opacity-50">Coming Soon</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-50 pointer-events-none grayscale">
+              <Card className="glass-card p-6">
+                <div className="h-12 w-12 bg-white/10 rounded-full mb-4"></div>
+                <div className="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
+                <div className="h-4 w-full bg-white/10 rounded"></div>
+              </Card>
+              <Card className="glass-card p-6">
+                <div className="h-12 w-12 bg-white/10 rounded-full mb-4"></div>
+                <div className="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
+                <div className="h-4 w-full bg-white/10 rounded"></div>
+              </Card>
+              <Card className="glass-card p-6">
+                <div className="h-12 w-12 bg-white/10 rounded-full mb-4"></div>
+                <div className="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
+                <div className="h-4 w-full bg-white/10 rounded"></div>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
 }
-
