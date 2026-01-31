@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useLocation as useRouter } from "wouter";
 import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,7 +13,8 @@ export default function Header() {
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
   const [chainModalOpen, setChainModalOpen] = useState(false);
   const [rewardsState, setRewardsState] = useState(rewardsStorage.get());
-
+  const [location, setLocation] = useLocation();
+  
   const handleChainSelect = (chain: ChainKind) => {
     // Temporary connection logic
     const newState = {
@@ -24,6 +25,11 @@ export default function Header() {
     rewardsStorage.set(newState);
     setRewardsState(newState);
     setChainModalOpen(false);
+
+    // Redirect to dashboard if connected from home page
+    if (location === "/") {
+      setLocation("/dashboard");
+    }
   };
 
   const handleDisconnect = () => {
@@ -31,7 +37,7 @@ export default function Header() {
     rewardsStorage.set(newState);
     setRewardsState(newState);
   };
-  const [location] = useLocation();
+  // const [location] = useLocation(); // Already declared above
   const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
