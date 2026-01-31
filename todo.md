@@ -313,3 +313,10 @@
 - [ ] Remove/replace Manus comments and references
 - [ ] Update package names and environment variable references
 - [ ] Test OAuth flow on published site
+
+
+## Production Blank Screen Fix
+- [ ] Diagnose production blank screen issue
+- [ ] Fix build/deployment configuration
+- [ ] Test on published URL
+- [ ] Verify OAuth flow works
