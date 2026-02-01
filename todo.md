@@ -438,3 +438,8 @@
 - [x] Change Coming Soon overlay to show background UI slightly visible (grayscale + blur + 20% opacity)
 - [x] Save original UI/UX to separate files for Vercel deployment (original-ui/ folder)
 - [x] Fix disconnect warning message to say "connect bonus (100 points)" instead of "all points"
+
+
+## Current Tasks (2026-02-01 Session 8)
+- [x] Fix TradingView widget cleanup error - added isMountedRef, safe cleanup, and script reuse - verified no errors on navigation
+- [x] Fix PC version price display showing "Loading..." - verified working (prices load after WebSocket connects)
