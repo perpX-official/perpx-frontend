@@ -16,8 +16,16 @@ const X_CLIENT_SECRET = process.env.X_CLIENT_SECRET || "";
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
 
+// Production base URL for OAuth callbacks
+const PRODUCTION_BASE_URL = process.env.OAUTH_CALLBACK_BASE_URL || "https://perpdex.manus.space";
+
 // Get the base URL for callbacks
 function getBaseUrl(req: Request): string {
+  // In production, always use the configured base URL to ensure OAuth callbacks work correctly
+  if (process.env.NODE_ENV === "production" || PRODUCTION_BASE_URL !== "https://perpdex.manus.space") {
+    return PRODUCTION_BASE_URL;
+  }
+  // In development, use request headers
   const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
   const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost:3000";
   return `${protocol}://${host}`;

@@ -326,3 +326,9 @@
 - [x] Remove WalletConnect/RainbowKit dependency
 - [x] Implement MetaMask direct connection
 - [ ] Test on production
+
+
+## X OAuth Error Fix
+- [x] Diagnose X OAuth "Something went wrong" error (callback URL mismatch)
+- [x] Fix callback URL to use production domain instead of internal server URL
+- [ ] Test OAuth flow after fix
