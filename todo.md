@@ -465,3 +465,10 @@
 - [x] Create README and DEPLOYMENT.md for GitHub
 - [x] Remove GMX references from code and comments
 - [x] Test and save checkpoint for GitHub export
+
+
+## Current Tasks (2026-02-02 Session 12) - OAuth URL Fix
+- [x] Review current X/Discord OAuth callback URL configuration
+- [x] Update socialOAuth.ts to use dynamic callback URLs (based on request origin)
+- [x] Update DEPLOYMENT.md with OAuth redirect URI instructions
+- [x] Test and save checkpoint

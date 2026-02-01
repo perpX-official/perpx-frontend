@@ -94,23 +94,61 @@ CREATE INDEX idx_points_history_wallet ON points_history(wallet_address);
 2. Create a new project
 3. Copy the **Project ID**
 
-## Step 3: Set Up Social OAuth (Optional)
+## Step 3: Set Up Social OAuth
 
-### X (Twitter) OAuth
+Social OAuth (X/Twitter and Discord) requires careful configuration of callback URLs. The system automatically detects the correct callback URL based on your deployment environment.
+
+### OAuth Callback URL Priority
+
+The system determines the callback URL in the following order:
+
+| Priority | Source | Use Case |
+|----------|--------|----------|
+| 1 | `OAUTH_CALLBACK_BASE_URL` env var | Production with custom domain |
+| 2 | `VERCEL_URL` env var (auto-set) | Vercel preview deployments |
+| 3 | Request headers | Development / other platforms |
+| 4 | `http://localhost:3000` | Local development |
+
+### X (Twitter) OAuth Setup
 
 1. Go to [Twitter Developer Portal](https://developer.twitter.com)
-2. Create a new app
-3. Enable OAuth 2.0
-4. Set callback URL: `https://your-domain.vercel.app/api/social/x/callback`
-5. Copy Client ID and Client Secret
+2. Create a new app or select existing app
+3. Go to **User authentication settings**
+4. Enable **OAuth 2.0**
+5. Set **Type of App** to "Web App, Automated App or Bot"
+6. Add **Callback URI / Redirect URL**:
+   - For custom domain: `https://your-domain.com/api/social/x/callback`
+   - For Vercel default: `https://your-project.vercel.app/api/social/x/callback`
+7. Add **Website URL**: Your app's homepage
+8. Copy **Client ID** and **Client Secret**
 
-### Discord OAuth
+### Discord OAuth Setup
 
 1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Create a new application
-3. Go to OAuth2 settings
-4. Add redirect URL: `https://your-domain.vercel.app/api/social/discord/callback`
-5. Copy Client ID and Client Secret
+2. Create a new application or select existing
+3. Go to **OAuth2 > General**
+4. Add **Redirects**:
+   - For custom domain: `https://your-domain.com/api/social/discord/callback`
+   - For Vercel default: `https://your-project.vercel.app/api/social/discord/callback`
+5. Copy **Client ID** and **Client Secret**
+
+### Important: Multiple Redirect URIs
+
+Both X and Discord allow multiple redirect URIs. You can add all of these to support different environments:
+
+```
+# Local development
+http://localhost:3000/api/social/x/callback
+http://localhost:3000/api/social/discord/callback
+
+# Vercel preview (replace with your project name)
+https://your-project.vercel.app/api/social/x/callback
+https://your-project.vercel.app/api/social/discord/callback
+
+# Production custom domain
+https://perpx.fi/api/social/x/callback
+https://perpx.fi/api/social/discord/callback
+```
 
 ## Step 4: Deploy to Vercel
 
@@ -130,17 +168,18 @@ CREATE INDEX idx_points_history_wallet ON points_history(wallet_address);
 | `ADMIN_WALLET_ADDRESS` | Admin wallet address |
 | `ADMIN_PASSWORD` | Admin panel password |
 
-### Optional - Social OAuth
+### OAuth Configuration
 
 | Variable | Description |
 |----------|-------------|
+| `OAUTH_CALLBACK_BASE_URL` | **Required for custom domain**. Your production URL (e.g., `https://perpx.fi`) |
 | `X_CLIENT_ID` | Twitter OAuth Client ID |
 | `X_CLIENT_SECRET` | Twitter OAuth Client Secret |
-| `X_BEARER_TOKEN` | Twitter API Bearer Token |
+| `X_BEARER_TOKEN` | Twitter API Bearer Token (for tweet verification) |
 | `DISCORD_CLIENT_ID` | Discord OAuth Client ID |
 | `DISCORD_CLIENT_SECRET` | Discord OAuth Client Secret |
 
-### Optional - Frontend
+### Frontend
 
 | Variable | Description |
 |----------|-------------|
@@ -148,7 +187,7 @@ CREATE INDEX idx_points_history_wallet ON points_history(wallet_address);
 | `VITE_APP_LOGO` | App logo URL |
 | `VITE_WALLETCONNECT_PROJECT_ID` | WalletConnect Project ID |
 
-### Optional - Storage (Supabase)
+### Storage (Supabase)
 
 | Variable | Description |
 |----------|-------------|
@@ -157,38 +196,76 @@ CREATE INDEX idx_points_history_wallet ON points_history(wallet_address);
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
 | `SUPABASE_STORAGE_BUCKET` | Storage bucket name |
 
-### Optional - External APIs
+### External APIs
 
 | Variable | Description |
 |----------|-------------|
 | `OPENAI_API_KEY` | OpenAI API key (for AI features) |
 | `GOOGLE_MAPS_API_KEY` | Google Maps API key |
 
-## Step 5: Update OAuth Redirect URIs
+## Step 5: Configure Custom Domain
 
-After deployment, update your OAuth redirect URIs:
-
-- **X (Twitter)**: `https://your-domain.vercel.app/api/social/x/callback`
-- **Discord**: `https://your-domain.vercel.app/api/social/discord/callback`
-
-## Step 6: Custom Domain (Optional)
+When using a custom domain, you must set `OAUTH_CALLBACK_BASE_URL`:
 
 1. Go to Vercel project settings
-2. Add your custom domain
+2. Add your custom domain (e.g., `perpx.fi`)
 3. Update DNS records as instructed
-4. Update OAuth redirect URIs with new domain
+4. **Add environment variable**: `OAUTH_CALLBACK_BASE_URL=https://perpx.fi`
+5. **Update OAuth redirect URIs** in X and Discord developer portals
+
+### Vercel Environment Variable Setup
+
+```bash
+# In Vercel Dashboard > Settings > Environment Variables
+
+OAUTH_CALLBACK_BASE_URL=https://perpx.fi
+```
+
+Without this setting, OAuth callbacks will fail when users access your site via the custom domain.
+
+## Step 6: Verify OAuth Configuration
+
+After deployment, verify your OAuth setup:
+
+1. Visit `https://your-domain.com/api/social/status`
+2. You should see:
+```json
+{
+  "x": { "configured": true, "clientIdSet": true },
+  "discord": { "configured": true, "clientIdSet": true }
+}
+```
 
 ## Troubleshooting
+
+### OAuth Callback Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `x_auth_invalid` | Missing code/state | Check redirect URI matches exactly |
+| `x_auth_expired` | State expired (>10 min) | User took too long, retry |
+| `x_token_failed` | Token exchange failed | Verify Client Secret is correct |
+| `discord_auth_denied` | User cancelled | Normal behavior |
+
+### Common OAuth Issues
+
+**"Redirect URI mismatch" error:**
+- Ensure the redirect URI in your OAuth app settings matches exactly
+- Check for trailing slashes (include or exclude consistently)
+- Verify `OAUTH_CALLBACK_BASE_URL` is set correctly for custom domains
+
+**OAuth works on Vercel default domain but not custom domain:**
+- Set `OAUTH_CALLBACK_BASE_URL` environment variable
+- Add custom domain redirect URI to OAuth app settings
+
+**OAuth works locally but not in production:**
+- Add production redirect URI to OAuth app settings
+- Check that environment variables are set in Vercel
 
 ### Database Connection Issues
 
 - Ensure SSL is enabled in Supabase
 - Check that the connection string includes `?sslmode=require`
-
-### OAuth Callback Errors
-
-- Verify redirect URIs match exactly (including trailing slashes)
-- Check that OAuth credentials are correct
 
 ### Wallet Connection Issues
 

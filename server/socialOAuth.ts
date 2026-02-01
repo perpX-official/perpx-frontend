@@ -16,19 +16,41 @@ const X_CLIENT_SECRET = process.env.X_CLIENT_SECRET || "";
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
 
-// Production base URL for OAuth callbacks
-const PRODUCTION_BASE_URL = process.env.OAUTH_CALLBACK_BASE_URL || "https://perpdex.manus.space";
-
-// Get the base URL for callbacks
+/**
+ * Get the base URL for OAuth callbacks
+ * 
+ * Priority:
+ * 1. OAUTH_CALLBACK_BASE_URL env var (explicit override)
+ * 2. VERCEL_URL env var (auto-set by Vercel)
+ * 3. Request headers (x-forwarded-proto/host)
+ * 4. Default localhost for development
+ * 
+ * IMPORTANT: When deploying to Vercel with custom domain:
+ * - Set OAUTH_CALLBACK_BASE_URL to your custom domain (e.g., https://perpx.fi)
+ * - Update X Developer Portal redirect URI to: https://perpx.fi/api/social/x/callback
+ * - Update Discord Developer Portal redirect URI to: https://perpx.fi/api/social/discord/callback
+ */
 function getBaseUrl(req: Request): string {
-  // In production, always use the configured base URL to ensure OAuth callbacks work correctly
-  if (process.env.NODE_ENV === "production" || PRODUCTION_BASE_URL !== "https://perpdex.manus.space") {
-    return PRODUCTION_BASE_URL;
+  // 1. Explicit override (recommended for production with custom domain)
+  if (process.env.OAUTH_CALLBACK_BASE_URL) {
+    return process.env.OAUTH_CALLBACK_BASE_URL.replace(/\/$/, "");
   }
-  // In development, use request headers
+  
+  // 2. Vercel auto-generated URL (for preview deployments)
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // 3. Use request headers (works for most cases)
   const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
-  const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost:3000";
-  return `${protocol}://${host}`;
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  
+  if (host) {
+    return `${protocol}://${host}`;
+  }
+  
+  // 4. Default for local development
+  return "http://localhost:3000";
 }
 
 // ============================================
