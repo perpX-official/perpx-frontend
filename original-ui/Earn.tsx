@@ -1,10 +1,12 @@
+// Original Earn page UI - for Vercel deployment
+// This version has no Coming Soon overlay and is fully functional
+
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
-import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 import { TrendingUp, Droplet, Coins, Shield, Zap, Users } from "lucide-react";
 
 export default function Earn() {
@@ -38,9 +40,7 @@ export default function Earn() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-      <div className="relative h-[calc(100vh-64px)] overflow-hidden">
-        <ComingSoonOverlay />
-        <div className="container py-8 space-y-8 pointer-events-none filter grayscale-[0.5] blur-[2px] opacity-20">
+        <div className="container py-8 space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2">
@@ -251,7 +251,6 @@ export default function Earn() {
             </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );

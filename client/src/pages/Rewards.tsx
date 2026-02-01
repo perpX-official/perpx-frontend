@@ -646,7 +646,7 @@ export default function Rewards() {
                   Are you sure you want to disconnect your {disconnectDialog.platform === 'twitter' ? 'X (Twitter)' : 'Discord'} account?
                   <br /><br />
                   <span className="text-red-400 font-semibold">
-                    Warning: All your accumulated points will be reset to 0.
+                    Warning: You will lose the connect bonus (100 points) for this account.
                   </span>
                 </>
               ) : (
@@ -655,9 +655,9 @@ export default function Rewards() {
                     This action cannot be undone!
                   </span>
                   <span className="text-white/80">
-                    You will lose <span className="text-red-400 font-bold">{profile?.totalPoints || 0} points</span> permanently.
+                    You will lose <span className="text-red-400 font-bold">100 points</span> (connect bonus for {disconnectDialog.platform === 'twitter' ? 'X' : 'Discord'}).
                     <br /><br />
-                    If you reconnect later, you will need to start earning points from scratch.
+                    If you reconnect with the same account, you will not receive the bonus again.
                   </span>
                 </>
               )}
@@ -680,7 +680,7 @@ export default function Rewards() {
               ) : (
                 <>
                   <Unplug className="h-4 w-4 mr-2" />
-                  Disconnect & Reset Points
+                  Disconnect & Remove Bonus
                 </>
               )}
             </Button>

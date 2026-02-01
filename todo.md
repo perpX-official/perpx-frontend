@@ -432,3 +432,9 @@
 - [x] Fix point expiration to only deduct connect bonus (100 points for X, 100 points for Discord), not all points
 - [x] Restore points for users who disconnected and lost all points incorrectly (no affected users found in database)
 - [x] Fix Coming Soon overlay - remove background UI that shows when scrolling (hidden background content, no scroll)
+
+
+## Current Tasks (2026-02-01 Session 7)
+- [x] Change Coming Soon overlay to show background UI slightly visible (grayscale + blur + 20% opacity)
+- [x] Save original UI/UX to separate files for Vercel deployment (original-ui/ folder)
+- [x] Fix disconnect warning message to say "connect bonus (100 points)" instead of "all points"
