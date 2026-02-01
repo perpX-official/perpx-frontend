@@ -398,3 +398,12 @@
 - [x] Verify daily task reset is actually 00:00 UTC in backend code
 - [x] Fix market list prices (BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT) to sync with real-time Binance prices
 - [x] Add missing trade translations (trade.stop, trade.long, trade.short, etc.) to all languages
+
+
+## Current Tasks (2026-02-01 Session 2)
+- [x] Fix market list prices showing "Loading..." - added REST API fallback for initial load
+- [x] Make X/Discord account names clickable links in admin Users table
+- [x] Add Daily Tasks count column in admin Users table
+- [x] Add user activity graph (Day/Week/Month/Year/All) in admin Activity tab
+- [ ] Add daily task completion count column between Discord and Action columns
+- [ ] Add user activity graph (daily/weekly/monthly/yearly/all-time) to admin dashboard

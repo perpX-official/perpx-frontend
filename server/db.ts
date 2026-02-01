@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { nanoid } from "nanoid";
 import { 
@@ -488,7 +488,7 @@ export async function getTaskCompletions(walletAddress: string) {
 // ============================================
 
 /**
- * Get all wallet profiles with pagination
+ * Get all wallet profiles with pagination (includes daily task count)
  */
 export async function getAllWalletProfiles(
   page = 1,
@@ -521,8 +521,36 @@ export async function getAllWalletProfiles(
     .limit(limit)
     .offset(offset);
 
+  // Get daily task completion counts for each profile
+  const walletAddresses = profiles.map(p => p.walletAddress);
+  const dailyTaskCounts: Record<string, number> = {};
+  
+  if (walletAddresses.length > 0) {
+    const taskCounts = await db
+      .select({
+        walletAddress: taskCompletions.walletAddress,
+        count: sql<number>`COUNT(*)`
+      })
+      .from(taskCompletions)
+      .where(and(
+        inArray(taskCompletions.walletAddress, walletAddresses),
+        eq(taskCompletions.taskType, 'daily_post')
+      ))
+      .groupBy(taskCompletions.walletAddress);
+    
+    taskCounts.forEach(tc => {
+      dailyTaskCounts[tc.walletAddress] = tc.count;
+    });
+  }
+
+  // Add daily task count to each profile
+  const profilesWithTaskCount = profiles.map(p => ({
+    ...p,
+    dailyTaskCount: dailyTaskCounts[p.walletAddress] || 0
+  }));
+
   return {
-    profiles,
+    profiles: profilesWithTaskCount,
     pagination: {
       page,
       limit,
@@ -597,6 +625,89 @@ export async function getAdminStats() {
     todayTaskCompletions,
     chainStats,
     todayUTC,
+  };
+}
+
+/**
+ * Get user activity statistics for graphs (daily/weekly/monthly/yearly/all-time)
+ */
+export async function getUserActivityStats() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const now = new Date();
+  
+  // Helper to get date string N days ago
+  const getDateNDaysAgo = (days: number) => {
+    const date = new Date(now);
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().split('T')[0];
+  };
+
+  // Get daily stats for the past 30 days (for daily/weekly/monthly views)
+  const dailyStats = await db
+    .select({
+      date: sql<string>`DATE(createdAt)`,
+      newUsers: sql<number>`COUNT(*)`
+    })
+    .from(walletProfiles)
+    .where(sql`createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`)
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt) ASC`);
+
+  // Get daily task completions for the past 30 days
+  const dailyTaskStats = await db
+    .select({
+      date: taskCompletions.completionDate,
+      completions: sql<number>`COUNT(DISTINCT walletAddress)`
+    })
+    .from(taskCompletions)
+    .where(sql`completionDate >= ${getDateNDaysAgo(30)}`)
+    .groupBy(taskCompletions.completionDate)
+    .orderBy(sql`completionDate ASC`);
+
+  // Get monthly stats for the past 12 months (for yearly view)
+  const monthlyStats = await db
+    .select({
+      month: sql<string>`DATE_FORMAT(createdAt, '%Y-%m')`,
+      newUsers: sql<number>`COUNT(*)`
+    })
+    .from(walletProfiles)
+    .where(sql`createdAt >= DATE_SUB(NOW(), INTERVAL 12 MONTH)`)
+    .groupBy(sql`DATE_FORMAT(createdAt, '%Y-%m')`)
+    .orderBy(sql`DATE_FORMAT(createdAt, '%Y-%m') ASC`);
+
+  // Get monthly task completions for the past 12 months
+  const monthlyTaskStats = await db
+    .select({
+      month: sql<string>`DATE_FORMAT(completedAt, '%Y-%m')`,
+      completions: sql<number>`COUNT(DISTINCT walletAddress)`
+    })
+    .from(taskCompletions)
+    .where(sql`completedAt >= DATE_SUB(NOW(), INTERVAL 12 MONTH)`)
+    .groupBy(sql`DATE_FORMAT(completedAt, '%Y-%m')`)
+    .orderBy(sql`DATE_FORMAT(completedAt, '%Y-%m') ASC`);
+
+  // All-time cumulative stats
+  const allTimeStats = await db
+    .select({
+      totalUsers: sql<number>`COUNT(*)`,
+      totalTaskCompletions: sql<number>`(SELECT COUNT(DISTINCT walletAddress) FROM task_completions)`
+    })
+    .from(walletProfiles);
+
+  return {
+    daily: {
+      users: dailyStats,
+      tasks: dailyTaskStats
+    },
+    monthly: {
+      users: monthlyStats,
+      tasks: monthlyTaskStats
+    },
+    allTime: allTimeStats[0] || { totalUsers: 0, totalTaskCompletions: 0 }
   };
 }
 

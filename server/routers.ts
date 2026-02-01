@@ -20,6 +20,7 @@ import {
   searchWalletProfiles,
   adjustUserPoints,
   getDailyPostCompletions,
+  getUserActivityStats,
 } from "./db";
 
 export const appRouter = router({
@@ -216,6 +217,12 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         return await getDailyPostCompletions(input.page, input.limit);
+      }),
+
+    // Get user activity statistics for graphs
+    getActivityStats: publicProcedure
+      .query(async () => {
+        return await getUserActivityStats();
       }),
   }),
 });

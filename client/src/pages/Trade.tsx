@@ -68,6 +68,37 @@ export default function Trade() {
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
+  // ✅ Fetch initial prices via REST API (fallback for WebSocket)
+  useEffect(() => {
+    const fetchInitialPrices = async () => {
+      try {
+        const symbols = TRADING_PAIRS_CONFIG.map(p => p.symbol);
+        const responses = await Promise.all(
+          symbols.map(symbol => 
+            fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
+              .then(res => res.json())
+          )
+        );
+        
+        setTradingPairs(prev => prev.map((pair, index) => ({
+          ...pair,
+          price: parseFloat(responses[index].lastPrice),
+          change: parseFloat(responses[index].priceChangePercent)
+        })));
+        
+        // Also set current price for selected pair
+        if (responses[0]) {
+          setCurrentPrice(parseFloat(responses[0].lastPrice));
+          setPriceChange(parseFloat(responses[0].priceChangePercent));
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial prices:', error);
+      }
+    };
+    
+    fetchInitialPrices();
+  }, []);
+
   // ✅ Connect to Binance WebSocket for ALL trading pairs (for the dropdown list)
   useEffect(() => {
     // Create combined stream URL for all pairs

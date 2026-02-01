@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
   Minus,
   ExternalLink,
   FileText,
+  BarChart3,
 } from "lucide-react";
 import {
   Dialog,
@@ -48,6 +49,7 @@ export default function Admin() {
   const [tweetPage, setTweetPage] = useState(1);
   const [sortBy, setSortBy] = useState<"totalPoints" | "createdAt">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [activityPeriod, setActivityPeriod] = useState<"daily" | "weekly" | "monthly" | "yearly" | "all">("daily");
   
   // Points adjustment dialog
   const [adjustDialogOpen, setAdjustDialogOpen] = useState(false);
@@ -93,6 +95,11 @@ export default function Admin() {
 
   const { data: dailyPostsData, isLoading: dailyPostsLoading, refetch: refetchDailyPosts } = trpc.admin.getDailyPosts.useQuery(
     { page: tweetPage, limit: 20 },
+    { enabled: isAuthenticated }
+  );
+
+  const { data: activityStats, isLoading: activityLoading, refetch: refetchActivity } = trpc.admin.getActivityStats.useQuery(
+    undefined,
     { enabled: isAuthenticated }
   );
 
@@ -191,6 +198,7 @@ export default function Admin() {
                 refetchStats();
                 refetchUsers();
                 refetchDailyPosts();
+                refetchActivity();
               }}
               className="border-white/20 text-white hover:bg-white/10"
             >
@@ -289,7 +297,7 @@ export default function Admin() {
           </Card>
         )}
 
-        {/* Tabs for Users and Tweet Verification */}
+        {/* Tabs for Users, Tweet Verification, and Activity */}
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList className="bg-white/5 border border-white/10">
             <TabsTrigger value="users" className="data-[state=active]:bg-primary/20">
@@ -299,6 +307,10 @@ export default function Admin() {
             <TabsTrigger value="tweets" className="data-[state=active]:bg-primary/20">
               <FileText className="h-4 w-4 mr-2" />
               Tweet Verification
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="data-[state=active]:bg-primary/20">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Activity
             </TabsTrigger>
           </TabsList>
 
@@ -341,19 +353,20 @@ export default function Admin() {
                       <th className="text-left py-3 px-4 text-white/60 font-medium">Points</th>
                       <th className="text-left py-3 px-4 text-white/60 font-medium">X</th>
                       <th className="text-left py-3 px-4 text-white/60 font-medium">Discord</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Daily Tasks</th>
                       <th className="text-left py-3 px-4 text-white/60 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(usersLoading || searchLoading) ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8">
+                        <td colSpan={7} className="text-center py-8">
                           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                         </td>
                       </tr>
                     ) : displayUsers?.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8 text-white/60">
+                        <td colSpan={7} className="text-center py-8 text-white/60">
                           No users found
                         </td>
                       </tr>
@@ -378,18 +391,37 @@ export default function Admin() {
                             <span className="text-primary font-bold">{user.totalPoints.toLocaleString()}</span>
                           </td>
                           <td className="py-3 px-4">
-                            {user.xConnected ? (
-                              <span className="text-sky-400">@{user.xUsername}</span>
+                            {user.xConnected && user.xUsername ? (
+                              <a
+                                href={`https://x.com/${user.xUsername}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sky-400 hover:underline inline-flex items-center gap-1"
+                              >
+                                @{user.xUsername}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
                             ) : (
                               <span className="text-white/40">-</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
-                            {user.discordConnected ? (
-                              <span className="text-indigo-400">{user.discordUsername}</span>
+                            {user.discordConnected && user.discordUsername ? (
+                              <a
+                                href={`https://discord.com/users/${user.discordUsername}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-indigo-400 hover:underline inline-flex items-center gap-1"
+                              >
+                                {user.discordUsername}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
                             ) : (
                               <span className="text-white/40">-</span>
                             )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-white/80">{user.dailyTaskCount || 0}</span>
                           </td>
                           <td className="py-3 px-4">
                             <Button
@@ -562,6 +594,84 @@ export default function Admin() {
               )}
             </Card>
           </TabsContent>
+
+          {/* Activity Tab */}
+          <TabsContent value="activity">
+            <Card className="glass-card p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white">User Activity</h3>
+                <div className="flex gap-2">
+                  {(["daily", "weekly", "monthly", "yearly", "all"] as const).map((period) => (
+                    <Button
+                      key={period}
+                      variant={activityPeriod === period ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActivityPeriod(period)}
+                      className={activityPeriod === period 
+                        ? "bg-primary text-white" 
+                        : "border-white/20 text-white hover:bg-white/10"
+                      }
+                    >
+                      {period === "daily" ? "Day" : 
+                       period === "weekly" ? "Week" : 
+                       period === "monthly" ? "Month" : 
+                       period === "yearly" ? "Year" : "All"}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : activityStats ? (
+                <div className="space-y-8">
+                  {/* New Users Chart */}
+                  <div>
+                    <h4 className="text-white/80 font-medium mb-4">New Users</h4>
+                    <div className="h-64 bg-white/5 rounded-lg p-4">
+                      <ActivityChart 
+                        data={activityStats} 
+                        period={activityPeriod} 
+                        type="users" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Task Completions Chart */}
+                  <div>
+                    <h4 className="text-white/80 font-medium mb-4">Users Completing Tasks</h4>
+                    <div className="h-64 bg-white/5 rounded-lg p-4">
+                      <ActivityChart 
+                        data={activityStats} 
+                        period={activityPeriod} 
+                        type="tasks" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card className="bg-white/5 p-4">
+                      <p className="text-white/60 text-sm">All-Time Users</p>
+                      <p className="text-2xl font-bold text-white">
+                        {activityStats.allTime?.totalUsers?.toLocaleString() || 0}
+                      </p>
+                    </Card>
+                    <Card className="bg-white/5 p-4">
+                      <p className="text-white/60 text-sm">All-Time Task Participants</p>
+                      <p className="text-2xl font-bold text-white">
+                        {activityStats.allTime?.totalTaskCompletions?.toLocaleString() || 0}
+                      </p>
+                    </Card>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-white/60 text-center py-8">No activity data available</p>
+              )}
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* Points Adjustment Dialog */}
@@ -637,6 +747,96 @@ export default function Admin() {
           </DialogContent>
         </Dialog>
       </div>
+    </div>
+  );
+}
+
+// Activity Chart Component
+interface ActivityChartProps {
+  data: {
+    daily: {
+      users: Array<{ date: string; newUsers: number }>;
+      tasks: Array<{ date: string | null; completions: number }>;
+    };
+    monthly: {
+      users: Array<{ month: string; newUsers: number }>;
+      tasks: Array<{ month: string; completions: number }>;
+    };
+    allTime: { totalUsers: number; totalTaskCompletions: number };
+  };
+  period: "daily" | "weekly" | "monthly" | "yearly" | "all";
+  type: "users" | "tasks";
+}
+
+function ActivityChart({ data, period, type }: ActivityChartProps) {
+  const chartData = useMemo(() => {
+    if (period === "all") {
+      // Show all-time as a single bar
+      return [{
+        label: "All Time",
+        value: type === "users" ? data.allTime.totalUsers : data.allTime.totalTaskCompletions
+      }];
+    }
+
+    if (period === "yearly") {
+      // Show monthly data for yearly view
+      const sourceData = type === "users" ? data.monthly.users : data.monthly.tasks;
+      return sourceData.map(item => ({
+        label: 'month' in item ? item.month : '',
+        value: 'newUsers' in item ? item.newUsers : ('completions' in item ? item.completions : 0)
+      }));
+    }
+
+    // For daily, weekly, monthly - use daily data
+    const sourceData = type === "users" ? data.daily.users : data.daily.tasks;
+    let filteredData = sourceData;
+
+    if (period === "daily") {
+      // Last 7 days
+      filteredData = sourceData.slice(-7);
+    } else if (period === "weekly") {
+      // Last 14 days
+      filteredData = sourceData.slice(-14);
+    } else if (period === "monthly") {
+      // Last 30 days
+      filteredData = sourceData.slice(-30);
+    }
+
+    return filteredData.map(item => {
+      const itemAny = item as any;
+      return {
+        label: itemAny.date ? String(itemAny.date).slice(-5) : (itemAny.month || ''),
+        value: itemAny.newUsers ?? itemAny.completions ?? 0
+      };
+    });
+  }, [data, period, type]);
+
+  const maxValue = Math.max(...chartData.map(d => d.value), 1);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-white/40">
+        No data available for this period
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-end justify-between h-full gap-1">
+      {chartData.map((item, index) => (
+        <div key={index} className="flex flex-col items-center flex-1 h-full">
+          <div className="flex-1 w-full flex items-end">
+            <div
+              className="w-full bg-primary/60 hover:bg-primary transition-colors rounded-t"
+              style={{ height: `${(item.value / maxValue) * 100}%`, minHeight: item.value > 0 ? '4px' : '0' }}
+              title={`${item.label}: ${item.value}`}
+            />
+          </div>
+          <span className="text-[10px] text-white/40 mt-1 truncate w-full text-center">
+            {item.label}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
