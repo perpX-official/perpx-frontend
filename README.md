@@ -21,7 +21,7 @@ PerpX is a decentralized perpetual exchange built on Base, offering up to 100x l
 
 - **Frontend**: React 19 + Vite + Tailwind CSS 4
 - **Blockchain**: Base (Ethereum L2)
-- **Smart Contracts**: Solidity (GMX-style architecture)
+- **Smart Contracts**: Solidity (Oracle-based architecture)
 - **Price Oracles**: Chainlink
 - **Wallet**: Web3 + WalletConnect
 
@@ -58,7 +58,7 @@ perpx-frontend/
 
 ```bash
 # Clone the repository
-git clone https://github.com/perpx-official/perpx-frontend.git
+git clone https://github.com/perpX-official/perpx-frontend.git
 cd perpx-frontend
 
 # Install dependencies
