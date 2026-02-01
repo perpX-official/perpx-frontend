@@ -392,3 +392,9 @@
 - [x] Add admin_adjustment to transactionType enum in schema.ts
 - [x] Run database migration for schema changes
 - [x] Verify Trade.tsx already has real-time Binance WebSocket price feeds
+
+
+## Current Tasks (2026-02-01)
+- [x] Verify daily task reset is actually 00:00 UTC in backend code
+- [x] Fix market list prices (BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT) to sync with real-time Binance prices
+- [x] Add missing trade translations (trade.stop, trade.long, trade.short, etc.) to all languages

@@ -9,14 +9,23 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import { toast } from "sonner";
 
-
-const TRADING_PAIRS = [
-  { symbol: "BTCUSDT", name: "Bitcoin", price: 111062.6, change: 3.17, volume: "2.5B" },
-  { symbol: "ETHUSDT", name: "Ethereum", price: 3842.5, change: 2.45, volume: "1.2B" },
-  { symbol: "SOLUSDT", name: "Solana", price: 195.8, change: -1.23, volume: "850M" },
-  { symbol: "BNBUSDT", name: "BNB", price: 612.3, change: 1.89, volume: "420M" },
-  { symbol: "XRPUSDT", name: "Ripple", price: 0.5234, change: 4.56, volume: "680M" },
+// Base trading pairs configuration (prices will be updated in real-time)
+const TRADING_PAIRS_CONFIG = [
+  { symbol: "BTCUSDT", name: "Bitcoin", volume: "2.5B" },
+  { symbol: "ETHUSDT", name: "Ethereum", volume: "1.2B" },
+  { symbol: "SOLUSDT", name: "Solana", volume: "850M" },
+  { symbol: "BNBUSDT", name: "BNB", volume: "420M" },
+  { symbol: "XRPUSDT", name: "Ripple", volume: "680M" },
 ];
+
+// Type for trading pair with real-time data
+interface TradingPair {
+  symbol: string;
+  name: string;
+  volume: string;
+  price: number;
+  change: number;
+}
 
 export default function Trade() {
   const { t } = useLanguage();
@@ -33,14 +42,21 @@ export default function Trade() {
   const orders: any[] = [];
   const trades: any[] = [];
   
-  const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
-
-  // ✅ Real-time price state management
-  const [currentPrice, setCurrentPrice] = useState(selectedPair.price);
-  const [priceChange, setPriceChange] = useState(selectedPair.change);
+  // ✅ Real-time prices for ALL trading pairs
+  const [tradingPairs, setTradingPairs] = useState<TradingPair[]>(
+    TRADING_PAIRS_CONFIG.map(p => ({ ...p, price: 0, change: 0 }))
+  );
   
-  // WebSocket reference
+  const [selectedPairIndex, setSelectedPairIndex] = useState(0);
+  const selectedPair = tradingPairs[selectedPairIndex];
+
+  // ✅ Real-time price state for the selected pair (displayed in header)
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [priceChange, setPriceChange] = useState(0);
+  
+  // WebSocket references - one for selected pair, one for all pairs
   const wsRef = useRef<WebSocket | null>(null);
+  const allPairsWsRef = useRef<WebSocket | null>(null);
 
   const [showPairSelector, setShowPairSelector] = useState(false);
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
@@ -52,12 +68,68 @@ export default function Trade() {
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
-  // ✅ FIXED: Connect to Binance WebSocket for real-time price updates
+  // ✅ Connect to Binance WebSocket for ALL trading pairs (for the dropdown list)
+  useEffect(() => {
+    // Create combined stream URL for all pairs
+    const streams = TRADING_PAIRS_CONFIG.map(p => `${p.symbol.toLowerCase()}@ticker`).join('/');
+    const wsUrl = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+    
+    console.log('Connecting to Binance Combined WebSocket for all pairs');
+    
+    // Close existing connection
+    if (allPairsWsRef.current) {
+      allPairsWsRef.current.close();
+    }
+    
+    // Create new WebSocket connection
+    const ws = new WebSocket(wsUrl);
+    allPairsWsRef.current = ws;
+    
+    ws.onopen = () => {
+      console.log('All pairs WebSocket connected');
+    };
+    
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        const data = message.data;
+        const symbol = data.s; // Symbol like "BTCUSDT"
+        const newPrice = parseFloat(data.c); // Last price
+        const priceChangePercent = parseFloat(data.P); // Price change percent
+        
+        // Update the specific pair in the list
+        setTradingPairs(prev => prev.map(pair => 
+          pair.symbol === symbol 
+            ? { ...pair, price: newPrice, change: priceChangePercent }
+            : pair
+        ));
+      } catch (error) {
+        console.error('Failed to parse all pairs WebSocket message:', error);
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error('All pairs WebSocket error:', error);
+    };
+    
+    ws.onclose = () => {
+      console.log('All pairs WebSocket disconnected');
+    };
+    
+    // Cleanup on unmount
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    };
+  }, []);
+
+  // ✅ Connect to Binance WebSocket for the SELECTED pair (for the header display)
   useEffect(() => {
     const symbol = selectedPair.symbol.toLowerCase();
     const wsUrl = `wss://stream.binance.com:9443/ws/${symbol}@ticker`;
     
-    console.log('Connecting to Binance WebSocket:', wsUrl);
+    console.log('Connecting to Binance WebSocket for selected pair:', symbol);
     
     // Close existing connection
     if (wsRef.current) {
@@ -69,7 +141,7 @@ export default function Trade() {
     wsRef.current = ws;
     
     ws.onopen = () => {
-      console.log('WebSocket connected for', selectedPair.symbol);
+      console.log('Selected pair WebSocket connected for', selectedPair.symbol);
     };
     
     ws.onmessage = (event) => {
@@ -78,22 +150,20 @@ export default function Trade() {
         const newPrice = parseFloat(data.c); // 'c' is the last price
         const priceChangePercent = parseFloat(data.P); // 'P' is the price change percent
         
-        console.log('Price update:', newPrice, 'Change:', priceChangePercent + '%');
-        
-        // ✅ FIXED: Use functional update to get the latest state
+        // Update the header display
         setCurrentPrice(newPrice);
         setPriceChange(priceChangePercent);
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error('Failed to parse selected pair WebSocket message:', error);
       }
     };
     
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error('Selected pair WebSocket error:', error);
     };
     
     ws.onclose = () => {
-      console.log('WebSocket disconnected');
+      console.log('Selected pair WebSocket disconnected');
     };
     
     // Cleanup on unmount or symbol change
@@ -138,6 +208,22 @@ export default function Trade() {
       return;
     }
     toast.success('Order cancelled successfully');
+  };
+
+  // Helper function to format price based on the symbol
+  const formatPrice = (price: number, symbol: string) => {
+    if (price === 0) return "Loading...";
+    
+    // XRP and other low-priced assets need more decimal places
+    if (symbol === "XRPUSDT") {
+      return price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    }
+    // SOL, BNB need 1-2 decimal places
+    if (symbol === "SOLUSDT" || symbol === "BNBUSDT") {
+      return price.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+    }
+    // BTC, ETH - standard 2 decimal places
+    return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
@@ -185,7 +271,9 @@ export default function Trade() {
             </button>
             <div className="text-right">
               {/* ✅ Use real-time price from Binance WebSocket */}
-              <div className="text-2xl font-bold text-white">{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div className="text-2xl font-bold text-white">
+                {currentPrice > 0 ? formatPrice(currentPrice, selectedPair.symbol) : "Loading..."}
+              </div>
               <div className={`text-sm ${priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
               </div>
@@ -193,14 +281,14 @@ export default function Trade() {
           </div>
         </div>
 
-        {/* Pair Selector Dropdown */}
+        {/* Pair Selector Dropdown - ✅ NOW WITH REAL-TIME PRICES */}
         {showPairSelector && (
           <div className="bg-card border-b border-white/5 max-h-60 overflow-y-auto">
-            {TRADING_PAIRS.map((pair) => (
+            {tradingPairs.map((pair, index) => (
               <button
                 key={pair.symbol}
                 onClick={() => {
-                  setSelectedPair(pair);
+                  setSelectedPairIndex(index);
                   setCurrentPrice(pair.price);
                   setPriceChange(pair.change);
                   setShowPairSelector(false);
@@ -215,9 +303,10 @@ export default function Trade() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white">{pair.price.toLocaleString()}</div>
+                  {/* ✅ Real-time price for each pair */}
+                  <div className="text-white">{formatPrice(pair.price, pair.symbol)}</div>
                   <div className={`text-xs ${pair.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {pair.change >= 0 ? '+' : ''}{pair.change}%
+                    {pair.change >= 0 ? '+' : ''}{pair.change.toFixed(2)}%
                   </div>
                 </div>
               </button>
@@ -283,252 +372,217 @@ export default function Trade() {
             </button>
           </div>
 
-          {/* Price Input - Only for Limit and Stop Orders */}
+          {/* Price Inputs */}
           {orderType === "limit" && (
             <div>
-              <label className="text-sm text-white/60 mb-2 block">{t('trade.limitPrice')}</label>
+              <label className="text-xs text-white/60 mb-1 block">{t('trade.limitPrice')}</label>
               <Input
                 type="number"
+                placeholder={currentPrice > 0 ? formatPrice(currentPrice, selectedPair.symbol) : "0.00"}
                 value={limitPrice}
                 onChange={(e) => setLimitPrice(e.target.value)}
-                placeholder={currentPrice.toString()}
                 className="bg-card/50 border-white/10"
               />
             </div>
           )}
 
           {orderType === "stop" && (
-            <div>
-              <label className="text-sm text-white/60 mb-2 block">{t('trade.stopPrice')}</label>
-              <Input
-                type="number"
-                value={stopPrice}
-                onChange={(e) => setStopPrice(e.target.value)}
-                placeholder={currentPrice.toString()}
-                className="bg-card/50 border-white/10"
-              />
-            </div>
+            <>
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">{t('trade.stopPrice')}</label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={stopPrice}
+                  onChange={(e) => setStopPrice(e.target.value)}
+                  className="bg-card/50 border-white/10"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 mb-1 block">{t('trade.limitPrice')}</label>
+                <Input
+                  type="number"
+                  placeholder={currentPrice > 0 ? formatPrice(currentPrice, selectedPair.symbol) : "0.00"}
+                  value={limitPrice}
+                  onChange={(e) => setLimitPrice(e.target.value)}
+                  className="bg-card/50 border-white/10"
+                />
+              </div>
+            </>
           )}
 
           {/* Amount Input */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-sm text-white/60">{t('trade.amount')}</label>
-              <span className="text-xs text-white/40">
-                {t('trade.available')}: {balance.toLocaleString()} USDT
-              </span>
+            <div className="flex justify-between mb-1">
+              <label className="text-xs text-white/60">{t('trade.amount')} (USDT)</label>
+              <span className="text-xs text-white/60">{t('trade.available')}: {balance.toLocaleString()} USDT</span>
             </div>
             <Input
               type="number"
+              placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
               className="bg-card/50 border-white/10"
             />
-            <div className="flex gap-2 mt-2">
-              {[25, 50, 75, 100].map((percent) => (
-                <button
-                  key={percent}
-                  onClick={() => handlePercentageClick(percent)}
-                  className="flex-1 py-1 text-xs bg-card/30 hover:bg-card/50 rounded transition-colors text-white/60"
-                >
-                  {percent}%
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Buy/Sell Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => handleTrade('buy')}
-              className="bg-green-600 hover:bg-green-700 text-white py-6"
-            >
-              {t('trade.buy')} / {t('trade.long')}
-            </Button>
-            <Button
-              onClick={() => handleTrade('sell')}
-              className="bg-red-600 hover:bg-red-700 text-white py-6"
-            >
-              {t('trade.sell')} / {t('trade.short')}
-            </Button>
-          </div>
-        </div>
-
-        {/* Bottom Tabs */}
-        <div className="bg-card/50 border-t border-white/5">
-          <div className="flex border-b border-white/5">
-            {(['positions', 'orders', 'history', 'trades'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
-                  activeTab === tab
-                    ? "border-primary text-white"
-                    : "border-transparent text-white/60"
-                }`}
+          {/* Percentage Buttons */}
+          <div className="flex gap-2">
+            {[25, 50, 75, 100].map((percent) => (
+              <Button
+                key={percent}
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => handlePercentageClick(percent)}
               >
-                {t(`trade.${tab}`)}
-              </button>
+                {percent}%
+              </Button>
             ))}
           </div>
 
-          <div className="p-4 max-h-60 overflow-y-auto">
-            {activeTab === "positions" && (
-              <div className="space-y-2">
-                {positions.length === 0 ? (
-                  <div className="text-center py-8 text-white/40">
-                    {t('trade.noPositions')}
-                  </div>
-                ) : (
-                  positions.map((position) => (
-                    <Card key={position.id} className="p-3 bg-card/30 border-white/10">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-white font-medium">{position.pair}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${
-                              position.side === 'long' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                            }`}>
-                              {position.side.toUpperCase()} {position.leverage}x
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleClosePosition(position.id)}
-                          className="text-xs text-red-500 hover:text-red-400"
-                        >
-                          {t('trade.close')}
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-white/60">{t('trade.size')}: </span>
-                          <span className="text-white">{position.size}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.entryPrice')}: </span>
-                          <span className="text-white">{position.entryPrice}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.markPrice')}: </span>
-                          <span className="text-white">{position.currentPrice.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.pnl')}: </span>
-                          <span className={position.pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                            {position.pnl >= 0 ? '+' : ''}{position.pnl.toFixed(2)} USDT
-                          </span>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
-            )}
+          {/* Buy/Sell Buttons */}
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              onClick={() => handleTrade('buy')}
+            >
+              {tradeMode === "perpetual" ? t('trade.long') : t('trade.buy')}
+            </Button>
+            <Button
+              className="flex-1 bg-red-600 hover:bg-red-700"
+              onClick={() => handleTrade('sell')}
+            >
+              {tradeMode === "perpetual" ? t('trade.short') : t('trade.sell')}
+            </Button>
+          </div>
 
-            {activeTab === "orders" && (
-              <div className="space-y-2">
-                {orders.length === 0 ? (
-                  <div className="text-center py-8 text-white/40">
-                    {t('trade.noOrders')}
-                  </div>
-                ) : (
-                  orders.map((order) => (
-                    <Card key={order.id} className="p-3 bg-card/30 border-white/10">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-white font-medium">{order.pair}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${
-                              order.side === 'buy' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                            }`}>
-                              {order.side.toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleCancelOrder(order.id)}
-                          className="text-xs text-red-500 hover:text-red-400"
-                        >
-                          {t('trade.cancel')}
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-white/60">{t('trade.type')}: </span>
-                          <span className="text-white">{order.type}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.price')}: </span>
-                          <span className="text-white">{order.price}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.amount')}: </span>
-                          <span className="text-white">{order.amount}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.status')}: </span>
-                          <span className="text-yellow-500">{order.status}</span>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
-            )}
+          {/* Positions/Orders Tabs */}
+          <div className="mt-4">
+            <div className="flex gap-2 border-b border-white/10 mb-4">
+              <button
+                onClick={() => setActiveTab("positions")}
+                className={`pb-2 px-2 text-sm ${
+                  activeTab === "positions"
+                    ? "text-white border-b-2 border-primary"
+                    : "text-white/60"
+                }`}
+              >
+                {t('trade.positions')} ({positions.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("orders")}
+                className={`pb-2 px-2 text-sm ${
+                  activeTab === "orders"
+                    ? "text-white border-b-2 border-primary"
+                    : "text-white/60"
+                }`}
+              >
+                {t('trade.openOrders')} ({orders.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("trades")}
+                className={`pb-2 px-2 text-sm ${
+                  activeTab === "trades"
+                    ? "text-white border-b-2 border-primary"
+                    : "text-white/60"
+                }`}
+              >
+                {t('trade.trades')} ({trades.length})
+              </button>
+            </div>
 
-            {activeTab === "history" && (
-              <div className="text-center py-8 text-white/40">
-                {t('trade.noHistory')}
-              </div>
-            )}
+            {/* Tab Content */}
+            <div className="min-h-[100px]">
+              {activeTab === "positions" && (
+                <div className="text-center text-white/40 py-8">
+                  {positions.length === 0 ? t('trade.noPositions') : (
+                    <div className="space-y-2">
+                      {positions.map((position: any) => (
+                        <Card key={position.id} className="p-3 bg-card/50">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium text-white">{position.symbol}</div>
+                              <div className={`text-sm ${position.side === 'long' ? 'text-green-500' : 'text-red-500'}`}>
+                                {position.side.toUpperCase()} {position.leverage}x
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`font-medium ${position.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {position.pnl >= 0 ? '+' : ''}{position.pnl.toFixed(2)} USDT
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleClosePosition(position.id)}
+                              >
+                                {t('trade.close')}
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {activeTab === "trades" && (
-              <div className="space-y-2">
-                {trades.length === 0 ? (
-                  <div className="text-center py-8 text-white/40">
-                    {t('trade.noTrades')}
-                  </div>
-                ) : (
-                  trades.map((trade) => (
-                    <Card key={trade.id} className="p-3 bg-card/30 border-white/10">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-white font-medium">{trade.pair}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${
-                              trade.side === 'long' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                            }`}>
-                              {trade.side.toUpperCase()}
-                            </span>
+              {activeTab === "orders" && (
+                <div className="text-center text-white/40 py-8">
+                  {orders.length === 0 ? t('trade.noOrders') : (
+                    <div className="space-y-2">
+                      {orders.map((order: any) => (
+                        <Card key={order.id} className="p-3 bg-card/50">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium text-white">{order.symbol}</div>
+                              <div className="text-sm text-white/60">
+                                {order.type} - {order.side}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white">{order.price}</div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleCancelOrder(order.id)}
+                              >
+                                {t('trade.cancel')}
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        {trade.pnl && (
-                          <div className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)} USDT
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "trades" && (
+                <div className="text-center text-white/40 py-8">
+                  {trades.length === 0 ? t('trade.noTrades') : (
+                    <div className="space-y-2">
+                      {trades.map((trade: any) => (
+                        <Card key={trade.id} className="p-3 bg-card/50">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium text-white">{trade.symbol}</div>
+                              <div className={`text-sm ${trade.side === 'buy' ? 'text-green-500' : 'text-red-500'}`}>
+                                {trade.side.toUpperCase()}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white">{trade.price}</div>
+                              <div className="text-xs text-white/60">{trade.amount}</div>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs mt-2">
-                        <div>
-                          <span className="text-white/60">{t('trade.size')}: </span>
-                          <span className="text-white">{trade.size.toFixed(4)}</span>
-                        </div>
-                        <div>
-                          <span className="text-white/60">{t('trade.price')}: </span>
-                          <span className="text-white">{trade.price.toFixed(2)}</span>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-white/60">{t('trade.time')}: </span>
-                          <span className="text-white">{new Date(trade.timestamp).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
-            )}
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
