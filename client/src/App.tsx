@@ -9,6 +9,8 @@ import { DemoTradingProvider } from "./contexts/DemoTradingContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
 import Home from "./pages/Home";
 import Trade from "./pages/Trade";
@@ -65,21 +67,29 @@ function App() {
     <ErrorBoundary>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider
-            defaultTheme="dark"
-            // switchable
+          <RainbowKitProvider 
+            theme={darkTheme({
+              accentColor: '#0ABAB5',
+              accentColorForeground: 'white',
+              borderRadius: 'medium',
+            })}
           >
-            <LanguageProvider>
-              <DemoTradingProvider>
-                <WalletProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Router />
-                  </TooltipProvider>
-                </WalletProvider>
-              </DemoTradingProvider>
-            </LanguageProvider>
-          </ThemeProvider>
+            <ThemeProvider
+              defaultTheme="dark"
+              // switchable
+            >
+              <LanguageProvider>
+                <DemoTradingProvider>
+                  <WalletProvider>
+                    <TooltipProvider>
+                      <Toaster />
+                      <Router />
+                    </TooltipProvider>
+                  </WalletProvider>
+                </DemoTradingProvider>
+              </LanguageProvider>
+            </ThemeProvider>
+          </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ErrorBoundary>

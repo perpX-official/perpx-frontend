@@ -1,16 +1,13 @@
-import { http, createConfig } from 'wagmi'
-import { mainnet, arbitrum, base, optimism } from 'wagmi/chains'
-import { injected } from 'wagmi/connectors'
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { mainnet, arbitrum, base, optimism } from 'wagmi/chains';
 
-export const config = createConfig({
+// WalletConnect Project ID - Get your own at https://cloud.walletconnect.com
+// This is a demo project ID for development purposes
+const WALLETCONNECT_PROJECT_ID = 'c4f79cc821944d9680842e34466bfb';
+
+export const config = getDefaultConfig({
+  appName: 'PerpX',
+  projectId: WALLETCONNECT_PROJECT_ID,
   chains: [mainnet, arbitrum, base, optimism],
-  connectors: [
-    injected(), // MetaMask and other injected wallets
-  ],
-  transports: {
-    [mainnet.id]: http(),
-    [arbitrum.id]: http(),
-    [base.id]: http(),
-    [optimism.id]: http(),
-  },
-})
+  ssr: false, // Disable SSR for client-side only
+});

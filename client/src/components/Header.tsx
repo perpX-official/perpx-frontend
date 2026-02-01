@@ -1,62 +1,46 @@
 import { Link, useLocation } from "wouter";
-import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Award, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
+import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { ChainSelectModal } from "./ChainSelectModal";
+import { useAccount } from 'wagmi';
 import { rewardsStorage, type ChainKind } from "@/lib/rewardsStorage";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const [chainModalOpen, setChainModalOpen] = useState(false);
-  const [rewardsState, setRewardsState] = useState(rewardsStorage.get());
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   
-  // Sync state with storage
+  // Wagmi hook for wallet state
+  const { address, isConnected } = useAccount();
+
+  // Sync wagmi state with rewardsStorage for compatibility with other components
   useEffect(() => {
-    const interval = setInterval(() => {
-      const current = rewardsStorage.get();
-      if (JSON.stringify(current) !== JSON.stringify(rewardsState)) {
-        setRewardsState(current);
+    if (isConnected && address) {
+      const newState = {
+        chain: 'evm' as ChainKind,
+        chainType: 'evm' as const,
+        address: address, // Store FULL address (42 chars)
+        isConnected: true
+      };
+      rewardsStorage.set(newState);
+      // Initialize user data with full address
+      rewardsStorage.initUser(address, 'evm');
+    } else {
+      // Only clear if wagmi says we're disconnected
+      const currentState = rewardsStorage.get();
+      if (currentState.isConnected) {
+        const newState = { 
+          chain: null, 
+          chainType: null, 
+          address: null, 
+          isConnected: false 
+        };
+        rewardsStorage.set(newState);
       }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [rewardsState]);
-
-  const handleChainSelect = (chain: ChainKind) => {
-    // Mock address generation based on chain
-    const mockAddress = chain === 'evm' ? "0x71C...9A21" : 
-                       chain === 'tron' ? "T9yD...k3jL" : 
-                       "Sol...8k92";
-    
-    const newState = {
-      chain,
-      address: mockAddress,
-      isConnected: true
-    };
-    
-    // Initialize user data if new
-    rewardsStorage.initUser(mockAddress, chain);
-    
-    rewardsStorage.set(newState);
-    setRewardsState(newState);
-    setChainModalOpen(false);
-
-    // Redirect logic: Only redirect to dashboard if on home page
-    if (location === "/") {
-      setLocation("/dashboard");
     }
-  };
-
-  const handleDisconnect = () => {
-    const newState = { chain: null, address: null, isConnected: false };
-    rewardsStorage.set(newState);
-    setRewardsState(newState);
-    // Reload to reset states
-    window.location.reload();
-  };
+  }, [isConnected, address]);
 
   const { language, setLanguage, t } = useLanguage();
 
@@ -240,29 +224,15 @@ export default function Header() {
                   {t('button.launchApp')}
                 </Link>
               ) : (
-                <>
-                  {!rewardsState.isConnected ? (
-                    <button
-                      onClick={() => setChainModalOpen(true)}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 whitespace-nowrap"
-                    >
-                      Connect Wallet
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="hidden sm:block px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80">
-                        {rewardsState.chain === 'evm' ? 'Ethereum' : rewardsState.chain === 'tron' ? 'Tron' : 'Solana'}
-                      </div>
-                      <button
-                        onClick={handleDisconnect}
-                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        {rewardsState.address}
-                      </button>
-                    </div>
-                  )}
-                </>
+                /* RainbowKit ConnectButton - handles all wallet connection UI */
+                <ConnectButton 
+                  chainStatus="icon"
+                  showBalance={false}
+                  accountStatus={{
+                    smallScreen: 'avatar',
+                    largeScreen: 'full',
+                  }}
+                />
               )}
             </div>
           </div>
@@ -270,50 +240,85 @@ export default function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-20 px-6">
-          <div className="flex flex-col gap-4">
-            <Link href="/trade" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.perpetual')}
-            </Link>
-            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.portfolio')}
-            </Link>
-            <Link href="/referral" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.referral')}
-            </Link>
-            <Link href="/rewards" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.rewards')}
-            </Link>
-            <Link href="/earn" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.earn')}
-            </Link>
-            <Link href="/stake" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.stake')}
-            </Link>
-            <Link href="/stats" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white py-2 border-b border-white/10">
-              {t('nav.stats')}
-            </Link>
-            <div className="py-2">
-              <div className="text-sm font-medium text-white/60 mb-2">{t('more')}</div>
-              <div className="grid grid-cols-2 gap-2">
+      {mobileMenuOpen && !isHomePage && !isLegalPage && (
+        <div className="lg:hidden fixed inset-0 top-[57px] bg-background/95 backdrop-blur-sm z-40">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex flex-col gap-4">
+              <Link href="/trade" 
+                className={`text-lg font-medium py-2 ${location === "/trade" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.perpetual')}
+              </Link>
+              <Link href="/dashboard" 
+                className={`text-lg font-medium py-2 ${location === "/dashboard" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.portfolio')}
+              </Link>
+              <Link href="/referral" 
+                className={`text-lg font-medium py-2 ${location === "/referral" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.referral')}
+              </Link>
+              <Link href="/rewards" 
+                className={`text-lg font-medium py-2 ${location === "/rewards" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.rewards')}
+              </Link>
+              <Link href="/earn" 
+                className={`text-lg font-medium py-2 ${location === "/earn" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.earn')}
+              </Link>
+              <Link href="/stake" 
+                className={`text-lg font-medium py-2 ${location === "/stake" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.stake')}
+              </Link>
+              <Link href="/stats" 
+                className={`text-lg font-medium py-2 ${location === "/stats" ? "text-white" : "text-white/60"}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav.stats')}
+              </Link>
+              
+              <div className="border-t border-white/10 pt-4 mt-2">
+                <div className="text-sm text-white/40 mb-3">{t('more')}</div>
                 {moreItems.map((item, index) => (
-                  <Link key={index} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 text-sm text-white">
-                    <item.icon className="h-4 w-4 text-primary" />
-                    {t(item.titleKey)}
-                  </Link>
+                  item.external ? (
+                    <a
+                      key={index}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 py-2 text-white/60"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <item.icon className="h-5 w-5 text-primary" />
+                      {t(item.titleKey)}
+                    </a>
+                  ) : (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className="flex items-center gap-3 py-2 text-white/60"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <item.icon className="h-5 w-5 text-primary" />
+                      {t(item.titleKey)}
+                    </Link>
+                  )
                 ))}
               </div>
             </div>
           </div>
         </div>
       )}
-
-      <ChainSelectModal
-        open={chainModalOpen}
-        onClose={() => setChainModalOpen(false)}
-        onSelect={handleChainSelect}
-      />
     </>
   );
 }

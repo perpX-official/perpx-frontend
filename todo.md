@@ -333,3 +333,17 @@
 - [x] Diagnose X OAuth "Something went wrong" error (callback URL mismatch)
 - [x] Fix callback URL to use production domain instead of internal server URL
 - [ ] Test OAuth flow after fix
+
+
+## Critical Bug Fix - MetaMask Connection
+- [ ] Fix MetaMask connection - currently auto-connects to hardcoded address (0x71C...9A21)
+- [ ] Ensure actual MetaMask wallet is used instead of fixed address
+- [ ] Clear any hardcoded test data from localStorage initialization
+- [ ] Test real MetaMask connection on published site
+
+
+## WalletConnect + RainbowKit Implementation
+- [x] Remove ALL hardcoded addresses (0x71C...9A21, 0x1234...5678, etc.)
+- [x] Set up RainbowKit with WalletConnect properly
+- [x] Use real wallet address from wagmi/RainbowKit in all components
+- [x] Test actual MetaMask connection on published site

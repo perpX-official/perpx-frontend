@@ -1,6 +1,7 @@
 import { Wallet, Zap } from 'lucide-react';
-import { useState } from 'react';
-import { ChainSelectModal } from './ChainSelectModal';
+import { useAccount } from 'wagmi';
+import { useEffect } from 'react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { rewardsStorage, type ChainKind } from '@/lib/rewardsStorage';
 
 interface ConnectWalletScreenProps {
@@ -9,20 +10,23 @@ interface ConnectWalletScreenProps {
 }
 
 export default function ConnectWalletScreen({ title, description }: ConnectWalletScreenProps) {
-  const [chainModalOpen, setChainModalOpen] = useState(false);
+  // Wagmi hook for wallet state
+  const { address, isConnected } = useAccount();
 
-  const handleChainSelect = (chain: ChainKind) => {
-    // Temporary connection logic
-    const newState = {
-      chain,
-      address: "0x1234...5678", // Mock address
-      isConnected: true
-    };
-    rewardsStorage.set(newState);
-    setChainModalOpen(false);
-    // Force reload to update state across components if needed, 
-    // though Dashboard polling should catch it.
-  };
+  // Sync wagmi state with rewardsStorage when connected
+  useEffect(() => {
+    if (isConnected && address) {
+      const newState = {
+        chain: 'evm' as ChainKind,
+        chainType: 'evm' as const,
+        address: address, // Store FULL address (42 chars)
+        isConnected: true
+      };
+      rewardsStorage.set(newState);
+      // Initialize user data with full address
+      rewardsStorage.initUser(address, 'evm');
+    }
+  }, [isConnected, address]);
 
   return (
     <div className="container mx-auto px-4 py-20">
@@ -43,23 +47,12 @@ export default function ConnectWalletScreen({ title, description }: ConnectWalle
             </p>
           </div>
 
-          {/* Connect Button */}
+          {/* RainbowKit Connect Button */}
           <div className="flex justify-center">
             <div className="scale-110">
-              <button
-                onClick={() => setChainModalOpen(true)}
-                className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105"
-              >
-                Connect Wallet
-              </button>
+              <ConnectButton />
             </div>
           </div>
-
-          <ChainSelectModal
-            open={chainModalOpen}
-            onClose={() => setChainModalOpen(false)}
-            onSelect={handleChainSelect}
-          />
 
           {/* Divider */}
           <div className="relative">
