@@ -38,9 +38,9 @@ export default function Earn() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-      <div className="relative">
+      <div className="relative h-[calc(100vh-64px)] overflow-hidden">
         <ComingSoonOverlay />
-        <div className="container py-8 space-y-8 pointer-events-none filter grayscale-[0.3]">
+        <div className="container py-8 space-y-8 pointer-events-none filter grayscale-[0.3] blur-sm opacity-30 hidden">
           {/* Header */}
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2">

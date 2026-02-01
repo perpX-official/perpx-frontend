@@ -256,7 +256,8 @@ export async function connectXAccount(
 }
 
 /**
- * Disconnect X account - resets ALL points to 0
+ * Disconnect X account - deducts only the X connect bonus (100 points)
+ * This prevents users from repeatedly connecting/disconnecting to farm points
  */
 export async function disconnectXAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
@@ -269,31 +270,31 @@ export async function disconnectXAccount(walletAddress: string): Promise<{ succe
     return { success: false, points: 0, message: "Wallet profile not found" };
   }
 
-  const previousPoints = profile.totalPoints;
+  // Only deduct the X connect bonus (100 points)
+  const xConnectBonus = 100;
+  const newTotal = Math.max(0, profile.totalPoints - xConnectBonus);
 
-  // Reset all points to 0 and disconnect X
+  // Disconnect X and deduct only the connect bonus
   await db
     .update(walletProfiles)
     .set({
       xConnected: false,
       xUsername: null,
       xConnectedAt: null,
-      totalPoints: 0,
+      totalPoints: newTotal,
     })
     .where(eq(walletProfiles.walletAddress, walletAddress));
 
   // Record point loss in history
-  if (previousPoints > 0) {
-    await db.insert(pointsHistory).values({
-      walletAddress,
-      transactionType: "x_disconnect",
-      pointsChange: -previousPoints,
-      balanceAfter: 0,
-      description: "Points reset due to X account disconnection",
-    });
-  }
+  await db.insert(pointsHistory).values({
+    walletAddress,
+    transactionType: "x_disconnect",
+    pointsChange: -xConnectBonus,
+    balanceAfter: newTotal,
+    description: "X connect bonus revoked due to account disconnection",
+  });
 
-  return { success: true, points: 0, message: "X account disconnected. All points have been reset." };
+  return { success: true, points: newTotal, message: "X account disconnected. X connect bonus has been revoked." };
 }
 
 /**
@@ -344,7 +345,8 @@ export async function connectDiscordAccount(
 }
 
 /**
- * Disconnect Discord account - resets ALL points to 0
+ * Disconnect Discord account - deducts only the Discord connect bonus (100 points)
+ * This prevents users from repeatedly connecting/disconnecting to farm points
  */
 export async function disconnectDiscordAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
@@ -357,31 +359,31 @@ export async function disconnectDiscordAccount(walletAddress: string): Promise<{
     return { success: false, points: 0, message: "Wallet profile not found" };
   }
 
-  const previousPoints = profile.totalPoints;
+  // Only deduct the Discord connect bonus (100 points)
+  const discordConnectBonus = 100;
+  const newTotal = Math.max(0, profile.totalPoints - discordConnectBonus);
 
-  // Reset all points to 0 and disconnect Discord
+  // Disconnect Discord and deduct only the connect bonus
   await db
     .update(walletProfiles)
     .set({
       discordConnected: false,
       discordUsername: null,
       discordConnectedAt: null,
-      totalPoints: 0,
+      totalPoints: newTotal,
     })
     .where(eq(walletProfiles.walletAddress, walletAddress));
 
   // Record point loss in history
-  if (previousPoints > 0) {
-    await db.insert(pointsHistory).values({
-      walletAddress,
-      transactionType: "discord_disconnect",
-      pointsChange: -previousPoints,
-      balanceAfter: 0,
-      description: "Points reset due to Discord account disconnection",
-    });
-  }
+  await db.insert(pointsHistory).values({
+    walletAddress,
+    transactionType: "discord_disconnect",
+    pointsChange: -discordConnectBonus,
+    balanceAfter: newTotal,
+    description: "Discord connect bonus revoked due to account disconnection",
+  });
 
-  return { success: true, points: 0, message: "Discord account disconnected. All points have been reset." };
+  return { success: true, points: newTotal, message: "Discord account disconnected. Discord connect bonus has been revoked." };
 }
 
 /**

@@ -426,3 +426,9 @@
 - [x] Save Coming Soon background UI to separate file for future use (ComingSoonBackgroundUI component)
 - [x] Implement X/Discord disconnect point expiration - reset points to 0 when disconnected
 - [x] Add 2-step confirmation dialog for X/Discord disconnect ("Are you sure?" message)
+
+
+## Current Tasks (2026-02-01 Session 6)
+- [x] Fix point expiration to only deduct connect bonus (100 points for X, 100 points for Discord), not all points
+- [x] Restore points for users who disconnected and lost all points incorrectly (no affected users found in database)
+- [x] Fix Coming Soon overlay - remove background UI that shows when scrolling (hidden background content, no scroll)

@@ -91,9 +91,9 @@ export default function Stake() {
       
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-      <div className="relative">
+      <div className="relative h-[calc(100vh-64px)] overflow-hidden">
         <ComingSoonOverlay />
-        <div className="container mx-auto px-4 py-8 lg:py-12 pointer-events-none filter grayscale-[0.3]">
+        <div className="container mx-auto px-4 py-8 lg:py-12 pointer-events-none filter grayscale-[0.3] blur-sm opacity-30 hidden">
           {/* Hero Section */}
           <div className="mb-8 lg:mb-12">
             <div className="flex items-center gap-3 mb-4">

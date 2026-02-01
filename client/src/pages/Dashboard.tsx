@@ -44,9 +44,9 @@ export default function Dashboard() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-        <div className="relative">
+        <div className="relative h-[calc(100vh-64px)] overflow-hidden">
           <ComingSoonOverlay />
-          <div className="pointer-events-none filter grayscale-[0.3]">
+          <div className="pointer-events-none filter grayscale-[0.3] blur-sm opacity-30 hidden">
             <RewardsDashboard
               chain={chain}
               address={address}

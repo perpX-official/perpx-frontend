@@ -1,0 +1,8 @@
+{
+  "query": "SELECT ph.wallet_address, ph.transaction_type, ph.points_change, ph.balance_after, ph.description, ph.created_at, wp.total_points as current_points\nFROM points_history ph\nLEFT JOIN wallet_profiles wp ON ph.wallet_address = wp.wallet_address\nWHERE ph.transaction_type IN ('x_disconnect', 'discord_disconnect')\nORDER BY ph.created_at DESC\nLIMIT 50;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4Mi7r6KRM9CCx7n.root --database 5TtxXMEfXGQpTF7p5f28zY --execute SELECT ph.wallet_address, ph.transaction_type, ph.points_change, ph.balance_after, ph.description, ph.created_at, wp.total_points as current_points\nFROM points_history ph\nLEFT JOIN wallet_profiles wp ON ph.wallet_address = wp.wallet_address\nWHERE ph.transaction_type IN ('x_disconnect', 'discord_disconnect')\nORDER BY ph.created_at DESC\nLIMIT 50;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'ph.wallet_address' in 'on clause'"
+  ]
+}

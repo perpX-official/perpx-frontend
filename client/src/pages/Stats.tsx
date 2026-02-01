@@ -47,9 +47,9 @@ export default function Stats() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-      <div className="relative">
+      <div className="relative h-[calc(100vh-64px)] overflow-hidden">
         <ComingSoonOverlay />
-        <div className="container mx-auto px-4 py-8 pointer-events-none filter grayscale-[0.3]">
+        <div className="container mx-auto px-4 py-8 pointer-events-none filter grayscale-[0.3] blur-sm opacity-30 hidden">
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('stats.title')}</h1>
             <p className="text-white/60">{t('stats.subtitle')}</p>

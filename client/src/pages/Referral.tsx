@@ -34,9 +34,9 @@ export default function Referral() {
 
       {/* Main Content - Only show when wallet is connected */}
       {isConnected && (
-      <div className="relative">
+      <div className="relative h-[calc(100vh-64px)] overflow-hidden">
         <ComingSoonOverlay />
-        <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12 pointer-events-none filter grayscale-[0.3]">
+        <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12 pointer-events-none filter grayscale-[0.3] blur-sm opacity-30 hidden">
           {/* Hero Section */}
           <div className="mb-8 sm:mb-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
