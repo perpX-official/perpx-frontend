@@ -2,8 +2,8 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, Globe, ChevronDown, Check, MessageSquare, Shield, FileText, BookOpen, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
+import { useAppKit } from '@reown/appkit/react';
 import { rewardsStorage, type ChainKind } from "@/lib/rewardsStorage";
 
 export default function Header() {
@@ -14,6 +14,8 @@ export default function Header() {
   
   // Wagmi hook for wallet state
   const { address, isConnected } = useAccount();
+  const { open } = useAppKit();
+  const { disconnect } = useDisconnect();
 
   // Sync wagmi state with rewardsStorage for compatibility with other components
   useEffect(() => {
@@ -61,6 +63,11 @@ export default function Header() {
     { icon: FileText, titleKey: 'more.blog', descKey: 'more.blogDesc', href: '/blog' },
     { icon: MessageCircle, titleKey: 'more.discord', descKey: 'more.discordDesc', href: 'https://discord.gg/perpx', external: true },
   ];
+
+  // Format address for display
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   return (
     <>
@@ -223,16 +230,24 @@ export default function Header() {
                 <Link href="/trade" className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                   {t('button.launchApp')}
                 </Link>
+              ) : isConnected && address ? (
+                /* Connected state - show address with dropdown */
+                <button
+                  onClick={() => open()}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card/50 hover:bg-card/70 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors border border-white/10 flex items-center gap-2"
+                >
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="hidden sm:inline">{formatAddress(address)}</span>
+                  <span className="sm:hidden">{formatAddress(address)}</span>
+                </button>
               ) : (
-                /* RainbowKit ConnectButton - handles all wallet connection UI */
-                <ConnectButton 
-                  chainStatus="icon"
-                  showBalance={false}
-                  accountStatus={{
-                    smallScreen: 'avatar',
-                    largeScreen: 'full',
-                  }}
-                />
+                /* Not connected - show connect button */
+                <button
+                  onClick={() => open()}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                >
+                  {t('button.connectWallet')}
+                </button>
               )}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useAppKit } from '@reown/appkit/react';
 import { rewardsStorage, type ChainKind } from '@/lib/rewardsStorage';
 
 interface WalletContextType {
@@ -16,7 +16,7 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   // Use wagmi hooks for real wallet connection
   const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { open } = useAppKit();
   const { disconnect: wagmiDisconnect } = useDisconnect();
 
   // Sync wagmi state with rewardsStorage
@@ -47,10 +47,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [isConnected, address]);
 
   const connect = () => {
-    // Use RainbowKit's connect modal
-    if (openConnectModal) {
-      openConnectModal();
-    }
+    // Use AppKit's modal
+    open();
   };
 
   const disconnect = () => {

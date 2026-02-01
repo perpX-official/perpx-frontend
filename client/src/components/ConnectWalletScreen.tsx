@@ -1,7 +1,7 @@
 import { Wallet, Zap } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { useEffect } from 'react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAppKit } from '@reown/appkit/react';
 import { rewardsStorage, type ChainKind } from '@/lib/rewardsStorage';
 
 interface ConnectWalletScreenProps {
@@ -12,6 +12,7 @@ interface ConnectWalletScreenProps {
 export default function ConnectWalletScreen({ title, description }: ConnectWalletScreenProps) {
   // Wagmi hook for wallet state
   const { address, isConnected } = useAccount();
+  const { open } = useAppKit();
 
   // Sync wagmi state with rewardsStorage when connected
   useEffect(() => {
@@ -47,11 +48,15 @@ export default function ConnectWalletScreen({ title, description }: ConnectWalle
             </p>
           </div>
 
-          {/* RainbowKit Connect Button */}
+          {/* AppKit Connect Button */}
           <div className="flex justify-center">
-            <div className="scale-110">
-              <ConnectButton />
-            </div>
+            <button
+              onClick={() => open()}
+              className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium transition-all duration-200 text-lg flex items-center gap-3"
+            >
+              <Wallet className="h-5 w-5" />
+              Connect Wallet
+            </button>
           </div>
 
           {/* Divider */}

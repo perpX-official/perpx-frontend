@@ -1,13 +1,30 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { mainnet, arbitrum, base, optimism } from 'wagmi/chains';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet, arbitrum, base, optimism } from '@reown/appkit/networks';
+import { cookieStorage, createStorage } from '@wagmi/core';
 
-// WalletConnect Project ID - Get your own at https://cloud.walletconnect.com
-// Using a public demo project ID for development
-const WALLETCONNECT_PROJECT_ID = '21fef48091f12692cad574a6f7753643';
+// WalletConnect Project ID - https://cloud.walletconnect.com
+export const projectId = '7b3c2778deabef041da731133fab3568';
 
-export const config = getDefaultConfig({
-  appName: 'PerpX',
-  projectId: WALLETCONNECT_PROJECT_ID,
-  chains: [mainnet, arbitrum, base, optimism],
-  ssr: false, // Disable SSR for client-side only
+// Metadata for WalletConnect
+export const metadata = {
+  name: 'PerpX',
+  description: 'Next-Gen Perpetual Trading',
+  url: 'https://perpx.fi',
+  icons: ['https://perpx.fi/perpx-icon.png']
+};
+
+// Supported networks
+export const networks = [mainnet, arbitrum, base, optimism];
+
+// Create wagmi adapter for AppKit
+export const wagmiAdapter = new WagmiAdapter({
+  storage: createStorage({
+    storage: cookieStorage
+  }),
+  ssr: false,
+  projectId,
+  networks
 });
+
+// Export config for WagmiProvider
+export const config = wagmiAdapter.wagmiConfig;

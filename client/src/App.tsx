@@ -8,9 +8,9 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { DemoTradingProvider } from "./contexts/DemoTradingContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { WagmiProvider } from 'wagmi';
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
+// Initialize AppKit
+import './config/appkit';
 import Home from "./pages/Home";
 import Trade from "./pages/Trade";
 import Dashboard from "./pages/Dashboard";
@@ -64,29 +64,21 @@ function App() {
   return (
     <ErrorBoundary>
       <WagmiProvider config={config}>
-        <RainbowKitProvider 
-          theme={darkTheme({
-            accentColor: '#0ABAB5',
-            accentColorForeground: 'white',
-            borderRadius: 'medium',
-          })}
+        <ThemeProvider
+          defaultTheme="dark"
+          // switchable
         >
-          <ThemeProvider
-            defaultTheme="dark"
-            // switchable
-          >
-            <LanguageProvider>
-              <DemoTradingProvider>
-                <WalletProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Router />
-                  </TooltipProvider>
-                </WalletProvider>
-              </DemoTradingProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </RainbowKitProvider>
+          <LanguageProvider>
+            <DemoTradingProvider>
+              <WalletProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </WalletProvider>
+            </DemoTradingProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </WagmiProvider>
     </ErrorBoundary>
   );
