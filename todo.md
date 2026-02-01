@@ -347,3 +347,9 @@
 - [x] Set up RainbowKit with WalletConnect properly
 - [x] Use real wallet address from wagmi/RainbowKit in all components
 - [x] Test actual MetaMask connection on published site
+
+
+## Build Circular Dependency Fix
+- [x] Remove manualChunks configuration to avoid circular dependency errors
+- [x] Let Vite/Rollup handle chunking automatically
+- [x] Fix "Cannot access 'p3' before initialization" error on published site
