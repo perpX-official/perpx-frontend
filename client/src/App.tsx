@@ -8,7 +8,6 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { DemoTradingProvider } from "./contexts/DemoTradingContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { WagmiProvider } from 'wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
@@ -60,37 +59,34 @@ function Router() {
   );
 }
 
-const queryClient = new QueryClient();
-
+// App component - QueryClientProvider is provided by main.tsx
 function App() {
   return (
     <ErrorBoundary>
       <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider 
-            theme={darkTheme({
-              accentColor: '#0ABAB5',
-              accentColorForeground: 'white',
-              borderRadius: 'medium',
-            })}
+        <RainbowKitProvider 
+          theme={darkTheme({
+            accentColor: '#0ABAB5',
+            accentColorForeground: 'white',
+            borderRadius: 'medium',
+          })}
+        >
+          <ThemeProvider
+            defaultTheme="dark"
+            // switchable
           >
-            <ThemeProvider
-              defaultTheme="dark"
-              // switchable
-            >
-              <LanguageProvider>
-                <DemoTradingProvider>
-                  <WalletProvider>
-                    <TooltipProvider>
-                      <Toaster />
-                      <Router />
-                    </TooltipProvider>
-                  </WalletProvider>
-                </DemoTradingProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </RainbowKitProvider>
-        </QueryClientProvider>
+            <LanguageProvider>
+              <DemoTradingProvider>
+                <WalletProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Router />
+                  </TooltipProvider>
+                </WalletProvider>
+              </DemoTradingProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </RainbowKitProvider>
       </WagmiProvider>
     </ErrorBoundary>
   );

@@ -2,8 +2,8 @@ import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { mainnet, arbitrum, base, optimism } from 'wagmi/chains';
 
 // WalletConnect Project ID - Get your own at https://cloud.walletconnect.com
-// This is a demo project ID for development purposes
-const WALLETCONNECT_PROJECT_ID = 'c4f79cc821944d9680842e34466bfb';
+// Using a public demo project ID for development
+const WALLETCONNECT_PROJECT_ID = '21fef48091f12692cad574a6f7753643';
 
 export const config = getDefaultConfig({
   appName: 'PerpX',
