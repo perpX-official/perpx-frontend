@@ -627,26 +627,24 @@ export default function Admin() {
                 </div>
               ) : activityStats ? (
                 <div className="space-y-8">
-                  {/* New Users Chart */}
+                  {/* New Users Line Chart */}
                   <div>
-                    <h4 className="text-white/80 font-medium mb-4">New Users</h4>
+                    <h4 className="text-white/80 font-medium mb-4">New Users (Line Chart)</h4>
                     <div className="h-64 bg-white/5 rounded-lg p-4">
-                      <ActivityChart 
+                      <UserLineChart 
                         data={activityStats} 
                         period={activityPeriod} 
-                        type="users" 
                       />
                     </div>
                   </div>
 
-                  {/* Task Completions Chart */}
+                  {/* Task Completion Rate Pie Chart */}
                   <div>
-                    <h4 className="text-white/80 font-medium mb-4">Users Completing Tasks</h4>
-                    <div className="h-64 bg-white/5 rounded-lg p-4">
-                      <ActivityChart 
-                        data={activityStats} 
-                        period={activityPeriod} 
-                        type="tasks" 
+                    <h4 className="text-white/80 font-medium mb-4">Task Completion Rate</h4>
+                    <div className="h-64 bg-white/5 rounded-lg p-4 flex items-center justify-center">
+                      <TaskCompletionPieChart 
+                        totalUsers={activityStats.allTime?.totalUsers || 0}
+                        taskParticipants={activityStats.allTime?.totalTaskCompletions || 0}
                       />
                     </div>
                   </div>
@@ -660,9 +658,11 @@ export default function Admin() {
                       </p>
                     </Card>
                     <Card className="bg-white/5 p-4">
-                      <p className="text-white/60 text-sm">All-Time Task Participants</p>
+                      <p className="text-white/60 text-sm">Task Completion Rate</p>
                       <p className="text-2xl font-bold text-white">
-                        {activityStats.allTime?.totalTaskCompletions?.toLocaleString() || 0}
+                        {activityStats.allTime?.totalUsers > 0 
+                          ? ((activityStats.allTime?.totalTaskCompletions / activityStats.allTime?.totalUsers) * 100).toFixed(1)
+                          : 0}%
                       </p>
                     </Card>
                   </div>
@@ -751,8 +751,8 @@ export default function Admin() {
   );
 }
 
-// Activity Chart Component
-interface ActivityChartProps {
+// User Line Chart Component with dynamic Y-axis scaling
+interface UserLineChartProps {
   data: {
     daily: {
       users: Array<{ date: string; newUsers: number }>;
@@ -765,53 +765,53 @@ interface ActivityChartProps {
     allTime: { totalUsers: number; totalTaskCompletions: number };
   };
   period: "daily" | "weekly" | "monthly" | "yearly" | "all";
-  type: "users" | "tasks";
 }
 
-function ActivityChart({ data, period, type }: ActivityChartProps) {
+function UserLineChart({ data, period }: UserLineChartProps) {
   const chartData = useMemo(() => {
     if (period === "all") {
-      // Show all-time as a single bar
-      return [{
-        label: "All Time",
-        value: type === "users" ? data.allTime.totalUsers : data.allTime.totalTaskCompletions
-      }];
+      return [{ label: "All Time", value: data.allTime.totalUsers }];
     }
 
     if (period === "yearly") {
-      // Show monthly data for yearly view
-      const sourceData = type === "users" ? data.monthly.users : data.monthly.tasks;
-      return sourceData.map(item => ({
-        label: 'month' in item ? item.month : '',
-        value: 'newUsers' in item ? item.newUsers : ('completions' in item ? item.completions : 0)
+      return data.monthly.users.map(item => ({
+        label: item.month,
+        value: item.newUsers
       }));
     }
 
-    // For daily, weekly, monthly - use daily data
-    const sourceData = type === "users" ? data.daily.users : data.daily.tasks;
+    const sourceData = data.daily.users;
     let filteredData = sourceData;
 
     if (period === "daily") {
-      // Last 7 days
       filteredData = sourceData.slice(-7);
     } else if (period === "weekly") {
-      // Last 14 days
       filteredData = sourceData.slice(-14);
     } else if (period === "monthly") {
-      // Last 30 days
       filteredData = sourceData.slice(-30);
     }
 
-    return filteredData.map(item => {
-      const itemAny = item as any;
-      return {
-        label: itemAny.date ? String(itemAny.date).slice(-5) : (itemAny.month || ''),
-        value: itemAny.newUsers ?? itemAny.completions ?? 0
-      };
-    });
-  }, [data, period, type]);
+    return filteredData.map(item => ({
+      label: item.date ? String(item.date).slice(-5) : '',
+      value: item.newUsers
+    }));
+  }, [data, period]);
 
+  // Dynamic Y-axis calculation: round up to nearest nice number
   const maxValue = Math.max(...chartData.map(d => d.value), 1);
+  const getYAxisMax = (max: number) => {
+    if (max <= 5) return 5;
+    if (max <= 10) return 10;
+    if (max <= 20) return 20;
+    if (max <= 50) return 50;
+    if (max <= 100) return 100;
+    if (max <= 200) return 200;
+    if (max <= 500) return 500;
+    if (max <= 1000) return 1000;
+    return Math.ceil(max / 500) * 500;
+  };
+  const yAxisMax = getYAxisMax(maxValue);
+  const yAxisSteps = [0, Math.round(yAxisMax / 4), Math.round(yAxisMax / 2), Math.round(yAxisMax * 3 / 4), yAxisMax];
 
   if (chartData.length === 0) {
     return (
@@ -821,22 +821,177 @@ function ActivityChart({ data, period, type }: ActivityChartProps) {
     );
   }
 
+  // Calculate SVG path for line chart
+  const width = 100;
+  const height = 100;
+  const padding = 10;
+  const chartWidth = width - padding * 2;
+  const chartHeight = height - padding * 2;
+  
+  const points = chartData.map((item, index) => {
+    const x = padding + (chartWidth / (chartData.length - 1 || 1)) * index;
+    const y = padding + chartHeight - (item.value / yAxisMax) * chartHeight;
+    return { x, y, value: item.value, label: item.label };
+  });
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaPath = `${linePath} L ${points[points.length - 1]?.x || padding} ${padding + chartHeight} L ${padding} ${padding + chartHeight} Z`;
+
   return (
-    <div className="flex items-end justify-between h-full gap-1">
-      {chartData.map((item, index) => (
-        <div key={index} className="flex flex-col items-center flex-1 h-full">
-          <div className="flex-1 w-full flex items-end">
-            <div
-              className="w-full bg-primary/60 hover:bg-primary transition-colors rounded-t"
-              style={{ height: `${(item.value / maxValue) * 100}%`, minHeight: item.value > 0 ? '4px' : '0' }}
-              title={`${item.label}: ${item.value}`}
+    <div className="relative h-full w-full flex">
+      {/* Y-axis labels */}
+      <div className="flex flex-col justify-between h-full pr-2 text-[10px] text-white/40">
+        {yAxisSteps.reverse().map((step, i) => (
+          <span key={i}>{step}</span>
+        ))}
+      </div>
+      
+      {/* Chart area */}
+      <div className="flex-1 relative">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => (
+            <line
+              key={i}
+              x1={padding}
+              y1={padding + chartHeight * ratio}
+              x2={width - padding}
+              y2={padding + chartHeight * ratio}
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="0.5"
             />
-          </div>
-          <span className="text-[10px] text-white/40 mt-1 truncate w-full text-center">
-            {item.label}
-          </span>
+          ))}
+          
+          {/* Area fill */}
+          <path d={areaPath} fill="url(#lineGradient)" opacity="0.3" />
+          
+          {/* Line */}
+          <path d={linePath} fill="none" stroke="#0ABAB5" strokeWidth="2" />
+          
+          {/* Data points */}
+          {points.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r="3" fill="#0ABAB5" />
+          ))}
+          
+          {/* Gradient definition */}
+          <defs>
+            <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0ABAB5" />
+              <stop offset="100%" stopColor="transparent" />
+            </linearGradient>
+          </defs>
+        </svg>
+        
+        {/* X-axis labels */}
+        <div className="flex justify-between text-[10px] text-white/40 mt-1">
+          {chartData.map((item, i) => (
+            <span key={i} className="truncate" style={{ width: `${100 / chartData.length}%`, textAlign: 'center' }}>
+              {item.label}
+            </span>
+          ))}
         </div>
-      ))}
+      </div>
+    </div>
+  );
+}
+
+// Task Completion Pie Chart Component
+interface TaskCompletionPieChartProps {
+  totalUsers: number;
+  taskParticipants: number;
+}
+
+function TaskCompletionPieChart({ totalUsers, taskParticipants }: TaskCompletionPieChartProps) {
+  const completionRate = totalUsers > 0 ? (taskParticipants / totalUsers) * 100 : 0;
+  const nonCompletionRate = 100 - completionRate;
+  
+  // SVG pie chart calculations
+  const size = 200;
+  const center = size / 2;
+  const radius = 70;
+  const innerRadius = 45; // For donut chart effect
+  
+  // Calculate arc paths
+  const completedAngle = (completionRate / 100) * 360;
+  const startAngle = -90; // Start from top
+  
+  const polarToCartesian = (cx: number, cy: number, r: number, angle: number) => {
+    const rad = (angle * Math.PI) / 180;
+    return {
+      x: cx + r * Math.cos(rad),
+      y: cy + r * Math.sin(rad)
+    };
+  };
+  
+  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
+    const start = polarToCartesian(cx, cy, r, endAngle);
+    const end = polarToCartesian(cx, cy, r, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+  };
+  
+  const completedPath = describeArc(center, center, radius, startAngle, startAngle + completedAngle);
+  const remainingPath = describeArc(center, center, radius, startAngle + completedAngle, startAngle + 360);
+
+  return (
+    <div className="flex items-center gap-8">
+      {/* Pie Chart */}
+      <div className="relative">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {/* Background circle */}
+          <circle cx={center} cy={center} r={radius} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="25" />
+          
+          {/* Completed arc (green) */}
+          {completionRate > 0 && (
+            <path
+              d={completedPath}
+              fill="none"
+              stroke="#0ABAB5"
+              strokeWidth="25"
+              strokeLinecap="round"
+            />
+          )}
+          
+          {/* Remaining arc (gray) */}
+          {nonCompletionRate > 0 && completionRate < 100 && (
+            <path
+              d={remainingPath}
+              fill="none"
+              stroke="rgba(255,255,255,0.2)"
+              strokeWidth="25"
+              strokeLinecap="round"
+            />
+          )}
+        </svg>
+        
+        {/* Center text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-bold text-white">{completionRate.toFixed(1)}%</span>
+          <span className="text-xs text-white/60">Completion Rate</span>
+        </div>
+      </div>
+      
+      {/* Legend */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-[#0ABAB5]"></div>
+          <div>
+            <p className="text-sm text-white">Completed Tasks</p>
+            <p className="text-xs text-white/60">{taskParticipants.toLocaleString()} users</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-white/20"></div>
+          <div>
+            <p className="text-sm text-white">No Tasks</p>
+            <p className="text-xs text-white/60">{(totalUsers - taskParticipants).toLocaleString()} users</p>
+          </div>
+        </div>
+        <div className="pt-2 border-t border-white/10">
+          <p className="text-xs text-white/60">Total Users</p>
+          <p className="text-lg font-bold text-white">{totalUsers.toLocaleString()}</p>
+        </div>
+      </div>
     </div>
   );
 }

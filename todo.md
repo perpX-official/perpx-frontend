@@ -407,3 +407,9 @@
 - [x] Add user activity graph (Day/Week/Month/Year/All) in admin Activity tab
 - [ ] Add daily task completion count column between Discord and Action columns
 - [ ] Add user activity graph (daily/weekly/monthly/yearly/all-time) to admin dashboard
+
+
+## Current Tasks (2026-02-01 Session 3)
+- [x] Fix market list prices - verified working (REST API + WebSocket)
+- [x] Change admin activity graph to line chart for user count (dynamic Y-axis scale: 5, 10, 20, 50, 100, etc.)
+- [x] Add task completion rate pie chart showing percentage of users completing tasks (donut style with legend)
