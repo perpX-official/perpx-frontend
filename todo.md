@@ -413,3 +413,9 @@
 - [x] Fix market list prices - verified working (REST API + WebSocket)
 - [x] Change admin activity graph to line chart for user count (dynamic Y-axis scale: 5, 10, 20, 50, 100, etc.)
 - [x] Add task completion rate pie chart showing percentage of users completing tasks (donut style with legend)
+
+
+## Current Tasks (2026-02-01 Session 4 - Mobile Fixes)
+- [x] Fix Coming Soon overlay z-index - changed from fixed z-40 to absolute z-30
+- [x] Fix Rewards page points display lag - added skeleton loading state to prevent 0 flash
+- [x] Improve mobile layout balance and spacing (Rewards page, task cards, Coming Soon overlay)

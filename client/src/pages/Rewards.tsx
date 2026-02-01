@@ -337,22 +337,22 @@ export default function Rewards() {
                        completeDailyPost.isPending || claimConnectBonus.isPending;
 
     return (
-      <Card key={task.id} className="glass-card p-6 hover-reveal relative group">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-4 flex-1">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <TaskIcon className="h-6 w-6 text-primary" />
+      <Card key={task.id} className="glass-card p-4 sm:p-6 hover-reveal relative group">
+        <div className="flex items-start justify-between mb-3 sm:mb-4">
+          <div className="flex items-start gap-3 sm:gap-4 flex-1">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <TaskIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-white">{task.title}</h3>
-                {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
+                <h3 className="text-base sm:text-lg font-bold text-white truncate">{task.title}</h3>
+                {isCompleted && <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />}
               </div>
-              <p className="text-sm text-white/60 mb-2">{task.description}</p>
+              <p className="text-xs sm:text-sm text-white/60 mb-1 sm:mb-2 line-clamp-2">{task.description}</p>
               {task.connectedUsername && (
-                <p className="text-xs text-primary mb-2">@{task.connectedUsername}</p>
+                <p className="text-xs text-primary mb-1 sm:mb-2 truncate">@{task.connectedUsername}</p>
               )}
-              <div className="text-primary font-bold">+{task.points} Points</div>
+              <div className="text-sm sm:text-base text-primary font-bold">+{task.points} Points</div>
             </div>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function Rewards() {
           <Button
             onClick={task.action}
             disabled={isCompleted || isMutating || (task.id === 'connect-wallet') || isDisabled}
-            className={`flex-1 ${
+            className={`flex-1 text-sm sm:text-base py-2 sm:py-2.5 ${
               isCompleted
                 ? 'bg-green-500/20 text-green-500 cursor-not-allowed'
                 : isDisabled
@@ -381,7 +381,7 @@ export default function Rewards() {
               onClick={task.disconnectAction}
               disabled={isMutating}
               variant="outline"
-              className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+              className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400 p-2 sm:p-2.5"
               title="Disconnect"
             >
               <Unplug className="h-4 w-4" />
@@ -404,64 +404,88 @@ export default function Rewards() {
       )}
 
       {isConnected && profileLoading && (
-        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <div className="h-10 w-48 bg-white/10 rounded animate-pulse mb-2"></div>
+            <div className="h-5 w-72 bg-white/10 rounded animate-pulse"></div>
+          </div>
+          {/* Points Skeleton */}
+          <div className="glass-card rounded-xl p-8 mb-8 text-center">
+            <div className="h-4 w-24 bg-white/10 rounded animate-pulse mx-auto mb-4"></div>
+            <div className="h-16 w-48 bg-white/10 rounded animate-pulse mx-auto mb-4"></div>
+            <div className="h-4 w-40 bg-white/10 rounded animate-pulse mx-auto"></div>
+          </div>
+          {/* Tasks Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-xl p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-lg animate-pulse"></div>
+                  <div className="flex-1">
+                    <div className="h-5 w-32 bg-white/10 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 w-48 bg-white/10 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="h-10 w-full bg-white/10 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {isConnected && profile && !profileLoading && (
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Rewards Center</h1>
-            <p className="text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          <div className="mb-4 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">Rewards Center</h1>
+            <p className="text-sm sm:text-base text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
             <p className="text-xs text-white/40 mt-1">Today (UTC): {profile.todayJST}</p>
           </div>
 
           {/* Total Points */}
-          <div className="glass-card rounded-xl p-8 mb-8 text-center relative overflow-hidden">
+          <div className="glass-card rounded-xl p-4 sm:p-8 mb-4 sm:mb-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 animate-pulse-slow"></div>
             <div className="relative z-10">
-              <div className="text-sm text-white/60 mb-2">Total Points</div>
-              <div className="text-5xl sm:text-6xl font-bold text-white mb-4 tracking-tight">
-                {profile.totalPoints.toLocaleString()} <span className="text-2xl text-primary">PTS</span>
+              <div className="text-xs sm:text-sm text-white/60 mb-1 sm:mb-2">Total Points</div>
+              <div className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4 tracking-tight">
+                {profile.totalPoints.toLocaleString()} <span className="text-lg sm:text-2xl text-primary">PTS</span>
               </div>
-              <div className="text-sm text-green-500 mb-2">
+              <div className="text-xs sm:text-sm text-green-500 mb-1 sm:mb-2">
                 100 PTS = 1 Token (Estimated)
               </div>
             </div>
           </div>
 
           {/* Task Categories */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Onboarding */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold text-white">Onboarding</h2>
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Onboarding</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {tasks.filter(t => t.category === 'onboarding').map(renderTask)}
               </div>
             </div>
 
             {/* Social */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold text-white">Social Tasks</h2>
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Social Tasks</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {tasks.filter(t => t.category === 'social').map(renderTask)}
               </div>
             </div>
 
             {/* Daily */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Trophy className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold text-white">Daily Tasks</h2>
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Daily Tasks</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {tasks.filter(t => t.category === 'daily').map(renderTask)}
               </div>
             </div>
