@@ -325,7 +325,8 @@
 ## MetaMask Only Integration
 - [x] Remove WalletConnect/RainbowKit dependency
 - [x] Implement MetaMask direct connection
-- [ ] Test on production
+- [x] Fix wallet address storage to use full address (42 chars) instead of shortened format
+- [x] Test on production
 
 
 ## X OAuth Error Fix
