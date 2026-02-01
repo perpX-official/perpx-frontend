@@ -375,3 +375,20 @@
 - [x] Fix modal background transparency (make text more readable)
 - [x] Unify Coming Soon section layout (z-index adjusted)
 - [x] Fix More dropdown z-index (show above blur overlay)
+
+
+## UI Fixes and New Features (Feb 01)
+- [ ] Change JST to UTC in frontend display (Daily Tasks section)
+- [ ] Unify Coming Soon overlay position across all pages
+- [ ] Add tweet URL verification feature to admin dashboard
+- [ ] Connect Trade.tsx prices to real-time data (BTC, ETH, SOL, BNB, XRP)
+
+
+## Recently Completed (2026-02-01)
+- [x] Fix JST to UTC display - Daily tasks now show "Resets at 00:00 UTC" instead of JST
+- [x] Add admin dashboard Tweet Verification tab with tweet URL review functionality
+- [x] Fix TypeScript errors in socialOAuth.ts (iterator errors with Array.from)
+- [x] Fix db.ts todayJST reference error (renamed to todayUTC)
+- [x] Add admin_adjustment to transactionType enum in schema.ts
+- [x] Run database migration for schema changes
+- [x] Verify Trade.tsx already has real-time Binance WebSocket price feeds

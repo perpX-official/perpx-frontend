@@ -19,6 +19,7 @@ import {
   getAdminStats,
   searchWalletProfiles,
   adjustUserPoints,
+  getDailyPostCompletions,
 } from "./db";
 
 export const appRouter = router({
@@ -205,6 +206,16 @@ export const appRouter = router({
           input.pointsChange,
           input.reason
         );
+      }),
+
+    // Get daily post completions with tweet URLs
+    getDailyPosts: publicProcedure
+      .input(z.object({
+        page: z.number().min(1).optional().default(1),
+        limit: z.number().min(1).max(100).optional().default(50),
+      }))
+      .query(async ({ input }) => {
+        return await getDailyPostCompletions(input.page, input.limit);
       }),
   }),
 });

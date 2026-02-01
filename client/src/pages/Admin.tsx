@@ -20,6 +20,8 @@ import {
   ArrowUpDown,
   Plus,
   Minus,
+  ExternalLink,
+  FileText,
 } from "lucide-react";
 import {
   Dialog,
@@ -29,6 +31,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,6 +45,7 @@ export default function Admin() {
   const [authError, setAuthError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [tweetPage, setTweetPage] = useState(1);
   const [sortBy, setSortBy] = useState<"totalPoints" | "createdAt">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
@@ -80,6 +89,11 @@ export default function Admin() {
   const { data: searchResults, isLoading: searchLoading } = trpc.admin.searchUsers.useQuery(
     { query: searchQuery, limit: 20 },
     { enabled: isAuthenticated && searchQuery.length > 2 }
+  );
+
+  const { data: dailyPostsData, isLoading: dailyPostsLoading, refetch: refetchDailyPosts } = trpc.admin.getDailyPosts.useQuery(
+    { page: tweetPage, limit: 20 },
+    { enabled: isAuthenticated }
   );
 
   const adjustPoints = trpc.admin.adjustPoints.useMutation({
@@ -176,6 +190,7 @@ export default function Admin() {
               onClick={() => {
                 refetchStats();
                 refetchUsers();
+                refetchDailyPosts();
               }}
               className="border-white/20 text-white hover:bg-white/10"
             >
@@ -274,145 +289,280 @@ export default function Admin() {
           </Card>
         )}
 
-        {/* Search & Users Table */}
-        <Card className="glass-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-white">Users</h3>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-                <Input
-                  type="text"
-                  placeholder="Search by wallet or username..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/5 border-white/20 text-white w-64"
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSortBy(sortBy === "totalPoints" ? "createdAt" : "totalPoints");
-                }}
-                className="border-white/20 text-white hover:bg-white/10"
-              >
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                Sort by {sortBy === "totalPoints" ? "Date" : "Points"}
-              </Button>
-            </div>
-          </div>
+        {/* Tabs for Users and Tweet Verification */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList className="bg-white/5 border border-white/10">
+            <TabsTrigger value="users" className="data-[state=active]:bg-primary/20">
+              <Users className="h-4 w-4 mr-2" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="tweets" className="data-[state=active]:bg-primary/20">
+              <FileText className="h-4 w-4 mr-2" />
+              Tweet Verification
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">Wallet</th>
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">Chain</th>
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">Points</th>
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">X</th>
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">Discord</th>
-                  <th className="text-left py-3 px-4 text-white/60 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(usersLoading || searchLoading) ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                    </td>
-                  </tr>
-                ) : displayUsers?.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-8 text-white/60">
-                      No users found
-                    </td>
-                  </tr>
-                ) : (
-                  displayUsers?.map((user: any) => (
-                    <tr key={user.walletAddress} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="py-3 px-4">
-                        <span className="text-white font-mono text-sm">
-                          {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          user.chainType === "evm" ? "bg-blue-500/20 text-blue-400" :
-                          user.chainType === "tron" ? "bg-red-500/20 text-red-400" :
-                          "bg-purple-500/20 text-purple-400"
-                        }`}>
-                          {user.chainType.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-primary font-bold">{user.totalPoints.toLocaleString()}</span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {user.xConnected ? (
-                          <span className="text-sky-400">@{user.xUsername}</span>
-                        ) : (
-                          <span className="text-white/40">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {user.discordConnected ? (
-                          <span className="text-indigo-400">{user.discordUsername}</span>
-                        ) : (
-                          <span className="text-white/40">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedWallet(user.walletAddress);
-                            setAdjustDialogOpen(true);
-                          }}
-                          className="border-white/20 text-white hover:bg-white/10"
-                        >
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                          Adjust
-                        </Button>
-                      </td>
+          {/* Users Tab */}
+          <TabsContent value="users">
+            <Card className="glass-card p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white">Users</h3>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                    <Input
+                      type="text"
+                      placeholder="Search by wallet or username..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-white/5 border-white/20 text-white w-64"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSortBy(sortBy === "totalPoints" ? "createdAt" : "totalPoints");
+                    }}
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                    Sort by {sortBy === "totalPoints" ? "Date" : "Points"}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Wallet</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Chain</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Points</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">X</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Discord</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Actions</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {usersData?.pagination && searchQuery.length <= 2 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
-              <p className="text-white/60 text-sm">
-                Page {usersData.pagination.page} of {usersData.pagination.totalPages} 
-                ({usersData.pagination.totalCount} total)
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(p => Math.min(usersData.pagination.totalPages, p + 1))}
-                  disabled={page >= usersData.pagination.totalPages}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                  </thead>
+                  <tbody>
+                    {(usersLoading || searchLoading) ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                        </td>
+                      </tr>
+                    ) : displayUsers?.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-white/60">
+                          No users found
+                        </td>
+                      </tr>
+                    ) : (
+                      displayUsers?.map((user: any) => (
+                        <tr key={user.walletAddress} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-3 px-4">
+                            <span className="text-white font-mono text-sm">
+                              {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              user.chainType === "evm" ? "bg-blue-500/20 text-blue-400" :
+                              user.chainType === "tron" ? "bg-red-500/20 text-red-400" :
+                              "bg-purple-500/20 text-purple-400"
+                            }`}>
+                              {user.chainType.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-bold">{user.totalPoints.toLocaleString()}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {user.xConnected ? (
+                              <span className="text-sky-400">@{user.xUsername}</span>
+                            ) : (
+                              <span className="text-white/40">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            {user.discordConnected ? (
+                              <span className="text-indigo-400">{user.discordUsername}</span>
+                            ) : (
+                              <span className="text-white/40">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedWallet(user.walletAddress);
+                                setAdjustDialogOpen(true);
+                              }}
+                              className="border-white/20 text-white hover:bg-white/10"
+                            >
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                              Adjust
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          )}
-        </Card>
+
+              {/* Pagination */}
+              {usersData?.pagination && searchQuery.length <= 2 && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+                  <p className="text-white/60 text-sm">
+                    Page {usersData.pagination.page} of {usersData.pagination.totalPages} 
+                    ({usersData.pagination.totalCount} total)
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(p => Math.min(usersData.pagination.totalPages, p + 1))}
+                      disabled={page >= usersData.pagination.totalPages}
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* Tweet Verification Tab */}
+          <TabsContent value="tweets">
+            <Card className="glass-card p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white">Daily Post Submissions</h3>
+                <p className="text-white/60 text-sm">
+                  Verify user tweets mentioning @perpXFi
+                </p>
+              </div>
+
+              {/* Tweet Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Date</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Wallet</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">X Username</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Points</th>
+                      <th className="text-left py-3 px-4 text-white/60 font-medium">Tweet URL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dailyPostsLoading ? (
+                      <tr>
+                        <td colSpan={5} className="text-center py-8">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                        </td>
+                      </tr>
+                    ) : dailyPostsData?.completions?.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center py-8 text-white/60">
+                          No daily post submissions yet
+                        </td>
+                      </tr>
+                    ) : (
+                      dailyPostsData?.completions?.map((post: any) => (
+                        <tr key={post.id} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-3 px-4">
+                            <span className="text-white/80 text-sm">
+                              {post.completionDate}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-white font-mono text-sm">
+                              {post.walletAddress.slice(0, 6)}...{post.walletAddress.slice(-4)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {post.xUsername ? (
+                              <a 
+                                href={`https://x.com/${post.xUsername}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sky-400 hover:underline"
+                              >
+                                @{post.xUsername}
+                              </a>
+                            ) : (
+                              <span className="text-white/40">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-bold">+{post.pointsAwarded}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {post.tweetUrl ? (
+                              <a
+                                href={post.tweetUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sky-400 hover:underline"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                View Tweet
+                              </a>
+                            ) : (
+                              <span className="text-white/40">No URL provided</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {dailyPostsData?.pagination && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+                  <p className="text-white/60 text-sm">
+                    Page {dailyPostsData.pagination.page} of {dailyPostsData.pagination.totalPages} 
+                    ({dailyPostsData.pagination.totalCount} total)
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTweetPage(p => Math.max(1, p - 1))}
+                      disabled={tweetPage === 1}
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTweetPage(p => Math.min(dailyPostsData.pagination.totalPages, p + 1))}
+                      disabled={tweetPage >= dailyPostsData.pagination.totalPages}
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Points Adjustment Dialog */}
         <Dialog open={adjustDialogOpen} onOpenChange={setAdjustDialogOpen}>

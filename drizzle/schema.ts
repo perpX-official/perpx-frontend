@@ -95,6 +95,7 @@ export const pointsHistory = mysqlTable("points_history", {
     "discord_connect",
     "daily_post",
     "referral_bonus",
+    "admin_adjustment",
     "other"
   ]).notNull(),
   /** Points change (positive for earning, negative for spending) */

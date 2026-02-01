@@ -596,7 +596,7 @@ export async function getAdminStats() {
     discordConnectedCount,
     todayTaskCompletions,
     chainStats,
-    todayJST,
+    todayUTC,
   };
 }
 
@@ -627,6 +627,73 @@ export async function searchWalletProfiles(query: string, limit = 20) {
 /**
  * Manually adjust user points (admin only)
  */
+/**
+ * Get daily post completions with tweet URLs for admin verification
+ */
+export async function getDailyPostCompletions(
+  page = 1,
+  limit = 50
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const countResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(taskCompletions)
+    .where(eq(taskCompletions.taskType, "daily_post"));
+  const totalCount = countResult[0]?.count || 0;
+
+  // Get completions with wallet profile info
+  const completions = await db
+    .select({
+      id: taskCompletions.id,
+      walletAddress: taskCompletions.walletAddress,
+      pointsAwarded: taskCompletions.pointsAwarded,
+      completionDate: taskCompletions.completionDate,
+      metadata: taskCompletions.metadata,
+      completedAt: taskCompletions.completedAt,
+      xUsername: walletProfiles.xUsername,
+    })
+    .from(taskCompletions)
+    .leftJoin(walletProfiles, eq(taskCompletions.walletAddress, walletProfiles.walletAddress))
+    .where(eq(taskCompletions.taskType, "daily_post"))
+    .orderBy(sql`${taskCompletions.completedAt} DESC`)
+    .limit(limit)
+    .offset(offset);
+
+  // Parse metadata to extract tweet URLs
+  const parsedCompletions = completions.map(c => {
+    let tweetUrl = null;
+    if (c.metadata) {
+      try {
+        const meta = JSON.parse(c.metadata);
+        tweetUrl = meta.tweetUrl || null;
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+    return {
+      ...c,
+      tweetUrl,
+    };
+  });
+
+  return {
+    completions: parsedCompletions,
+    pagination: {
+      page,
+      limit,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+    },
+  };
+}
+
 export async function adjustUserPoints(
   walletAddress: string,
   pointsChange: number,

@@ -316,7 +316,7 @@ export default function Rewards() {
     {
       id: 'post-twitter-daily',
       title: 'Post on X with @perpXFi',
-      description: `Mention @perpXFi in your post to earn points (Daily - Resets at 00:00 JST)`,
+      description: `Mention @perpXFi in your post to earn points (Daily - Resets at 00:00 UTC)`,
       points: 100,
       icon: Twitter,
       action: handleSocialPost,
@@ -414,7 +414,7 @@ export default function Rewards() {
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Rewards Center</h1>
             <p className="text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
-            <p className="text-xs text-white/40 mt-1">Today (JST): {profile.todayJST}</p>
+            <p className="text-xs text-white/40 mt-1">Today (UTC): {profile.todayJST}</p>
           </div>
 
           {/* Total Points */}
