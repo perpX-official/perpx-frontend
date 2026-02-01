@@ -345,18 +345,24 @@ export async function disconnectDiscordAccount(walletAddress: string): Promise<{
 }
 
 /**
- * Get current JST date string (YYYY-MM-DD)
+ * Get current UTC date string (YYYY-MM-DD)
+ * Daily tasks reset at 00:00 UTC
  */
-export function getJSTDateString(): string {
+export function getUTCDateString(): string {
   const now = new Date();
-  // JST is UTC+9
-  const jstOffset = 9 * 60 * 60 * 1000;
-  const jstDate = new Date(now.getTime() + jstOffset);
-  return jstDate.toISOString().split('T')[0];
+  return now.toISOString().split('T')[0];
 }
 
 /**
- * Check if daily post task is completed for today (JST)
+ * @deprecated Use getUTCDateString instead - kept for backward compatibility
+ */
+export function getJSTDateString(): string {
+  return getUTCDateString();
+}
+
+/**
+ * Check if daily post task is completed for today (UTC)
+ * Resets at 00:00 UTC
  */
 export async function isDailyPostCompleted(walletAddress: string): Promise<boolean> {
   const db = await getDb();
@@ -364,7 +370,7 @@ export async function isDailyPostCompleted(walletAddress: string): Promise<boole
     throw new Error("Database not available");
   }
 
-  const todayJST = getJSTDateString();
+  const todayUTC = getUTCDateString();
 
   const result = await db
     .select()
@@ -373,7 +379,7 @@ export async function isDailyPostCompleted(walletAddress: string): Promise<boole
       and(
         eq(taskCompletions.walletAddress, walletAddress),
         eq(taskCompletions.taskType, "daily_post"),
-        eq(taskCompletions.completionDate, todayJST)
+        eq(taskCompletions.completionDate, todayUTC)
       )
     )
     .limit(1);
@@ -402,7 +408,7 @@ export async function completeDailyPost(
     return { success: false, points: profile.totalPoints, message: "X account not connected" };
   }
 
-  const todayJST = getJSTDateString();
+  const todayUTC = getUTCDateString();
   const alreadyCompleted = await isDailyPostCompleted(walletAddress);
 
   if (alreadyCompleted) {
@@ -423,7 +429,7 @@ export async function completeDailyPost(
     walletAddress,
     taskType: "daily_post",
     pointsAwarded: bonusPoints,
-    completionDate: todayJST,
+    completionDate: todayUTC,
     metadata: tweetUrl ? JSON.stringify({ tweetUrl }) : null,
   });
 
@@ -433,7 +439,7 @@ export async function completeDailyPost(
     transactionType: "daily_post",
     pointsChange: bonusPoints,
     balanceAfter: newTotal,
-    description: `Daily X post completed (${todayJST})`,
+    description: `Daily X post completed (${todayUTC} UTC)`,
   });
 
   return { success: true, points: newTotal, message: "Daily post completed!" };
@@ -561,12 +567,12 @@ export async function getAdminStats() {
     .where(eq(walletProfiles.discordConnected, true));
   const discordConnectedCount = discordConnectedResult[0]?.count || 0;
 
-  // Today's task completions (JST)
-  const todayJST = getJSTDateString();
+  // Today's task completions (UTC)
+  const todayUTC = getUTCDateString();
   const todayTasksResult = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(taskCompletions)
-    .where(eq(taskCompletions.completionDate, todayJST));
+    .where(eq(taskCompletions.completionDate, todayUTC));
   const todayTaskCompletions = todayTasksResult[0]?.count || 0;
 
   // Users by chain type

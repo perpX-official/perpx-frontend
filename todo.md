@@ -360,3 +360,18 @@
 - [x] Allow users to post with @perpXFi mention
 - [x] Verify post URL and award points
 - [x] Test the complete flow
+
+
+## X API Tweet Verification & UTC Reset
+- [ ] Set up X Bearer Token as environment variable
+- [ ] Implement X API tweet verification (check @perpXFi mention)
+- [ ] Implement tweet deletion detection and point revocation
+- [ ] Change daily task reset time from JST to UTC (00:00 UTC)
+- [ ] Test the complete flow
+
+
+## UI Improvements & UTC Reset
+- [x] Change daily task reset from JST to UTC (00:00 UTC)
+- [x] Fix modal background transparency (make text more readable)
+- [x] Unify Coming Soon section layout (z-index adjusted)
+- [x] Fix More dropdown z-index (show above blur overlay)

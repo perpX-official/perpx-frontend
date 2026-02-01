@@ -135,7 +135,7 @@ export default function Header() {
                           className="fixed inset-0 z-40" 
                           onClick={() => setIsMoreOpen(false)}
                         />
-                        <div className="absolute top-full right-0 mt-2 w-96 glass-menu rounded-xl shadow-xl border border-white/10 overflow-hidden z-50">
+                        <div className="absolute top-full right-0 mt-2 w-96 glass-menu rounded-xl shadow-xl border border-white/10 overflow-hidden z-[60]">
                           <div className="grid grid-cols-2 gap-px bg-white/5">
                             {moreItems.map((item, index) => (
                               item.external ? (

@@ -493,7 +493,7 @@ export default function Rewards() {
 
       {/* Tweet URL Verification Modal */}
       <Dialog open={showTweetModal} onOpenChange={setShowTweetModal}>
-        <DialogContent className="sm:max-w-[500px] bg-card border-white/10">
+        <DialogContent className="sm:max-w-[500px] bg-[#1a1a2e] border-white/10 backdrop-blur-none">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Twitter className="h-5 w-5 text-primary" />

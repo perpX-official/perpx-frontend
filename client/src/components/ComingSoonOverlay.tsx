@@ -3,7 +3,7 @@ import { Lock, Construction, Rocket } from 'lucide-react';
 
 export function ComingSoonOverlay() {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm select-none overflow-hidden">
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm select-none overflow-hidden pointer-events-auto">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
