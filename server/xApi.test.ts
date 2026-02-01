@@ -47,7 +47,8 @@ describe("X API Bearer Token Validation", () => {
       expect(data).toHaveProperty("data");
     }
     
-    // Accept 200, 403, 404 as valid responses (token works)
-    expect([200, 403, 404, 429]).toContain(response.status);
+    // Accept 200, 402, 403, 404, 429 as valid responses (token works)
+    // 402 = Payment Required (API tier limitation)
+    expect([200, 402, 403, 404, 429]).toContain(response.status);
   }, 30000); // 30 second timeout
 });

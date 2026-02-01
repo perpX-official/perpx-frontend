@@ -1,5 +1,6 @@
-import { and, eq, sql, inArray } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { and, eq, sql, inArray, desc, asc } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { nanoid } from "nanoid";
 import { 
   InsertUser, 
@@ -11,15 +12,19 @@ import {
   InsertTaskCompletion,
   InsertPointsHistory
 } from "../drizzle/schema";
-import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _client: ReturnType<typeof postgres> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
+// Lazily create the drizzle instance for PostgreSQL/Supabase
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _client = postgres(process.env.DATABASE_URL, {
+        ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+        max: 10,
+      });
+      _db = drizzle(_client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -28,9 +33,14 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
+// Get admin wallet address from environment
+function getAdminWalletAddress(): string | undefined {
+  return process.env.ADMIN_WALLET_ADDRESS;
+}
+
+export async function upsertUserByWallet(walletAddress: string, name?: string): Promise<void> {
+  if (!walletAddress) {
+    throw new Error("Wallet address is required for upsert");
   }
 
   const db = await getDb();
@@ -40,61 +50,52 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.walletAddress, walletAddress))
+      .limit(1);
 
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
+    const isAdmin = walletAddress.toLowerCase() === getAdminWalletAddress()?.toLowerCase();
 
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
+    if (existingUser.length > 0) {
+      // Update existing user
+      await db
+        .update(users)
+        .set({
+          lastSignedIn: new Date(),
+          updatedAt: new Date(),
+          ...(name && { name }),
+          ...(isAdmin && { role: 'admin' as const }),
+        })
+        .where(eq(users.walletAddress, walletAddress));
+    } else {
+      // Insert new user
+      await db.insert(users).values({
+        walletAddress,
+        name: name || null,
+        role: isAdmin ? 'admin' : 'user',
+        lastSignedIn: new Date(),
+      });
     }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
   }
 }
 
-export async function getUserByOpenId(openId: string) {
+export async function getUserByWallet(walletAddress: string) {
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.walletAddress, walletAddress))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -257,7 +258,6 @@ export async function connectXAccount(
 
 /**
  * Disconnect X account - deducts only the X connect bonus (100 points)
- * This prevents users from repeatedly connecting/disconnecting to farm points
  */
 export async function disconnectXAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
@@ -346,7 +346,6 @@ export async function connectDiscordAccount(
 
 /**
  * Disconnect Discord account - deducts only the Discord connect bonus (100 points)
- * This prevents users from repeatedly connecting/disconnecting to farm points
  */
 export async function disconnectDiscordAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
@@ -393,13 +392,6 @@ export async function disconnectDiscordAccount(walletAddress: string): Promise<{
 export function getUTCDateString(): string {
   const now = new Date();
   return now.toISOString().split('T')[0];
-}
-
-/**
- * @deprecated Use getUTCDateString instead - kept for backward compatibility
- */
-export function getJSTDateString(): string {
-  return getUTCDateString();
 }
 
 /**
@@ -500,7 +492,7 @@ export async function getPointsHistory(walletAddress: string, limit = 50) {
     .select()
     .from(pointsHistory)
     .where(eq(pointsHistory.walletAddress, walletAddress))
-    .orderBy(sql`${pointsHistory.createdAt} DESC`)
+    .orderBy(desc(pointsHistory.createdAt))
     .limit(limit);
 
   return result;
@@ -519,7 +511,7 @@ export async function getTaskCompletions(walletAddress: string) {
     .select()
     .from(taskCompletions)
     .where(eq(taskCompletions.walletAddress, walletAddress))
-    .orderBy(sql`${taskCompletions.completedAt} DESC`);
+    .orderBy(desc(taskCompletions.completedAt));
 
   return result;
 }
@@ -547,7 +539,7 @@ export async function getAllWalletProfiles(
 
   // Get total count
   const countResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(walletProfiles);
   const totalCount = countResult[0]?.count || 0;
 
@@ -559,7 +551,7 @@ export async function getAllWalletProfiles(
   const profiles = await db
     .select()
     .from(walletProfiles)
-    .orderBy(sortOrder === "desc" ? sql`${orderColumn} DESC` : sql`${orderColumn} ASC`)
+    .orderBy(sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn))
     .limit(limit)
     .offset(offset);
 
@@ -571,7 +563,7 @@ export async function getAllWalletProfiles(
     const taskCounts = await db
       .select({
         walletAddress: taskCompletions.walletAddress,
-        count: sql<number>`COUNT(*)`
+        count: sql<number>`COUNT(*)::int`
       })
       .from(taskCompletions)
       .where(and(
@@ -613,26 +605,26 @@ export async function getAdminStats() {
 
   // Total users
   const userCountResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(walletProfiles);
   const totalUsers = userCountResult[0]?.count || 0;
 
   // Total points distributed
   const pointsResult = await db
-    .select({ total: sql<number>`SUM(totalPoints)` })
+    .select({ total: sql<number>`COALESCE(SUM(total_points), 0)::int` })
     .from(walletProfiles);
   const totalPointsDistributed = pointsResult[0]?.total || 0;
 
   // X connected count
   const xConnectedResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(walletProfiles)
     .where(eq(walletProfiles.xConnected, true));
   const xConnectedCount = xConnectedResult[0]?.count || 0;
 
   // Discord connected count
   const discordConnectedResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(walletProfiles)
     .where(eq(walletProfiles.discordConnected, true));
   const discordConnectedCount = discordConnectedResult[0]?.count || 0;
@@ -640,7 +632,7 @@ export async function getAdminStats() {
   // Today's task completions (UTC)
   const todayUTC = getUTCDateString();
   const todayTasksResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(taskCompletions)
     .where(eq(taskCompletions.completionDate, todayUTC));
   const todayTaskCompletions = todayTasksResult[0]?.count || 0;
@@ -649,7 +641,7 @@ export async function getAdminStats() {
   const chainStatsResult = await db
     .select({
       chainType: walletProfiles.chainType,
-      count: sql<number>`COUNT(*)`,
+      count: sql<number>`COUNT(*)::int`,
     })
     .from(walletProfiles)
     .groupBy(walletProfiles.chainType);
@@ -688,55 +680,55 @@ export async function getUserActivityStats() {
     return date.toISOString().split('T')[0];
   };
 
-  // Get daily stats for the past 30 days (for daily/weekly/monthly views)
+  // Get daily stats for the past 30 days (PostgreSQL syntax)
   const dailyStats = await db
     .select({
-      date: sql<string>`DATE(createdAt)`,
-      newUsers: sql<number>`COUNT(*)`
+      date: sql<string>`DATE(created_at)::text`,
+      newUsers: sql<number>`COUNT(*)::int`
     })
     .from(walletProfiles)
-    .where(sql`createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`)
-    .groupBy(sql`DATE(createdAt)`)
-    .orderBy(sql`DATE(createdAt) ASC`);
+    .where(sql`created_at >= NOW() - INTERVAL '30 days'`)
+    .groupBy(sql`DATE(created_at)`)
+    .orderBy(sql`DATE(created_at) ASC`);
 
   // Get daily task completions for the past 30 days
   const dailyTaskStats = await db
     .select({
       date: taskCompletions.completionDate,
-      completions: sql<number>`COUNT(DISTINCT walletAddress)`
+      completions: sql<number>`COUNT(DISTINCT wallet_address)::int`
     })
     .from(taskCompletions)
-    .where(sql`completionDate >= ${getDateNDaysAgo(30)}`)
+    .where(sql`completion_date >= ${getDateNDaysAgo(30)}`)
     .groupBy(taskCompletions.completionDate)
-    .orderBy(sql`completionDate ASC`);
+    .orderBy(sql`completion_date ASC`);
 
-  // Get monthly stats for the past 12 months (for yearly view)
+  // Get monthly stats for the past 12 months (PostgreSQL syntax)
   const monthlyStats = await db
     .select({
-      month: sql<string>`DATE_FORMAT(createdAt, '%Y-%m')`,
-      newUsers: sql<number>`COUNT(*)`
+      month: sql<string>`TO_CHAR(created_at, 'YYYY-MM')`,
+      newUsers: sql<number>`COUNT(*)::int`
     })
     .from(walletProfiles)
-    .where(sql`createdAt >= DATE_SUB(NOW(), INTERVAL 12 MONTH)`)
-    .groupBy(sql`DATE_FORMAT(createdAt, '%Y-%m')`)
-    .orderBy(sql`DATE_FORMAT(createdAt, '%Y-%m') ASC`);
+    .where(sql`created_at >= NOW() - INTERVAL '12 months'`)
+    .groupBy(sql`TO_CHAR(created_at, 'YYYY-MM')`)
+    .orderBy(sql`TO_CHAR(created_at, 'YYYY-MM') ASC`);
 
   // Get monthly task completions for the past 12 months
   const monthlyTaskStats = await db
     .select({
-      month: sql<string>`DATE_FORMAT(completedAt, '%Y-%m')`,
-      completions: sql<number>`COUNT(DISTINCT walletAddress)`
+      month: sql<string>`TO_CHAR(completed_at, 'YYYY-MM')`,
+      completions: sql<number>`COUNT(DISTINCT wallet_address)::int`
     })
     .from(taskCompletions)
-    .where(sql`completedAt >= DATE_SUB(NOW(), INTERVAL 12 MONTH)`)
-    .groupBy(sql`DATE_FORMAT(completedAt, '%Y-%m')`)
-    .orderBy(sql`DATE_FORMAT(completedAt, '%Y-%m') ASC`);
+    .where(sql`completed_at >= NOW() - INTERVAL '12 months'`)
+    .groupBy(sql`TO_CHAR(completed_at, 'YYYY-MM')`)
+    .orderBy(sql`TO_CHAR(completed_at, 'YYYY-MM') ASC`);
 
   // All-time cumulative stats
   const allTimeStats = await db
     .select({
-      totalUsers: sql<number>`COUNT(*)`,
-      totalTaskCompletions: sql<number>`(SELECT COUNT(DISTINCT walletAddress) FROM task_completions)`
+      totalUsers: sql<number>`COUNT(*)::int`,
+      totalTaskCompletions: sql<number>`(SELECT COUNT(DISTINCT wallet_address)::int FROM task_completions)`
     })
     .from(walletProfiles);
 
@@ -768,18 +760,15 @@ export async function searchWalletProfiles(query: string, limit = 20) {
     .select()
     .from(walletProfiles)
     .where(
-      sql`${walletProfiles.walletAddress} LIKE ${searchPattern} 
-          OR ${walletProfiles.xUsername} LIKE ${searchPattern} 
-          OR ${walletProfiles.discordUsername} LIKE ${searchPattern}`
+      sql`wallet_address ILIKE ${searchPattern} 
+          OR x_username ILIKE ${searchPattern} 
+          OR discord_username ILIKE ${searchPattern}`
     )
     .limit(limit);
 
   return profiles;
 }
 
-/**
- * Manually adjust user points (admin only)
- */
 /**
  * Get daily post completions with tweet URLs for admin verification
  */
@@ -796,7 +785,7 @@ export async function getDailyPostCompletions(
 
   // Get total count
   const countResult = await db
-    .select({ count: sql<number>`COUNT(*)` })
+    .select({ count: sql<number>`COUNT(*)::int` })
     .from(taskCompletions)
     .where(eq(taskCompletions.taskType, "daily_post"));
   const totalCount = countResult[0]?.count || 0;
@@ -815,7 +804,7 @@ export async function getDailyPostCompletions(
     .from(taskCompletions)
     .leftJoin(walletProfiles, eq(taskCompletions.walletAddress, walletProfiles.walletAddress))
     .where(eq(taskCompletions.taskType, "daily_post"))
-    .orderBy(sql`${taskCompletions.completedAt} DESC`)
+    .orderBy(desc(taskCompletions.completedAt))
     .limit(limit)
     .offset(offset);
 
@@ -847,6 +836,9 @@ export async function getDailyPostCompletions(
   };
 }
 
+/**
+ * Manually adjust user points (admin only)
+ */
 export async function adjustUserPoints(
   walletAddress: string,
   pointsChange: number,

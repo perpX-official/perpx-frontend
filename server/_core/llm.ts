@@ -1,4 +1,7 @@
-import { ENV } from "./env";
+/**
+ * LLM helper using OpenAI API
+ * Requires OPENAI_API_KEY environment variable
+ */
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -19,7 +22,7 @@ export type FileContent = {
   type: "file_url";
   file_url: {
     url: string;
-    mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4" ;
+    mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4";
   };
 };
 
@@ -66,6 +69,7 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
+  model?: string;
 };
 
 export type ToolCall = {
@@ -120,19 +124,9 @@ const normalizeContentPart = (
   if (typeof part === "string") {
     return { type: "text", text: part };
   }
-
-  if (part.type === "text") {
+  if (part.type === "text" || part.type === "image_url" || part.type === "file_url") {
     return part;
   }
-
-  if (part.type === "image_url") {
-    return part;
-  }
-
-  if (part.type === "file_url") {
-    return part;
-  }
-
   throw new Error("Unsupported message content part");
 };
 
@@ -143,31 +137,16 @@ const normalizeMessage = (message: Message) => {
     const content = ensureArray(message.content)
       .map(part => (typeof part === "string" ? part : JSON.stringify(part)))
       .join("\n");
-
-    return {
-      role,
-      name,
-      tool_call_id,
-      content,
-    };
+    return { role, name, tool_call_id, content };
   }
 
   const contentParts = ensureArray(message.content).map(normalizeContentPart);
 
-  // If there's only text content, collapse to a single string for compatibility
   if (contentParts.length === 1 && contentParts[0].type === "text") {
-    return {
-      role,
-      name,
-      content: contentParts[0].text,
-    };
+    return { role, name, content: contentParts[0].text };
   }
 
-  return {
-    role,
-    name,
-    content: contentParts,
-  };
+  return { role, name, content: contentParts };
 };
 
 const normalizeToolChoice = (
@@ -182,42 +161,27 @@ const normalizeToolChoice = (
 
   if (toolChoice === "required") {
     if (!tools || tools.length === 0) {
-      throw new Error(
-        "tool_choice 'required' was provided but no tools were configured"
-      );
+      throw new Error("tool_choice 'required' needs tools");
     }
-
     if (tools.length > 1) {
-      throw new Error(
-        "tool_choice 'required' needs a single tool or specify the tool name explicitly"
-      );
+      throw new Error("tool_choice 'required' needs a single tool or explicit name");
     }
-
-    return {
-      type: "function",
-      function: { name: tools[0].function.name },
-    };
+    return { type: "function", function: { name: tools[0].function.name } };
   }
 
   if ("name" in toolChoice) {
-    return {
-      type: "function",
-      function: { name: toolChoice.name },
-    };
+    return { type: "function", function: { name: toolChoice.name } };
   }
 
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
-
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
+const getApiKey = () => {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
+  return key;
 };
 
 const normalizeResponseFormat = ({
@@ -237,13 +201,8 @@ const normalizeResponseFormat = ({
   | undefined => {
   const explicitFormat = responseFormat || response_format;
   if (explicitFormat) {
-    if (
-      explicitFormat.type === "json_schema" &&
-      !explicitFormat.json_schema?.schema
-    ) {
-      throw new Error(
-        "responseFormat json_schema requires a defined schema object"
-      );
+    if (explicitFormat.type === "json_schema" && !explicitFormat.json_schema?.schema) {
+      throw new Error("responseFormat json_schema requires a defined schema object");
     }
     return explicitFormat;
   }
@@ -265,8 +224,11 @@ const normalizeResponseFormat = ({
   };
 };
 
+/**
+ * Invoke OpenAI Chat Completions API
+ */
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const apiKey = getApiKey();
 
   const {
     messages,
@@ -277,10 +239,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
     responseFormat,
     response_format,
+    model = "gpt-4o-mini",
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model,
     messages: messages.map(normalizeMessage),
   };
 
@@ -288,17 +251,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tools = tools;
   }
 
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
+  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice, tools);
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
-  }
-
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -312,20 +267,18 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(
-      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
-    );
+    throw new Error(`LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`);
   }
 
   return (await response.json()) as InvokeResult;

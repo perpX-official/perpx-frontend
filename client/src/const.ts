@@ -1,23 +1,25 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
+export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "PerpDEX";
 
 export const APP_LOGO =
   import.meta.env.VITE_APP_LOGO ||
-  "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
+  "https://placehold.co/128x128/0ABAB5/FFFFFF?text=PX";
 
-// Generate login URL at runtime so redirect URI reflects the current origin.
+/**
+ * Get login URL - for wallet-based auth, this returns the connect wallet page
+ * Note: With wallet authentication, users connect their wallet directly
+ * This function is kept for compatibility but redirects to home
+ */
 export const getLoginUrl = () => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
-  const state = btoa(redirectUri);
+  // With wallet-based auth, we don't need OAuth redirect
+  // Users connect wallet directly on the page
+  return "/";
+};
 
-  const url = new URL(`${oauthPortalUrl}/app-auth`);
-  url.searchParams.set("appId", appId);
-  url.searchParams.set("redirectUri", redirectUri);
-  url.searchParams.set("state", state);
-  url.searchParams.set("type", "signIn");
-
-  return url.toString();
+/**
+ * API base URL for backend calls
+ */
+export const getApiBaseUrl = () => {
+  return import.meta.env.VITE_API_URL || "";
 };

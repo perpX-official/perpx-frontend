@@ -10,23 +10,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface ManusDialogProps {
+interface WalletConnectDialogProps {
   title?: string;
   logo?: string;
   open?: boolean;
-  onLogin: () => void;
+  onConnect: () => void;
   onOpenChange?: (open: boolean) => void;
   onClose?: () => void;
 }
 
-export function ManusDialog({
+export function WalletConnectDialog({
   title = APP_TITLE,
   logo = APP_LOGO,
   open = false,
-  onLogin,
+  onConnect,
   onOpenChange,
   onClose,
-}: ManusDialogProps) {
+}: WalletConnectDialogProps) {
   const [internalOpen, setInternalOpen] = useState(open);
 
   useEffect(() => {
@@ -63,20 +63,23 @@ export function ManusDialog({
             {title}
           </DialogTitle>
           <DialogDescription className="text-sm text-[#858481] leading-5 tracking-[-0.154px]">
-            Please login with Manus to continue
+            Connect your wallet to continue
           </DialogDescription>
         </div>
 
         <DialogFooter className="px-5 py-5">
-          {/* Login button */}
+          {/* Connect button */}
           <Button
-            onClick={onLogin}
+            onClick={onConnect}
             className="w-full h-10 bg-[#1a1a19] hover:bg-[#1a1a19]/90 text-white rounded-[10px] text-sm font-medium leading-5 tracking-[-0.154px]"
           >
-            Login with Manus
+            Connect Wallet
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
+// Keep ManusDialog as alias for backwards compatibility
+export { WalletConnectDialog as ManusDialog };

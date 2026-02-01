@@ -455,3 +455,13 @@
 - [x] Update WalletConnect Project ID (7b3c2778deabef041da731133fab3568)
 - [x] Create Alibaba Cloud deployment guide
 - [x] Prepare code for GitHub push (README exists, .gitignore configured)
+
+
+## Current Tasks (2026-02-02 Session 11) - Supabase + Vercel Migration
+- [x] Identify changes needed for Supabase migration
+- [x] Update database connection for Supabase (PostgreSQL)
+- [x] Replace Manus OAuth with wallet signature authentication
+- [x] Adapt code for Vercel Serverless Functions
+- [x] Create README and DEPLOYMENT.md for GitHub
+- [x] Remove GMX references from code and comments
+- [x] Test and save checkpoint for GitHub export

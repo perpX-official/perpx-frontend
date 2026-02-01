@@ -14,7 +14,7 @@ import {
   completeDailyPost,
   isDailyPostCompleted,
   getPointsHistory,
-  getJSTDateString,
+  getUTCDateString,
   getAllWalletProfiles,
   getAdminStats,
   searchWalletProfiles,
@@ -50,12 +50,12 @@ export const appRouter = router({
         const dailyPostCompleted = profile.xConnected 
           ? await isDailyPostCompleted(input.walletAddress)
           : false;
-        const todayJST = getJSTDateString();
+        const todayUTC = getUTCDateString();
         
         return {
           ...profile,
           dailyPostCompleted,
-          todayJST,
+          todayUTC,
         };
       }),
 

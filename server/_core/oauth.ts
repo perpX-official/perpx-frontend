@@ -4,50 +4,93 @@ import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 
-function getQueryParam(req: Request, key: string): string | undefined {
-  const value = req.query[key];
-  return typeof value === "string" ? value : undefined;
-}
-
+/**
+ * Register wallet-based authentication routes
+ * Replaces Manus OAuth with wallet signature verification
+ */
 export function registerOAuthRoutes(app: Express) {
-  app.get("/api/oauth/callback", async (req: Request, res: Response) => {
-    const code = getQueryParam(req, "code");
-    const state = getQueryParam(req, "state");
+  /**
+   * Wallet authentication endpoint
+   * Called after frontend wallet signature verification
+   */
+  app.post("/api/auth/wallet", async (req: Request, res: Response) => {
+    const { walletAddress, signature, message, chainType } = req.body;
 
-    if (!code || !state) {
-      res.status(400).json({ error: "code and state are required" });
+    if (!walletAddress) {
+      res.status(400).json({ error: "walletAddress is required" });
       return;
     }
 
     try {
-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
-
-      if (!userInfo.openId) {
-        res.status(400).json({ error: "openId missing from user info" });
-        return;
+      // If signature is provided, verify it
+      if (signature && message) {
+        const isValid = await sdk.verifyWalletSignature(message, signature, walletAddress);
+        if (!isValid) {
+          res.status(401).json({ error: "Invalid signature" });
+          return;
+        }
       }
 
-      await db.upsertUser({
-        openId: userInfo.openId,
-        name: userInfo.name || null,
-        email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-        lastSignedIn: new Date(),
-      });
+      // Create or update user by wallet address
+      await db.upsertUserByWallet(walletAddress);
 
-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
-        name: userInfo.name || "",
+      // Create session token
+      const sessionToken = await sdk.createSessionToken(walletAddress, {
         expiresInMs: ONE_YEAR_MS,
       });
 
+      // Set session cookie
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      res.redirect(302, "/");
+      // Get or create wallet profile for rewards system
+      const chain = chainType || "evm";
+      const profile = await db.getOrCreateWalletProfile(walletAddress, chain);
+
+      res.json({ 
+        success: true, 
+        walletAddress,
+        profile,
+      });
     } catch (error) {
-      console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+      console.error("[Auth] Wallet authentication failed", error);
+      res.status(500).json({ error: "Authentication failed" });
     }
+  });
+
+  /**
+   * Logout endpoint
+   */
+  app.post("/api/auth/logout", async (req: Request, res: Response) => {
+    try {
+      const cookieOptions = getSessionCookieOptions(req);
+      res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[Auth] Logout failed", error);
+      res.status(500).json({ error: "Logout failed" });
+    }
+  });
+
+  /**
+   * Get current session info
+   */
+  app.get("/api/auth/me", async (req: Request, res: Response) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user) {
+        res.json({ authenticated: false, user: null });
+        return;
+      }
+      res.json({ authenticated: true, user });
+    } catch (error) {
+      res.json({ authenticated: false, user: null });
+    }
+  });
+
+  // Keep legacy OAuth callback for backwards compatibility (redirects to home)
+  app.get("/api/oauth/callback", async (req: Request, res: Response) => {
+    // Legacy OAuth is no longer supported - redirect to home
+    res.redirect(302, "/");
   });
 }

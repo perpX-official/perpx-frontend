@@ -9,7 +9,7 @@ PerpX is a decentralized perpetual exchange built on Base, offering up to 100x l
 ## Features
 
 - **100x Leverage**: Maximum capital efficiency for experienced traders
-- **Deep Liquidity**: GMX-style liquidity pools ensure minimal slippage
+- **Deep Liquidity**: Oracle-based liquidity pools ensure minimal slippage
 - **Lightning Fast**: Built on Base for sub-second execution
 - **Zero Fees**: No trading fees during launch period
 - **Decentralized**: Non-custodial, trustless trading
@@ -128,7 +128,7 @@ This project is deployed on Vercel and accessible at:
 
 ## Smart Contract Architecture
 
-PerpX uses a GMX-style architecture with the following components:
+PerpX uses an Oracle-based architecture with the following components:
 
 1. **Vault**: Liquidity pool for traders to trade against
 2. **Position Manager**: Manages long/short positions

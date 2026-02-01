@@ -459,7 +459,7 @@ export default function Rewards() {
           <div className="mb-4 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">Rewards Center</h1>
             <p className="text-sm sm:text-base text-white/60">Complete tasks to earn points and unlock exclusive benefits.</p>
-            <p className="text-xs text-white/40 mt-1">Today (UTC): {profile.todayJST}</p>
+            <p className="text-xs text-white/40 mt-1">Today (UTC): {profile.todayUTC}</p>
           </div>
 
           {/* Total Points */}
