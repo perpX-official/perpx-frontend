@@ -9,8 +9,6 @@ import { DemoTradingProvider } from "./contexts/DemoTradingContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
 import Home from "./pages/Home";
 import Trade from "./pages/Trade";
@@ -30,6 +28,7 @@ import Blog from "./pages/Blog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Admin from "./pages/Admin";
+
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -66,23 +65,21 @@ function App() {
     <ErrorBoundary>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            <ThemeProvider
-              defaultTheme="dark"
-              // switchable
-            >
-              <LanguageProvider>
-                <DemoTradingProvider>
-<WalletProvider>
+          <ThemeProvider
+            defaultTheme="dark"
+            // switchable
+          >
+            <LanguageProvider>
+              <DemoTradingProvider>
+                <WalletProvider>
                   <TooltipProvider>
                     <Toaster />
                     <Router />
                   </TooltipProvider>
                 </WalletProvider>
-</DemoTradingProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </RainbowKitProvider>
+              </DemoTradingProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ErrorBoundary>
@@ -90,4 +87,3 @@ function App() {
 }
 
 export default App;
-

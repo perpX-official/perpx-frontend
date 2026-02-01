@@ -320,3 +320,9 @@
 - [ ] Fix build/deployment configuration
 - [ ] Test on published URL
 - [ ] Verify OAuth flow works
+
+
+## MetaMask Only Integration
+- [x] Remove WalletConnect/RainbowKit dependency
+- [x] Implement MetaMask direct connection
+- [ ] Test on production

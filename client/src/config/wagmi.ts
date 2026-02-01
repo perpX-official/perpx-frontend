@@ -1,11 +1,12 @@
-import { http } from 'wagmi'
+import { http, createConfig } from 'wagmi'
 import { mainnet, arbitrum, base, optimism } from 'wagmi/chains'
-import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { injected } from 'wagmi/connectors'
 
-export const config = getDefaultConfig({
-  appName: 'PerpX',
-  projectId: 'c0d6e8e3c8f8b4c5e6f7a8b9c0d1e2f3',
+export const config = createConfig({
   chains: [mainnet, arbitrum, base, optimism],
+  connectors: [
+    injected(), // MetaMask and other injected wallets
+  ],
   transports: {
     [mainnet.id]: http(),
     [arbitrum.id]: http(),
@@ -13,4 +14,3 @@ export const config = getDefaultConfig({
     [optimism.id]: http(),
   },
 })
-
