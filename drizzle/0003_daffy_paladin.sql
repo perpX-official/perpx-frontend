@@ -1,0 +1,1 @@
+ALTER TABLE `points_history` MODIFY COLUMN `transactionType` enum('connect_bonus','x_connect','x_disconnect','discord_connect','discord_disconnect','daily_post','referral_bonus','admin_adjustment','other') NOT NULL;

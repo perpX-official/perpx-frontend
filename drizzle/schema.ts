@@ -92,7 +92,9 @@ export const pointsHistory = mysqlTable("points_history", {
   transactionType: mysqlEnum("transactionType", [
     "connect_bonus",
     "x_connect",
+    "x_disconnect",
     "discord_connect",
+    "discord_disconnect",
     "daily_post",
     "referral_bonus",
     "admin_adjustment",

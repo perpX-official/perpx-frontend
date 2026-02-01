@@ -22,6 +22,13 @@
       "when": 1769929539165,
       "tag": "0002_reflective_drax",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1769936517546,
+      "tag": "0003_daffy_paladin",
+      "breakpoints": true
     }
   ]
 }

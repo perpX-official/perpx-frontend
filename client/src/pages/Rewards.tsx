@@ -43,6 +43,13 @@ export default function Rewards() {
   const [tweetUrl, setTweetUrl] = useState("");
   const [tweetUrlError, setTweetUrlError] = useState("");
 
+  // 2-step disconnect confirmation dialog state
+  const [disconnectDialog, setDisconnectDialog] = useState<{
+    open: boolean;
+    platform: 'twitter' | 'discord' | null;
+    step: 1 | 2;
+  }>({ open: false, platform: null, step: 1 });
+
   // Get profile from backend
   const { data: profile, refetch: refetchProfile, isLoading: profileLoading } = trpc.rewards.getProfile.useQuery(
     { walletAddress: address || "", chainType: chainType || "evm" },
@@ -218,16 +225,30 @@ export default function Rewards() {
     return () => window.removeEventListener('message', handleMessage);
   }, [address]);
 
+  // Open 2-step disconnect confirmation dialog
   const handleDisconnectSocial = (platform: 'twitter' | 'discord') => {
     if (!address) return;
-    
-    if (confirm(`Are you sure you want to disconnect your ${platform} account?`)) {
-      if (platform === 'twitter') {
-        disconnectX.mutate({ walletAddress: address });
+    setDisconnectDialog({ open: true, platform, step: 1 });
+  };
+
+  // Handle disconnect dialog actions
+  const handleDisconnectDialogAction = () => {
+    if (disconnectDialog.step === 1) {
+      // Move to step 2
+      setDisconnectDialog(prev => ({ ...prev, step: 2 }));
+    } else {
+      // Execute disconnect
+      if (disconnectDialog.platform === 'twitter') {
+        disconnectX.mutate({ walletAddress: address! });
       } else {
-        disconnectDiscord.mutate({ walletAddress: address });
+        disconnectDiscord.mutate({ walletAddress: address! });
       }
+      setDisconnectDialog({ open: false, platform: null, step: 1 });
     }
+  };
+
+  const closeDisconnectDialog = () => {
+    setDisconnectDialog({ open: false, platform: null, step: 1 });
   };
 
   // Open Twitter Intent with @perpXFi mention
@@ -597,6 +618,71 @@ export default function Rewards() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
               Verify & Claim Points
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2-Step Disconnect Confirmation Dialog */}
+      <Dialog open={disconnectDialog.open} onOpenChange={(open) => !open && closeDisconnectDialog()}>
+        <DialogContent className="bg-[#0a0a0a] border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-white">
+              {disconnectDialog.step === 1 ? (
+                <span className="flex items-center gap-2">
+                  <Unplug className="h-5 w-5 text-red-500" />
+                  Disconnect {disconnectDialog.platform === 'twitter' ? 'X' : 'Discord'}?
+                </span>
+              ) : (
+                <span className="flex items-center gap-2 text-red-500">
+                  <Unplug className="h-5 w-5" />
+                  Final Confirmation
+                </span>
+              )}
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              {disconnectDialog.step === 1 ? (
+                <>
+                  Are you sure you want to disconnect your {disconnectDialog.platform === 'twitter' ? 'X (Twitter)' : 'Discord'} account?
+                  <br /><br />
+                  <span className="text-red-400 font-semibold">
+                    Warning: All your accumulated points will be reset to 0.
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-red-400 font-bold text-base block mb-2">
+                    This action cannot be undone!
+                  </span>
+                  <span className="text-white/80">
+                    You will lose <span className="text-red-400 font-bold">{profile?.totalPoints || 0} points</span> permanently.
+                    <br /><br />
+                    If you reconnect later, you will need to start earning points from scratch.
+                  </span>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={closeDisconnectDialog}
+              className="border-white/20 text-white hover:bg-white/10 flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDisconnectDialogAction}
+              className={`flex-1 ${disconnectDialog.step === 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
+            >
+              {disconnectDialog.step === 1 ? (
+                'Continue'
+              ) : (
+                <>
+                  <Unplug className="h-4 w-4 mr-2" />
+                  Disconnect & Reset Points
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

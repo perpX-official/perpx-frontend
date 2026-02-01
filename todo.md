@@ -419,3 +419,10 @@
 - [x] Fix Coming Soon overlay z-index - changed from fixed z-40 to absolute z-30
 - [x] Fix Rewards page points display lag - added skeleton loading state to prevent 0 flash
 - [x] Improve mobile layout balance and spacing (Rewards page, task cards, Coming Soon overlay)
+
+
+## Current Tasks (2026-02-01 Session 5)
+- [x] Fix Coming Soon overlay mobile layout - make it fit on screen without scrolling (except Rewards page)
+- [x] Save Coming Soon background UI to separate file for future use (ComingSoonBackgroundUI component)
+- [x] Implement X/Discord disconnect point expiration - reset points to 0 when disconnected
+- [x] Add 2-step confirmation dialog for X/Discord disconnect ("Are you sure?" message)

@@ -256,24 +256,44 @@ export async function connectXAccount(
 }
 
 /**
- * Disconnect X account
+ * Disconnect X account - resets ALL points to 0
  */
-export async function disconnectXAccount(walletAddress: string): Promise<{ success: boolean; message: string }> {
+export async function disconnectXAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
 
+  const profile = await getWalletProfile(walletAddress);
+  if (!profile) {
+    return { success: false, points: 0, message: "Wallet profile not found" };
+  }
+
+  const previousPoints = profile.totalPoints;
+
+  // Reset all points to 0 and disconnect X
   await db
     .update(walletProfiles)
     .set({
       xConnected: false,
       xUsername: null,
       xConnectedAt: null,
+      totalPoints: 0,
     })
     .where(eq(walletProfiles.walletAddress, walletAddress));
 
-  return { success: true, message: "X account disconnected" };
+  // Record point loss in history
+  if (previousPoints > 0) {
+    await db.insert(pointsHistory).values({
+      walletAddress,
+      transactionType: "x_disconnect",
+      pointsChange: -previousPoints,
+      balanceAfter: 0,
+      description: "Points reset due to X account disconnection",
+    });
+  }
+
+  return { success: true, points: 0, message: "X account disconnected. All points have been reset." };
 }
 
 /**
@@ -324,24 +344,44 @@ export async function connectDiscordAccount(
 }
 
 /**
- * Disconnect Discord account
+ * Disconnect Discord account - resets ALL points to 0
  */
-export async function disconnectDiscordAccount(walletAddress: string): Promise<{ success: boolean; message: string }> {
+export async function disconnectDiscordAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
 
+  const profile = await getWalletProfile(walletAddress);
+  if (!profile) {
+    return { success: false, points: 0, message: "Wallet profile not found" };
+  }
+
+  const previousPoints = profile.totalPoints;
+
+  // Reset all points to 0 and disconnect Discord
   await db
     .update(walletProfiles)
     .set({
       discordConnected: false,
       discordUsername: null,
       discordConnectedAt: null,
+      totalPoints: 0,
     })
     .where(eq(walletProfiles.walletAddress, walletAddress));
 
-  return { success: true, message: "Discord account disconnected" };
+  // Record point loss in history
+  if (previousPoints > 0) {
+    await db.insert(pointsHistory).values({
+      walletAddress,
+      transactionType: "discord_disconnect",
+      pointsChange: -previousPoints,
+      balanceAfter: 0,
+      description: "Points reset due to Discord account disconnection",
+    });
+  }
+
+  return { success: true, points: 0, message: "Discord account disconnected. All points have been reset." };
 }
 
 /**
