@@ -18,13 +18,30 @@ import {
   Users,
   Wallet,
   Unplug,
-  Loader2
+  Loader2,
+  ExternalLink,
+  Link as LinkIcon
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Rewards() {
   const { t } = useLanguage();
   const { isConnected, address, chainType } = useRewardsState();
   const [loading, setLoading] = useState<string | null>(null);
+  
+  // Tweet URL verification modal state
+  const [showTweetModal, setShowTweetModal] = useState(false);
+  const [tweetUrl, setTweetUrl] = useState("");
+  const [tweetUrlError, setTweetUrlError] = useState("");
 
   // Get profile from backend
   const { data: profile, refetch: refetchProfile, isLoading: profileLoading } = trpc.rewards.getProfile.useQuery(
@@ -93,6 +110,8 @@ export default function Rewards() {
     onSuccess: (data) => {
       if (data.success) {
         toast.success(data.message);
+        setShowTweetModal(false);
+        setTweetUrl("");
         refetchProfile();
       } else {
         toast.info(data.message);
@@ -211,16 +230,44 @@ export default function Rewards() {
     }
   };
 
-  const handleSocialPost = () => {
+  // Open Twitter Intent with @perpXFi mention
+  const handleOpenTweetIntent = () => {
+    const tweetText = encodeURIComponent("Trading on @perpXFi! 🚀\n\nThe next-generation perpetual DEX with up to 100x leverage.\n\n#PerpX #DeFi #Crypto");
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+    window.open(tweetUrl, '_blank', 'width=600,height=400');
+  };
+
+  // Validate tweet URL format
+  const validateTweetUrl = (url: string): boolean => {
+    // Accept both twitter.com and x.com URLs
+    const tweetUrlPattern = /^https?:\/\/(twitter\.com|x\.com)\/[a-zA-Z0-9_]+\/status\/\d+/;
+    return tweetUrlPattern.test(url);
+  };
+
+  // Handle tweet URL submission
+  const handleSubmitTweetUrl = () => {
     if (!address) return;
     
-    // Open tweet intent
-    window.open('https://twitter.com/intent/tweet?text=Trading%20on%20PerpX!%20%23PerpX&url=https://perpx.com', '_blank');
+    const trimmedUrl = tweetUrl.trim();
     
-    // In production, verify via API - for now we just mark as complete after a delay
-    setTimeout(() => {
-      completeDailyPost.mutate({ walletAddress: address });
-    }, 5000);
+    if (!trimmedUrl) {
+      setTweetUrlError("Please enter your tweet URL");
+      return;
+    }
+    
+    if (!validateTweetUrl(trimmedUrl)) {
+      setTweetUrlError("Invalid tweet URL. Please enter a valid Twitter/X post URL (e.g., https://x.com/username/status/123456789)");
+      return;
+    }
+    
+    setTweetUrlError("");
+    completeDailyPost.mutate({ walletAddress: address, tweetUrl: trimmedUrl });
+  };
+
+  // Handle social post button click
+  const handleSocialPost = () => {
+    if (!address) return;
+    setShowTweetModal(true);
   };
 
   const tasks = [
@@ -268,8 +315,8 @@ export default function Rewards() {
     },
     {
       id: 'post-twitter-daily',
-      title: 'Post on X',
-      description: `Share your trading journey on X (Daily - Resets at 00:00 JST)`,
+      title: 'Post on X with @perpXFi',
+      description: `Mention @perpXFi in your post to earn points (Daily - Resets at 00:00 JST)`,
       points: 100,
       icon: Twitter,
       action: handleSocialPost,
@@ -302,7 +349,7 @@ export default function Rewards() {
                 {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
               </div>
               <p className="text-sm text-white/60 mb-2">{task.description}</p>
-              {task.connectedUsername && isCompleted && (
+              {task.connectedUsername && (
                 <p className="text-xs text-primary mb-2">@{task.connectedUsername}</p>
               )}
               <div className="text-primary font-bold">+{task.points} Points</div>
@@ -443,6 +490,93 @@ export default function Rewards() {
           </div>
         </div>
       )}
+
+      {/* Tweet URL Verification Modal */}
+      <Dialog open={showTweetModal} onOpenChange={setShowTweetModal}>
+        <DialogContent className="sm:max-w-[500px] bg-card border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Twitter className="h-5 w-5 text-primary" />
+              Post on X with @perpXFi
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              Complete this daily task to earn 100 points
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Step 1: Create Tweet */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">1</div>
+                <Label className="text-white font-medium">Create your post</Label>
+              </div>
+              <p className="text-sm text-white/60 ml-8">
+                Click the button below to open X with a pre-filled message mentioning @perpXFi
+              </p>
+              <Button 
+                onClick={handleOpenTweetIntent}
+                className="ml-8 neuro-button"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open X to Post
+              </Button>
+            </div>
+
+            {/* Step 2: Submit URL */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">2</div>
+                <Label className="text-white font-medium">Submit your post URL</Label>
+              </div>
+              <p className="text-sm text-white/60 ml-8">
+                After posting, copy the URL of your post and paste it below
+              </p>
+              <div className="ml-8 space-y-2">
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                  <Input
+                    placeholder="https://x.com/username/status/123456789"
+                    value={tweetUrl}
+                    onChange={(e) => {
+                      setTweetUrl(e.target.value);
+                      setTweetUrlError("");
+                    }}
+                    className="pl-10 bg-background border-white/20 text-white placeholder:text-white/40"
+                  />
+                </div>
+                {tweetUrlError && (
+                  <p className="text-sm text-red-500">{tweetUrlError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowTweetModal(false);
+                setTweetUrl("");
+                setTweetUrlError("");
+              }}
+              className="border-white/20 text-white hover:bg-white/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitTweetUrl}
+              disabled={completeDailyPost.isPending || !tweetUrl.trim()}
+              className="neuro-button"
+            >
+              {completeDailyPost.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Verify & Claim Points
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

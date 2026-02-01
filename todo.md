@@ -353,3 +353,10 @@
 - [x] Remove manualChunks configuration to avoid circular dependency errors
 - [x] Let Vite/Rollup handle chunking automatically
 - [x] Fix "Cannot access 'p3' before initialization" error on published site
+
+
+## Daily Task - X Post Mention Feature
+- [x] Implement X post mention functionality for daily tasks
+- [x] Allow users to post with @perpXFi mention
+- [x] Verify post URL and award points
+- [x] Test the complete flow
