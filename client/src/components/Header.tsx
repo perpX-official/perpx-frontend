@@ -44,6 +44,18 @@ export default function Header() {
     }
   }, [isConnected, address]);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const { language, setLanguage, t } = useLanguage();
 
   const isHomePage = location === "/";
@@ -55,10 +67,10 @@ export default function Header() {
     cn: '中文'
   };
 
+  // Removed API item from moreItems
   const moreItems = [
     { icon: MessageSquare, titleKey: 'more.feedback', descKey: 'more.feedbackDesc', href: '/feedback' },
     { icon: Shield, titleKey: 'more.vip', descKey: 'more.vipDesc', href: '/vip' },
-    { icon: FileText, titleKey: 'more.api', descKey: 'more.apiDesc', href: '/api' },
     { icon: BookOpen, titleKey: 'more.documentation', descKey: 'more.documentationDesc', href: '/docs' },
     { icon: FileText, titleKey: 'more.blog', descKey: 'more.blogDesc', href: '/blog' },
     { icon: MessageCircle, titleKey: 'more.discord', descKey: 'more.discordDesc', href: 'https://discord.gg/perpx', external: true },
@@ -254,10 +266,10 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Fixed with overflow scroll and prevent background scroll */}
       {mobileMenuOpen && !isHomePage && !isLegalPage && (
-        <div className="lg:hidden fixed inset-0 top-[57px] bg-background/95 backdrop-blur-sm z-40">
-          <div className="container mx-auto px-4 py-6">
+        <div className="lg:hidden fixed inset-0 top-[57px] bg-background/95 backdrop-blur-sm z-40 overflow-y-auto overscroll-contain">
+          <div className="container mx-auto px-4 py-6 pb-20">
             <div className="flex flex-col gap-4">
               <Link href="/trade" 
                 className={`text-lg font-medium py-2 ${location === "/trade" ? "text-white" : "text-white/60"}`}

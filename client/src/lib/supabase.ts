@@ -17,9 +17,11 @@ export interface WalletProfile {
   x_connected: boolean;
   x_username: string | null;
   x_connected_at: string | null;
+  x_bonus_revoked: boolean; // Track if X bonus was revoked (for reconnect restore)
   discord_connected: boolean;
   discord_username: string | null;
   discord_connected_at: string | null;
+  discord_bonus_revoked: boolean; // Track if Discord bonus was revoked (for reconnect restore)
   referral_code: string | null;
   referred_by: string | null;
   created_at: string;
@@ -33,6 +35,7 @@ export interface TaskCompletion {
   points_awarded: number;
   completion_date: string | null;
   metadata: string | null;
+  is_revoked: boolean; // Track if the task completion was revoked (e.g., tweet deleted)
   completed_at: string;
 }
 
@@ -96,7 +99,9 @@ export async function getOrCreateWalletProfile(
       total_points: 0,
       connect_bonus_claimed: false,
       x_connected: false,
+      x_bonus_revoked: false,
       discord_connected: false,
+      discord_bonus_revoked: false,
     })
     .select()
     .single();
@@ -172,6 +177,7 @@ export async function claimConnectBonus(walletAddress: string): Promise<{ succes
 
 /**
  * Connect X (Twitter) account
+ * If bonus was previously revoked (disconnected), restore the bonus on reconnect
  */
 export async function connectXAccount(
   walletAddress: string,
@@ -188,6 +194,9 @@ export async function connectXAccount(
 
   const bonusPoints = 100;
   const newTotal = profile.total_points + bonusPoints;
+  
+  // Check if this is a reconnection (bonus was previously revoked)
+  const isReconnect = profile.x_bonus_revoked;
 
   // Update profile
   const { error: updateError } = await supabase
@@ -196,6 +205,7 @@ export async function connectXAccount(
       x_connected: true,
       x_username: xUsername,
       x_connected_at: new Date().toISOString(),
+      x_bonus_revoked: false, // Reset revoked status on reconnect
       total_points: newTotal,
     })
     .eq('wallet_address', walletAddress);
@@ -211,14 +221,20 @@ export async function connectXAccount(
     transaction_type: 'x_connect',
     points_change: bonusPoints,
     balance_after: newTotal,
-    description: `Connected X account: @${xUsername}`,
+    description: isReconnect 
+      ? `Reconnected X account: @${xUsername} - Bonus restored!`
+      : `Connected X account: @${xUsername}`,
   });
 
-  return { success: true, points: newTotal, message: 'X account connected!' };
+  const message = isReconnect 
+    ? 'X account reconnected! Your bonus has been restored.'
+    : 'X account connected!';
+
+  return { success: true, points: newTotal, message };
 }
 
 /**
- * Disconnect X account
+ * Disconnect X account - revokes the 100pt bonus
  */
 export async function disconnectXAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const profile = await getWalletProfile(walletAddress);
@@ -229,13 +245,14 @@ export async function disconnectXAccount(walletAddress: string): Promise<{ succe
   const xConnectBonus = 100;
   const newTotal = Math.max(0, profile.total_points - xConnectBonus);
 
-  // Update profile
+  // Update profile - mark bonus as revoked for potential future reconnect
   const { error: updateError } = await supabase
     .from('wallet_profiles')
     .update({
       x_connected: false,
       x_username: null,
       x_connected_at: null,
+      x_bonus_revoked: true, // Mark as revoked so reconnect can restore
       total_points: newTotal,
     })
     .eq('wallet_address', walletAddress);
@@ -259,6 +276,7 @@ export async function disconnectXAccount(walletAddress: string): Promise<{ succe
 
 /**
  * Connect Discord account
+ * If bonus was previously revoked (disconnected), restore the bonus on reconnect
  */
 export async function connectDiscordAccount(
   walletAddress: string,
@@ -275,6 +293,9 @@ export async function connectDiscordAccount(
 
   const bonusPoints = 100;
   const newTotal = profile.total_points + bonusPoints;
+  
+  // Check if this is a reconnection (bonus was previously revoked)
+  const isReconnect = profile.discord_bonus_revoked;
 
   // Update profile
   const { error: updateError } = await supabase
@@ -283,6 +304,7 @@ export async function connectDiscordAccount(
       discord_connected: true,
       discord_username: discordUsername,
       discord_connected_at: new Date().toISOString(),
+      discord_bonus_revoked: false, // Reset revoked status on reconnect
       total_points: newTotal,
     })
     .eq('wallet_address', walletAddress);
@@ -298,14 +320,20 @@ export async function connectDiscordAccount(
     transaction_type: 'discord_connect',
     points_change: bonusPoints,
     balance_after: newTotal,
-    description: `Connected Discord account: ${discordUsername}`,
+    description: isReconnect 
+      ? `Reconnected Discord account: ${discordUsername} - Bonus restored!`
+      : `Connected Discord account: ${discordUsername}`,
   });
 
-  return { success: true, points: newTotal, message: 'Discord account connected!' };
+  const message = isReconnect 
+    ? 'Discord account reconnected! Your bonus has been restored.'
+    : 'Discord account connected!';
+
+  return { success: true, points: newTotal, message };
 }
 
 /**
- * Disconnect Discord account
+ * Disconnect Discord account - revokes the 100pt bonus
  */
 export async function disconnectDiscordAccount(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
   const profile = await getWalletProfile(walletAddress);
@@ -316,13 +344,14 @@ export async function disconnectDiscordAccount(walletAddress: string): Promise<{
   const discordConnectBonus = 100;
   const newTotal = Math.max(0, profile.total_points - discordConnectBonus);
 
-  // Update profile
+  // Update profile - mark bonus as revoked for potential future reconnect
   const { error: updateError } = await supabase
     .from('wallet_profiles')
     .update({
       discord_connected: false,
       discord_username: null,
       discord_connected_at: null,
+      discord_bonus_revoked: true, // Mark as revoked so reconnect can restore
       total_points: newTotal,
     })
     .eq('wallet_address', walletAddress);
@@ -345,14 +374,14 @@ export async function disconnectDiscordAccount(walletAddress: string): Promise<{
 }
 
 /**
- * Check if daily post is completed for today
+ * Check if daily post is completed for today (and not revoked)
  */
 export async function isDailyPostCompleted(walletAddress: string): Promise<boolean> {
   const today = getUTCDateString();
   
   const { data, error } = await supabase
     .from('task_completions')
-    .select('id')
+    .select('id, is_revoked')
     .eq('wallet_address', walletAddress)
     .eq('task_type', 'daily_post')
     .eq('completion_date', today)
@@ -363,11 +392,35 @@ export async function isDailyPostCompleted(walletAddress: string): Promise<boole
     return false;
   }
 
+  // Return true if there's a completion record (even if revoked - can't re-submit)
   return data && data.length > 0;
 }
 
 /**
- * Complete daily post task
+ * Check if daily post was revoked today (tweet deleted)
+ */
+export async function isDailyPostRevoked(walletAddress: string): Promise<boolean> {
+  const today = getUTCDateString();
+  
+  const { data, error } = await supabase
+    .from('task_completions')
+    .select('id, is_revoked')
+    .eq('wallet_address', walletAddress)
+    .eq('task_type', 'daily_post')
+    .eq('completion_date', today)
+    .eq('is_revoked', true)
+    .limit(1);
+
+  if (error) {
+    console.error('Error checking daily post revoked status:', error);
+    return false;
+  }
+
+  return data && data.length > 0;
+}
+
+/**
+ * Complete daily post task (100 points)
  */
 export async function completeDailyPost(
   walletAddress: string,
@@ -383,13 +436,23 @@ export async function completeDailyPost(
   }
 
   const today = getUTCDateString();
-  const alreadyCompleted = await isDailyPostCompleted(walletAddress);
   
+  // Check if already completed today (including revoked - can't re-submit same day)
+  const alreadyCompleted = await isDailyPostCompleted(walletAddress);
   if (alreadyCompleted) {
+    // Check if it was revoked
+    const wasRevoked = await isDailyPostRevoked(walletAddress);
+    if (wasRevoked) {
+      return { 
+        success: false, 
+        points: profile.total_points, 
+        message: 'Your daily post was revoked (tweet deleted). You cannot re-submit until tomorrow (UTC reset).' 
+      };
+    }
     return { success: false, points: profile.total_points, message: 'Daily post already completed for today' };
   }
 
-  const bonusPoints = 50;
+  const bonusPoints = 100; // Changed from 50 to 100
   const newTotal = profile.total_points + bonusPoints;
 
   // Record task completion
@@ -399,6 +462,7 @@ export async function completeDailyPost(
     points_awarded: bonusPoints,
     completion_date: today,
     metadata: JSON.stringify({ tweetUrl }),
+    is_revoked: false,
   });
 
   if (taskError) {
@@ -421,7 +485,70 @@ export async function completeDailyPost(
     description: `Daily X post completed`,
   });
 
-  return { success: true, points: newTotal, message: 'Daily post completed! +50 points' };
+  return { success: true, points: newTotal, message: 'Daily post completed! +100 points' };
+}
+
+/**
+ * Revoke daily post (when tweet is deleted)
+ * Points are deducted and the user cannot re-submit until UTC reset
+ */
+export async function revokeDailyPost(walletAddress: string): Promise<{ success: boolean; points: number; message: string }> {
+  const profile = await getWalletProfile(walletAddress);
+  if (!profile) {
+    return { success: false, points: 0, message: 'Wallet profile not found' };
+  }
+
+  const today = getUTCDateString();
+  
+  // Find today's daily post completion
+  const { data: completion, error: selectError } = await supabase
+    .from('task_completions')
+    .select('*')
+    .eq('wallet_address', walletAddress)
+    .eq('task_type', 'daily_post')
+    .eq('completion_date', today)
+    .eq('is_revoked', false)
+    .limit(1)
+    .single();
+
+  if (selectError || !completion) {
+    return { success: false, points: profile.total_points, message: 'No active daily post found for today' };
+  }
+
+  const pointsToRevoke = completion.points_awarded;
+  const newTotal = Math.max(0, profile.total_points - pointsToRevoke);
+
+  // Mark task as revoked
+  const { error: updateTaskError } = await supabase
+    .from('task_completions')
+    .update({ is_revoked: true })
+    .eq('id', completion.id);
+
+  if (updateTaskError) {
+    console.error('Error revoking daily post:', updateTaskError);
+    return { success: false, points: profile.total_points, message: 'Failed to revoke daily post' };
+  }
+
+  // Update profile points
+  await supabase
+    .from('wallet_profiles')
+    .update({ total_points: newTotal })
+    .eq('wallet_address', walletAddress);
+
+  // Record in history
+  await supabase.from('points_history').insert({
+    wallet_address: walletAddress,
+    transaction_type: 'daily_post',
+    points_change: -pointsToRevoke,
+    balance_after: newTotal,
+    description: 'Daily post revoked - tweet was deleted',
+  });
+
+  return { 
+    success: true, 
+    points: newTotal, 
+    message: 'Daily post revoked. Points have been deducted. You cannot re-submit until tomorrow (UTC reset).' 
+  };
 }
 
 /**
@@ -441,4 +568,22 @@ export async function getPointsHistory(walletAddress: string, limit = 50): Promi
   }
 
   return data as PointsHistory[];
+}
+
+/**
+ * Get leaderboard (top users by points)
+ */
+export async function getLeaderboard(limit = 100): Promise<WalletProfile[]> {
+  const { data, error } = await supabase
+    .from('wallet_profiles')
+    .select('*')
+    .order('total_points', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching leaderboard:', error);
+    return [];
+  }
+
+  return data as WalletProfile[];
 }

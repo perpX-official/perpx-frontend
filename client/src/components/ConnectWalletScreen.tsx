@@ -1,4 +1,4 @@
-import { Wallet, Zap } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { useEffect } from 'react';
 import { useAppKit } from '@reown/appkit/react';
@@ -59,29 +59,9 @@ export default function ConnectWalletScreen({ title, description }: ConnectWalle
             </button>
           </div>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background text-white/40">or</span>
-            </div>
-          </div>
-
-          {/* Demo Mode Button */}
-          <div className="text-center space-y-3">
-            <p className="text-sm text-white/40">Try demo mode first</p>
-            <button
-              onClick={() => {
-                localStorage.setItem('demoMode', 'true');
-                window.location.reload();
-              }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500/20 to-primary/20 hover:from-purple-500/30 hover:to-primary/30 text-white rounded-lg font-medium transition-all duration-200 border border-white/10 flex items-center justify-center gap-2 group"
-            >
-              <Zap className="h-5 w-5 text-purple-400 group-hover:text-primary transition-colors" />
-              Enter Demo Mode
-            </button>
+          {/* Coming Soon Notice */}
+          <div className="text-center pt-4">
+            <p className="text-sm text-white/40">Full trading features coming soon</p>
           </div>
 
           {/* Features */}

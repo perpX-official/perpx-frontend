@@ -63,29 +63,14 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
   const [isLoading, setIsLoading] = useState(true);
 
   const cleanupWidget = useCallback(() => {
+    // Just nullify the widget reference - don't try to manipulate DOM
+    // TradingView widget will be garbage collected
     if (widgetRef.current) {
-      try {
-        // Don't call remove() - it causes the parentNode error
-        // Instead, just nullify the reference and let the DOM cleanup handle it
-        widgetRef.current = null;
-      } catch (error) {
-        // Silently ignore any cleanup errors
-      }
+      widgetRef.current = null;
     }
     
-    // Safely clear container content
-    const container = containerRef.current;
-    if (container) {
-      // Use a try-catch to handle any DOM manipulation errors
-      try {
-        // Remove all child nodes manually instead of using innerHTML
-        while (container.firstChild) {
-          container.removeChild(container.firstChild);
-        }
-      } catch (error) {
-        // Silently ignore DOM errors during cleanup
-      }
-    }
+    // Don't manually remove children - let React handle DOM cleanup
+    // This prevents the removeChild errors
   }, []);
 
   const initWidget = useCallback(() => {
@@ -97,7 +82,7 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
     
     if (typeof (window as any).TradingView === 'undefined') return;
 
-    // Clean up any existing widget first
+    // Clean up any existing widget reference
     cleanupWidget();
 
     // Format symbol for TradingView
@@ -182,11 +167,8 @@ function TradingViewChart({ symbol = 'BTCUSDT', mode = 'perpetual' }: TradingVie
 
     return () => {
       isMountedRef.current = false;
-      
-      // Schedule cleanup for next tick to avoid race conditions
-      setTimeout(() => {
-        cleanupWidget();
-      }, 0);
+      // Just mark as unmounted - don't do DOM manipulation in cleanup
+      cleanupWidget();
     };
   }, [symbol, mode, initWidget, cleanupWidget]);
 

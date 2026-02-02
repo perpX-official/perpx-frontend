@@ -18,11 +18,48 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    // Check if this is a DOM-related error that we can safely ignore
+    const errorMessage = error?.message || '';
+    const errorStack = error?.stack || '';
+    
+    // Ignore removeChild errors from TradingView widget cleanup
+    // These are harmless DOM errors that occur during navigation
+    if (
+      errorMessage.includes('removeChild') ||
+      errorMessage.includes('parentNode') ||
+      errorStack.includes('removeChild') ||
+      errorStack.includes('TradingView')
+    ) {
+      // Don't show error UI for these harmless errors
+      return { hasError: false, error: null };
+    }
+    
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log the error for debugging but don't show UI for harmless DOM errors
+    const errorMessage = error?.message || '';
+    const errorStack = error?.stack || '';
+    
+    if (
+      errorMessage.includes('removeChild') ||
+      errorMessage.includes('parentNode') ||
+      errorStack.includes('removeChild') ||
+      errorStack.includes('TradingView')
+    ) {
+      // Silently ignore these errors
+      console.warn('Ignored harmless DOM error:', error.message);
+      // Reset error state to allow normal rendering
+      this.setState({ hasError: false, error: null });
+      return;
+    }
+    
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && this.state.error) {
       return (
         <div className="flex items-center justify-center min-h-screen p-8 bg-background">
           <div className="flex flex-col items-center w-full max-w-2xl p-8">
