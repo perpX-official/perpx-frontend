@@ -587,3 +587,271 @@ export async function getLeaderboard(limit = 100): Promise<WalletProfile[]> {
 
   return data as WalletProfile[];
 }
+
+
+// ============================================
+// Admin API Functions (Direct Supabase Access)
+// ============================================
+
+/**
+ * Get admin dashboard statistics
+ */
+export async function getAdminStats(): Promise<{
+  totalUsers: number;
+  totalPointsDistributed: number;
+  xConnectedCount: number;
+  discordConnectedCount: number;
+}> {
+  // Get total users
+  const { count: totalUsers } = await supabase
+    .from('wallet_profiles')
+    .select('*', { count: 'exact', head: true });
+
+  // Get total points
+  const { data: pointsData } = await supabase
+    .from('wallet_profiles')
+    .select('total_points');
+  
+  const totalPointsDistributed = pointsData?.reduce((sum, p) => sum + (p.total_points || 0), 0) || 0;
+
+  // Get X connected count
+  const { count: xConnectedCount } = await supabase
+    .from('wallet_profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('x_connected', true);
+
+  // Get Discord connected count
+  const { count: discordConnectedCount } = await supabase
+    .from('wallet_profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('discord_connected', true);
+
+  return {
+    totalUsers: totalUsers || 0,
+    totalPointsDistributed,
+    xConnectedCount: xConnectedCount || 0,
+    discordConnectedCount: discordConnectedCount || 0,
+  };
+}
+
+/**
+ * Get all wallet profiles with pagination
+ */
+export async function getAllWalletProfiles(
+  page: number = 1,
+  limit: number = 20,
+  sortBy: 'total_points' | 'created_at' = 'created_at',
+  sortOrder: 'asc' | 'desc' = 'desc'
+): Promise<{ profiles: WalletProfile[]; total: number; page: number; totalPages: number }> {
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const { count: total } = await supabase
+    .from('wallet_profiles')
+    .select('*', { count: 'exact', head: true });
+
+  // Get profiles
+  const { data, error } = await supabase
+    .from('wallet_profiles')
+    .select('*')
+    .order(sortBy, { ascending: sortOrder === 'asc' })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error('Error fetching wallet profiles:', error);
+    return { profiles: [], total: 0, page, totalPages: 0 };
+  }
+
+  const totalPages = Math.ceil((total || 0) / limit);
+
+  return {
+    profiles: data as WalletProfile[],
+    total: total || 0,
+    page,
+    totalPages,
+  };
+}
+
+/**
+ * Search wallet profiles by address or username
+ */
+export async function searchWalletProfiles(
+  query: string,
+  limit: number = 20
+): Promise<WalletProfile[]> {
+  const { data, error } = await supabase
+    .from('wallet_profiles')
+    .select('*')
+    .or(`wallet_address.ilike.%${query}%,x_username.ilike.%${query}%,discord_username.ilike.%${query}%`)
+    .limit(limit);
+
+  if (error) {
+    console.error('Error searching wallet profiles:', error);
+    return [];
+  }
+
+  return data as WalletProfile[];
+}
+
+/**
+ * Adjust user points (admin function)
+ */
+export async function adjustUserPoints(
+  walletAddress: string,
+  pointsChange: number,
+  reason: string
+): Promise<{ success: boolean; newTotal: number; message: string }> {
+  const profile = await getWalletProfile(walletAddress);
+  if (!profile) {
+    return { success: false, newTotal: 0, message: 'Wallet profile not found' };
+  }
+
+  const newTotal = Math.max(0, profile.total_points + pointsChange);
+
+  // Update profile
+  const { error: updateError } = await supabase
+    .from('wallet_profiles')
+    .update({ total_points: newTotal })
+    .eq('wallet_address', walletAddress);
+
+  if (updateError) {
+    console.error('Error adjusting points:', updateError);
+    return { success: false, newTotal: profile.total_points, message: 'Failed to adjust points' };
+  }
+
+  // Record in history
+  await supabase.from('points_history').insert({
+    wallet_address: walletAddress,
+    transaction_type: 'admin_adjustment',
+    points_change: pointsChange,
+    balance_after: newTotal,
+    description: `Admin adjustment: ${reason}`,
+  });
+
+  return { success: true, newTotal, message: `Points adjusted by ${pointsChange > 0 ? '+' : ''}${pointsChange}` };
+}
+
+/**
+ * Get daily post completions with tweet URLs
+ */
+export async function getDailyPostCompletions(
+  page: number = 1,
+  limit: number = 20
+): Promise<{ completions: (TaskCompletion & { wallet_profile?: WalletProfile })[]; total: number; page: number; totalPages: number }> {
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const { count: total } = await supabase
+    .from('task_completions')
+    .select('*', { count: 'exact', head: true })
+    .eq('task_type', 'daily_post');
+
+  // Get completions
+  const { data, error } = await supabase
+    .from('task_completions')
+    .select('*')
+    .eq('task_type', 'daily_post')
+    .order('completed_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error('Error fetching daily post completions:', error);
+    return { completions: [], total: 0, page, totalPages: 0 };
+  }
+
+  // Fetch wallet profiles for each completion
+  const completionsWithProfiles = await Promise.all(
+    (data || []).map(async (completion) => {
+      const profile = await getWalletProfile(completion.wallet_address);
+      return { ...completion, wallet_profile: profile || undefined };
+    })
+  );
+
+  const totalPages = Math.ceil((total || 0) / limit);
+
+  return {
+    completions: completionsWithProfiles as (TaskCompletion & { wallet_profile?: WalletProfile })[],
+    total: total || 0,
+    page,
+    totalPages,
+  };
+}
+
+/**
+ * Get user activity statistics for graphs
+ */
+export async function getUserActivityStats(): Promise<{
+  daily: { date: string; count: number }[];
+  weekly: { week: string; count: number }[];
+  monthly: { month: string; count: number }[];
+  yearly: { year: string; count: number }[];
+  taskCompletionRates: {
+    connectBonus: number;
+    xConnected: number;
+    discordConnected: number;
+    dailyPost: number;
+  };
+}> {
+  // Get all profiles for statistics
+  const { data: profiles } = await supabase
+    .from('wallet_profiles')
+    .select('created_at, connect_bonus_claimed, x_connected, discord_connected');
+
+  // Get today's daily post count
+  const today = getUTCDateString();
+  const { count: dailyPostCount } = await supabase
+    .from('task_completions')
+    .select('*', { count: 'exact', head: true })
+    .eq('task_type', 'daily_post')
+    .eq('completion_date', today);
+
+  const totalUsers = profiles?.length || 0;
+
+  // Calculate task completion rates
+  const connectBonusCount = profiles?.filter(p => p.connect_bonus_claimed).length || 0;
+  const xConnectedCount = profiles?.filter(p => p.x_connected).length || 0;
+  const discordConnectedCount = profiles?.filter(p => p.discord_connected).length || 0;
+
+  // Group by date for daily stats (last 30 days)
+  const dailyStats: { [key: string]: number } = {};
+  const weeklyStats: { [key: string]: number } = {};
+  const monthlyStats: { [key: string]: number } = {};
+  const yearlyStats: { [key: string]: number } = {};
+
+  profiles?.forEach(profile => {
+    const date = new Date(profile.created_at);
+    const dateStr = date.toISOString().split('T')[0];
+    const weekStr = `${date.getFullYear()}-W${Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7).toString().padStart(2, '0')}`;
+    const monthStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    const yearStr = date.getFullYear().toString();
+
+    dailyStats[dateStr] = (dailyStats[dateStr] || 0) + 1;
+    weeklyStats[weekStr] = (weeklyStats[weekStr] || 0) + 1;
+    monthlyStats[monthStr] = (monthlyStats[monthStr] || 0) + 1;
+    yearlyStats[yearStr] = (yearlyStats[yearStr] || 0) + 1;
+  });
+
+  return {
+    daily: Object.entries(dailyStats)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-30)
+      .map(([date, count]) => ({ date, count })),
+    weekly: Object.entries(weeklyStats)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([week, count]) => ({ week, count })),
+    monthly: Object.entries(monthlyStats)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, count]) => ({ month, count })),
+    yearly: Object.entries(yearlyStats)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([year, count]) => ({ year, count })),
+    taskCompletionRates: {
+      connectBonus: totalUsers > 0 ? Math.round((connectBonusCount / totalUsers) * 100) : 0,
+      xConnected: totalUsers > 0 ? Math.round((xConnectedCount / totalUsers) * 100) : 0,
+      discordConnected: totalUsers > 0 ? Math.round((discordConnectedCount / totalUsers) * 100) : 0,
+      dailyPost: totalUsers > 0 ? Math.round(((dailyPostCount || 0) / totalUsers) * 100) : 0,
+    },
+  };
+}
