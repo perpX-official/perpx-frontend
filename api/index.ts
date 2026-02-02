@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response } from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../server/routers";
 import { createContext } from "../server/_core/context";
@@ -24,7 +24,7 @@ app.use(
 );
 
 // Health check
-app.get("/api/health", (req, res) => {
+app.get("/api/health", (req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
