@@ -1,11 +1,10 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { 
   Gift, 
@@ -32,11 +31,42 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  getOrCreateWalletProfile,
+  claimConnectBonus as claimConnectBonusApi,
+  connectXAccount,
+  disconnectXAccount,
+  connectDiscordAccount,
+  disconnectDiscordAccount,
+  completeDailyPost as completeDailyPostApi,
+  isDailyPostCompleted,
+  WalletProfile,
+} from "@/lib/supabase";
+
+// Get UTC date string (YYYY-MM-DD)
+function getUTCDateString(): string {
+  const now = new Date();
+  return now.toISOString().split('T')[0];
+}
+
+// Profile type for UI
+interface ProfileData {
+  totalPoints: number;
+  connectBonusClaimed: boolean;
+  xConnected: boolean;
+  xUsername: string | null;
+  discordConnected: boolean;
+  discordUsername: string | null;
+  dailyPostCompleted: boolean;
+  todayUTC: string;
+}
 
 export default function Rewards() {
   const { t } = useLanguage();
   const { isConnected, address, chainType } = useRewardsState();
   const [loading, setLoading] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   
   // Tweet URL verification modal state
   const [showTweetModal, setShowTweetModal] = useState(false);
@@ -50,114 +80,66 @@ export default function Rewards() {
     step: 1 | 2;
   }>({ open: false, platform: null, step: 1 });
 
-  // Get profile from backend
-  const { data: profile, refetch: refetchProfile, isLoading: profileLoading } = trpc.rewards.getProfile.useQuery(
-    { walletAddress: address || "", chainType: chainType || "evm" },
-    { enabled: !!address && !!chainType }
-  );
+  // Mutation states
+  const [isMutating, setIsMutating] = useState(false);
 
-  // Mutations
-  const claimConnectBonus = trpc.rewards.claimConnectBonus.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        refetchProfile();
-      } else {
-        toast.info(data.message);
+  // Fetch profile from Supabase
+  const fetchProfile = useCallback(async () => {
+    if (!address || !chainType) return;
+    
+    setProfileLoading(true);
+    try {
+      const walletProfile = await getOrCreateWalletProfile(address, chainType as 'evm' | 'tron' | 'solana');
+      if (walletProfile) {
+        const dailyCompleted = await isDailyPostCompleted(address);
+        setProfile({
+          totalPoints: walletProfile.total_points,
+          connectBonusClaimed: walletProfile.connect_bonus_claimed,
+          xConnected: walletProfile.x_connected,
+          xUsername: walletProfile.x_username,
+          discordConnected: walletProfile.discord_connected,
+          discordUsername: walletProfile.discord_username,
+          dailyPostCompleted: dailyCompleted,
+          todayUTC: getUTCDateString(),
+        });
       }
-    },
-    onError: (error) => toast.error(error.message),
-  });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [address, chainType]);
 
-  const connectX = trpc.rewards.connectX.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        refetchProfile();
-      } else {
-        toast.info(data.message);
-      }
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  const disconnectX = trpc.rewards.disconnectX.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        refetchProfile();
-      }
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  const connectDiscord = trpc.rewards.connectDiscord.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        refetchProfile();
-      } else {
-        toast.info(data.message);
-      }
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  const disconnectDiscord = trpc.rewards.disconnectDiscord.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        refetchProfile();
-      }
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  const completeDailyPost = trpc.rewards.completeDailyPost.useMutation({
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(data.message);
-        setShowTweetModal(false);
-        setTweetUrl("");
-        refetchProfile();
-      } else {
-        toast.info(data.message);
-      }
-    },
-    onError: (error) => toast.error(error.message),
-  });
+  // Load profile when wallet connects
+  useEffect(() => {
+    if (isConnected && address && chainType) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [isConnected, address, chainType, fetchProfile]);
 
   // Auto-claim connect bonus when profile is loaded and not yet claimed
   useEffect(() => {
-    if (profile && !profile.connectBonusClaimed && address) {
-      claimConnectBonus.mutate({ walletAddress: address });
-    }
+    const claimBonus = async () => {
+      if (profile && !profile.connectBonusClaimed && address) {
+        setIsMutating(true);
+        try {
+          const result = await claimConnectBonusApi(address);
+          if (result.success) {
+            toast.success(result.message);
+            fetchProfile();
+          }
+        } catch (error) {
+          console.error('Error claiming connect bonus:', error);
+        } finally {
+          setIsMutating(false);
+        }
+      }
+    };
+    claimBonus();
   }, [profile?.connectBonusClaimed, address]);
-
-  // Check OAuth status on mount
-  const { data: oauthStatus } = trpc.rewards.getOAuthStatus.useQuery();
-
-  const handleSocialConnect = (platform: 'twitter' | 'discord') => {
-    if (!address) return;
-    
-    // Check if OAuth is configured
-    if (platform === 'twitter' && !oauthStatus?.x?.configured) {
-      // Fallback to manual input if OAuth not configured
-      handleManualSocialConnect(platform);
-      return;
-    }
-    if (platform === 'discord' && !oauthStatus?.discord?.configured) {
-      handleManualSocialConnect(platform);
-      return;
-    }
-    
-    // Redirect to OAuth endpoint
-    const endpoint = platform === 'twitter' 
-      ? `/api/social/x/auth?wallet=${encodeURIComponent(address)}`
-      : `/api/social/discord/auth?wallet=${encodeURIComponent(address)}`;
-    
-    window.location.href = endpoint;
-  };
 
   // Fallback manual connection (when OAuth is not configured)
   const handleManualSocialConnect = (platform: 'twitter' | 'discord') => {
@@ -206,24 +188,47 @@ export default function Rewards() {
     }
   };
 
+  const handleSocialConnect = (platform: 'twitter' | 'discord') => {
+    if (!address) return;
+    handleManualSocialConnect(platform);
+  };
+
   // Listen for social connection messages
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       if (event.data?.type === 'SOCIAL_CONNECTED' && address) {
         const platform = event.data.platform;
         const username = event.data.username;
         
-        if (platform === 'twitter') {
-          connectX.mutate({ walletAddress: address, xUsername: username });
-        } else if (platform === 'discord') {
-          connectDiscord.mutate({ walletAddress: address, discordUsername: username });
+        setIsMutating(true);
+        try {
+          if (platform === 'twitter') {
+            const result = await connectXAccount(address, username);
+            if (result.success) {
+              toast.success(result.message);
+            } else {
+              toast.info(result.message);
+            }
+          } else if (platform === 'discord') {
+            const result = await connectDiscordAccount(address, username);
+            if (result.success) {
+              toast.success(result.message);
+            } else {
+              toast.info(result.message);
+            }
+          }
+          fetchProfile();
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to connect account');
+        } finally {
+          setIsMutating(false);
         }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [address]);
+  }, [address, fetchProfile]);
 
   // Open 2-step disconnect confirmation dialog
   const handleDisconnectSocial = (platform: 'twitter' | 'discord') => {
@@ -232,16 +237,30 @@ export default function Rewards() {
   };
 
   // Handle disconnect dialog actions
-  const handleDisconnectDialogAction = () => {
+  const handleDisconnectDialogAction = async () => {
     if (disconnectDialog.step === 1) {
       // Move to step 2
       setDisconnectDialog(prev => ({ ...prev, step: 2 }));
     } else {
       // Execute disconnect
-      if (disconnectDialog.platform === 'twitter') {
-        disconnectX.mutate({ walletAddress: address! });
-      } else {
-        disconnectDiscord.mutate({ walletAddress: address! });
+      setIsMutating(true);
+      try {
+        if (disconnectDialog.platform === 'twitter') {
+          const result = await disconnectXAccount(address!);
+          if (result.success) {
+            toast.success(result.message);
+          }
+        } else {
+          const result = await disconnectDiscordAccount(address!);
+          if (result.success) {
+            toast.success(result.message);
+          }
+        }
+        fetchProfile();
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to disconnect account');
+      } finally {
+        setIsMutating(false);
       }
       setDisconnectDialog({ open: false, platform: null, step: 1 });
     }
@@ -266,7 +285,7 @@ export default function Rewards() {
   };
 
   // Handle tweet URL submission
-  const handleSubmitTweetUrl = () => {
+  const handleSubmitTweetUrl = async () => {
     if (!address) return;
     
     const trimmedUrl = tweetUrl.trim();
@@ -282,7 +301,22 @@ export default function Rewards() {
     }
     
     setTweetUrlError("");
-    completeDailyPost.mutate({ walletAddress: address, tweetUrl: trimmedUrl });
+    setIsMutating(true);
+    try {
+      const result = await completeDailyPostApi(address, trimmedUrl);
+      if (result.success) {
+        toast.success(result.message);
+        setShowTweetModal(false);
+        setTweetUrl("");
+        fetchProfile();
+      } else {
+        toast.info(result.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to complete daily post');
+    } finally {
+      setIsMutating(false);
+    }
   };
 
   // Handle social post button click
@@ -353,9 +387,6 @@ export default function Rewards() {
     const isCompleted = task.isCompleted;
     const TaskIcon = task.icon || Star;
     const isDisabled = task.requiresXConnection && !profile?.xConnected;
-    const isMutating = connectX.isPending || disconnectX.isPending || 
-                       connectDiscord.isPending || disconnectDiscord.isPending ||
-                       completeDailyPost.isPending || claimConnectBonus.isPending;
 
     return (
       <Card key={task.id} className="glass-card p-4 sm:p-6 hover-reveal relative group">
@@ -611,10 +642,10 @@ export default function Rewards() {
             </Button>
             <Button
               onClick={handleSubmitTweetUrl}
-              disabled={completeDailyPost.isPending || !tweetUrl.trim()}
+              disabled={isMutating || !tweetUrl.trim()}
               className="neuro-button"
             >
-              {completeDailyPost.isPending ? (
+              {isMutating ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
               Verify & Claim Points
@@ -673,8 +704,12 @@ export default function Rewards() {
             </Button>
             <Button
               onClick={handleDisconnectDialogAction}
+              disabled={isMutating}
               className={`flex-1 ${disconnectDialog.step === 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
             >
+              {isMutating ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               {disconnectDialog.step === 1 ? (
                 'Continue'
               ) : (
