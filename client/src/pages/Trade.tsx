@@ -617,6 +617,7 @@ export default function Trade() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

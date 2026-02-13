@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Wallet, Zap, Globe, Loader2, X, Copy, Check, AlertTriangle, LogOut } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
+import { detectMetaMaskAvailable } from "@/lib/evmProviders";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 
@@ -75,6 +76,7 @@ export function ChainSelectModal() {
 
   const hasTronExtension =
     typeof window !== "undefined" && (!!(window as any).tronLink || !!(window as any).tronWeb);
+  const hasMetaMask = detectMetaMaskAvailable();
 
   const tronWalletOptions = React.useMemo(() => {
     const options = [...TRON_WALLET_OPTIONS_BASE];
@@ -201,6 +203,10 @@ export function ChainSelectModal() {
   };
 
   const handleEvmMetaMask = async () => {
+    if (!hasMetaMask) {
+      toast.error("MetaMask not detected. Disable Phantom EVM or use WalletConnect.");
+      return;
+    }
     setConnecting(true);
     try {
       await connectEvm("metamask");
@@ -476,9 +482,10 @@ export function ChainSelectModal() {
             </p>
             <ChainButton
               label="MetaMask"
-              subLabel="Browser Extension"
+              subLabel={hasMetaMask ? "Browser Extension" : "Not detected"}
               icon={<span className="text-xl">🦊</span>}
               onClick={handleEvmMetaMask}
+              disabled={!hasMetaMask}
             />
             <ChainButton
               label="WalletConnect"

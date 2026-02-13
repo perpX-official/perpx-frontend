@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode, useEffect, useState, useCallback, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { rewardsStorage, type ChainKind } from '@/lib/rewardsStorage';
+import { detectMetaMaskAvailable, isPhantomEvmProvider } from '@/lib/evmProviders';
 import { useTronWallet } from '@/hooks/useTronWallet';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 
@@ -66,10 +67,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [activeChain, setActiveChain] = useState<ActiveChain>(null);
   const [intendedChain, setIntendedChain] = useState<ActiveChain>(null);
 
-  // Force-disconnect EVM if it connects while the user intended Tron/Solana.
+  // Force-disconnect EVM if it connects while the user did not intend EVM.
   useEffect(() => {
-    if (evmConnected && (intendedChain === 'tron' || intendedChain === 'sol')) {
-      console.log('[WalletContext] Blocking EVM auto-connect while on Tron/Solana, disconnecting...');
+    if (evmConnected && intendedChain !== 'evm') {
+      console.log(
+        '[WalletContext] Blocking EVM auto-connect while intended chain is',
+        intendedChain ?? 'none',
+        '- disconnecting...'
+      );
       wagmiDisconnect();
       return;
     }
@@ -175,6 +180,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         throw new Error(mode === 'walletconnect' ? 'WalletConnect not available' : 'MetaMask not available');
       }
 
+      if (mode === 'metamask') {
+        const metaMaskAvailable = detectMetaMaskAvailable();
+        if (!metaMaskAvailable) {
+          intendedEvmConnectorIdRef.current = null;
+          throw new Error('MetaMask not detected. Disable Phantom EVM or use WalletConnect.');
+        }
+      }
+
       intendedEvmConnectorIdRef.current = targetConnector.id;
 
       if (mode === 'walletconnect') {
@@ -192,6 +205,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
 
       await connectAsync({ connector: targetConnector });
+
+      if (mode === 'metamask') {
+        try {
+          const provider: any = await targetConnector.getProvider();
+          if (isPhantomEvmProvider(provider)) {
+            wagmiDisconnect();
+            intendedEvmConnectorIdRef.current = null;
+            throw new Error('MetaMask not detected. Phantom EVM provider was selected.');
+          }
+        } catch (err: any) {
+          if (err?.message) {
+            throw err;
+          }
+        }
+      }
 
       // Cleanup display_uri listener and QR once connected
       if (mode === 'walletconnect') {
