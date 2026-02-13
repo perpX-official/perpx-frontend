@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
+import { withApiBase } from "@/lib/apiBase";
 import ConnectWalletScreen from "@/components/ConnectWalletScreen";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -198,9 +199,10 @@ export default function Rewards() {
     }
     
     // Redirect to OAuth endpoint
-    const endpoint = platform === 'twitter' 
-      ? `/api/social/x/auth?wallet=${encodeURIComponent(address)}`
-      : `/api/social/discord/auth?wallet=${encodeURIComponent(address)}`;
+    const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
+    const endpoint = platform === 'twitter'
+      ? withApiBase(`/api/social/x/auth?wallet=${encodeURIComponent(address)}&redirect=${encodeURIComponent(redirectOrigin)}`)
+      : withApiBase(`/api/social/discord/auth?wallet=${encodeURIComponent(address)}&redirect=${encodeURIComponent(redirectOrigin)}`);
     
     window.location.href = endpoint;
   };
