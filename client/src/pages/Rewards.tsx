@@ -56,10 +56,11 @@ export default function Rewards() {
 
   // Get profile from backend
   const safeAddress = address?.trim() || "";
-  const { data: profile, refetch: refetchProfile, isLoading: profileLoading } = trpc.rewards.getProfile.useQuery(
+  const { data: profile, refetch: refetchProfile, isLoading: profileLoading, error: profileError } = trpc.rewards.getProfile.useQuery(
     { walletAddress: safeAddress, chainType: chainType || "evm" },
-    { enabled: safeAddress.length > 0 && !!chainType }
+    { enabled: isConnected && safeAddress.length > 0 && !!chainType }
   );
+  const profileErrorMessage = profileError instanceof Error ? profileError.message : null;
 
   // Mutations
   const claimConnectBonus = trpc.rewards.claimConnectBonus.useMutation({
@@ -518,6 +519,20 @@ export default function Rewards() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {isConnected && !profileLoading && !profile && (
+        <div className="container mx-auto px-4 py-8">
+          <Card className="glass-card p-6 sm:p-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Could not load rewards data</h2>
+            <p className="text-white/60 mb-6">
+              {profileErrorMessage || "Rewards profile is not ready yet. Please try again."}
+            </p>
+            <Button onClick={() => refetchProfile()} className="neuro-button">
+              Retry
+            </Button>
+          </Card>
         </div>
       )}
 

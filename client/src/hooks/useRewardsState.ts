@@ -4,6 +4,20 @@ import { rewardsStorage, type RewardsState, type ChainKind } from '@/lib/rewards
 
 // Demo wallet address for demo mode
 const DEMO_WALLET_ADDRESS = '0xDE286bcD39d0a6C106871e106871106871106871';
+const DEMO_MODE_KEY = 'demoMode';
+const DEMO_MODE_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+
+function getDemoModeFromStorage() {
+  if (typeof window === 'undefined') return false;
+
+  const stored = localStorage.getItem(DEMO_MODE_KEY) === 'true';
+  if (!DEMO_MODE_ENABLED && stored) {
+    // Prevent accidental permanent "connected" state in production.
+    localStorage.removeItem(DEMO_MODE_KEY);
+    return false;
+  }
+  return DEMO_MODE_ENABLED && stored;
+}
 
 export function useRewardsState() {
   // Use WalletContext for ALL chain state (including EVM)
@@ -11,16 +25,11 @@ export function useRewardsState() {
   const { address: walletAddress, activeChain, isConnected: walletConnected } = useWallet();
   
   // Check for demo mode
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('demoMode') === 'true';
-    }
-    return false;
-  });
+  const [isDemoMode, setIsDemoMode] = useState(getDemoModeFromStorage);
   
   const [state, setState] = useState<RewardsState>(() => {
     // Check demo mode first
-    if (typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true') {
+    if (getDemoModeFromStorage()) {
       return {
         chain: 'evm' as ChainKind,
         chainType: 'evm' as const,
@@ -40,8 +49,7 @@ export function useRewardsState() {
   // Listen for demo mode changes
   useEffect(() => {
     const checkDemoMode = () => {
-      const demoMode = localStorage.getItem('demoMode') === 'true';
-      setIsDemoMode(demoMode);
+      setIsDemoMode(getDemoModeFromStorage());
     };
     
     // Check on mount and listen for storage changes
@@ -54,7 +62,7 @@ export function useRewardsState() {
   // Sync state with wallet connections or demo mode
   useEffect(() => {
     // Demo mode takes priority
-    if (isDemoMode) {
+    if (DEMO_MODE_ENABLED && isDemoMode) {
       const newState: RewardsState = {
         chain: 'evm' as ChainKind,
         chainType: 'evm' as const,

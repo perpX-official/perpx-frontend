@@ -37,8 +37,22 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
-const apiBase = import.meta.env.VITE_API_BASE_URL || "";
-const trpcUrl = apiBase ? `${apiBase.replace(/\/$/, "")}/api/trpc` : "/api/trpc";
+const resolveApiBase = () => {
+  const fromEnv = (import.meta.env.VITE_API_BASE_URL || "").trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "perpx.fi" || host === "www.perpx.fi" || host.endsWith(".perpx.fi")) {
+      return "https://api.perpx.fi";
+    }
+  }
+
+  return "";
+};
+
+const apiBase = resolveApiBase();
+const trpcUrl = apiBase ? `${apiBase}/api/trpc` : "/api/trpc";
 
 const trpcClient = trpc.createClient({
   links: [

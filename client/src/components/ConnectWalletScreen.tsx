@@ -8,6 +8,7 @@ interface ConnectWalletScreenProps {
 
 export default function ConnectWalletScreen({ title, description }: ConnectWalletScreenProps) {
   const { openChainSelect } = useWallet();
+  const demoModeEnabled = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
 
   return (
     <div className="container mx-auto px-4 py-20">
@@ -50,19 +51,21 @@ export default function ConnectWalletScreen({ title, description }: ConnectWalle
           </div>
 
           {/* Demo Mode Button */}
-          <div className="text-center space-y-3">
-            <p className="text-sm text-white/40">Try demo mode first</p>
-            <button
-              onClick={() => {
-                localStorage.setItem('demoMode', 'true');
-                window.location.reload();
-              }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500/20 to-primary/20 hover:from-purple-500/30 hover:to-primary/30 text-white rounded-lg font-medium transition-all duration-200 border border-white/10 flex items-center justify-center gap-2 group"
-            >
-              <Zap className="h-5 w-5 text-purple-400 group-hover:text-primary transition-colors" />
-              Enter Demo Mode
-            </button>
-          </div>
+          {demoModeEnabled && (
+            <div className="text-center space-y-3">
+              <p className="text-sm text-white/40">Try demo mode first</p>
+              <button
+                onClick={() => {
+                  localStorage.setItem('demoMode', 'true');
+                  window.location.reload();
+                }}
+                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500/20 to-primary/20 hover:from-purple-500/30 hover:to-primary/30 text-white rounded-lg font-medium transition-all duration-200 border border-white/10 flex items-center justify-center gap-2 group"
+              >
+                <Zap className="h-5 w-5 text-purple-400 group-hover:text-primary transition-colors" />
+                Enter Demo Mode
+              </button>
+            </div>
+          )}
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-4 pt-4">
