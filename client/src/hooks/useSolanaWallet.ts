@@ -6,6 +6,7 @@ import {
   SOLANA_WALLETS,
   isMobileDevice,
 } from '@/config/walletConstants';
+import { getWalletConnectionErrorMessage } from '@/lib/walletConnectionError';
 
 export type SolanaProviderType = 'phantom' | 'solflare' | 'backpack' | 'okx' | 'bitget' | 'walletconnect' | null;
 
@@ -172,10 +173,11 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
         walletName: 'WalletConnect',
       });
     } catch (err: any) {
+      const message = getWalletConnectionErrorMessage(err);
       setState((prev) => ({
         ...prev,
         isPending: false,
-        error: err?.message || 'WalletConnect connection failed',
+        error: message,
       }));
       throw err;
     }
@@ -212,10 +214,11 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
           await connectWalletConnect();
         }
       } catch (err: any) {
+        const message = getWalletConnectionErrorMessage(err);
         setState((prev) => ({
           ...prev,
           isPending: false,
-          error: err?.message || 'Connection failed',
+          error: message,
         }));
         throw err;
       }

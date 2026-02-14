@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Wallet, Zap, Globe, Loader2, X, Copy, Check, AlertTriangle, LogOut } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
 import { detectMetaMaskAvailable } from "@/lib/evmProviders";
+import { getWalletConnectionErrorMessage } from "@/lib/walletConnectionError";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import {
@@ -210,7 +211,7 @@ export function ChainSelectModal() {
 
   const handleEvmMetaMask = async () => {
     if (!hasMetaMask) {
-      toast.error("MetaMask not detected. Disable Phantom EVM or use WalletConnect.");
+      toast.error(getWalletConnectionErrorMessage(new Error("MetaMask not detected")));
       return;
     }
     setConnecting(true);
@@ -218,7 +219,7 @@ export function ChainSelectModal() {
       await connectEvm("metamask");
       handleClose();
     } catch (err: any) {
-      toast.error(err?.message || "MetaMask connection failed");
+      toast.error(getWalletConnectionErrorMessage(err));
       setConnecting(false);
     }
   };
@@ -233,7 +234,7 @@ export function ChainSelectModal() {
       if (evmWcUri) {
         setConnecting(false);
       } else {
-        toast.error(err?.message || "WalletConnect connection failed");
+        toast.error(getWalletConnectionErrorMessage(err));
         setView("evm_wallets");
         setConnecting(false);
       }
@@ -246,7 +247,7 @@ export function ChainSelectModal() {
       await connectTron("tronlink");
       handleClose();
     } catch (err: any) {
-      toast.error(err?.message || "Tron connection failed");
+      toast.error(getWalletConnectionErrorMessage(err));
       setConnecting(false);
     }
   };
@@ -263,7 +264,7 @@ export function ChainSelectModal() {
       if (tronWcUri) {
         setConnecting(false);
       } else {
-        toast.error(err?.message || "Tron connection failed");
+        toast.error(getWalletConnectionErrorMessage(err));
         setView("tron_wallets");
         setConnecting(false);
       }
@@ -296,7 +297,7 @@ export function ChainSelectModal() {
         setView("wc_qr");
         setConnecting(false);
       } else {
-        toast.error(err?.message || "Solana connection failed");
+        toast.error(getWalletConnectionErrorMessage(err));
         setConnecting(false);
       }
     }

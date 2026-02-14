@@ -8,6 +8,7 @@ import {
   isMobileDevice,
   TRON_MOBILE_WALLETS,
 } from '@/config/walletConstants';
+import { getWalletConnectionErrorMessage } from '@/lib/walletConnectionError';
 
 export type TronProviderType = 'walletconnect' | 'extension' | null;
 
@@ -86,7 +87,11 @@ export function useTronWallet(): UseTronWalletReturn {
 
     if (!hasTronExtension()) {
       const err = new Error('Browser extension not detected. Please install a Tron-compatible extension.');
-      setState((prev) => ({ ...prev, isPending: false, error: err.message }));
+      setState((prev) => ({
+        ...prev,
+        isPending: false,
+        error: getWalletConnectionErrorMessage(err),
+      }));
       throw err;
     }
 
@@ -124,10 +129,11 @@ export function useTronWallet(): UseTronWalletReturn {
         error: null,
       });
     } catch (err: any) {
+      const message = getWalletConnectionErrorMessage(err);
       setState((prev) => ({
         ...prev,
         isPending: false,
-        error: err?.message || 'Extension connection failed',
+        error: message,
       }));
       throw err;
     }
@@ -197,10 +203,11 @@ export function useTronWallet(): UseTronWalletReturn {
         error: null,
       });
     } catch (err: any) {
+      const message = getWalletConnectionErrorMessage(err);
       setState((prev) => ({
         ...prev,
         isPending: false,
-        error: err?.message || 'WalletConnect connection failed',
+        error: message,
       }));
       throw err;
     }
@@ -226,10 +233,11 @@ export function useTronWallet(): UseTronWalletReturn {
         }
         await connectWalletConnect();
       } catch (err: any) {
+        const message = getWalletConnectionErrorMessage(err);
         setState((prev) => ({
           ...prev,
           isPending: false,
-          error: err?.message || 'Connection failed',
+          error: message,
         }));
         throw err;
       }
