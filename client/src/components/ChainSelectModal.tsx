@@ -4,6 +4,18 @@ import { useWallet } from "@/contexts/WalletContext";
 import { detectMetaMaskAvailable } from "@/lib/evmProviders";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import {
+  WalletMetamask,
+  WalletWalletConnect,
+  WalletPhantom,
+  WalletSolflare,
+  WalletBackpack,
+  WalletTrust,
+  WalletOkx,
+  WalletSafe,
+  ExchangeBitget,
+  NetworkTron,
+} from "@web3icons/react";
 
 type ModalView =
   | "chains"
@@ -21,37 +33,31 @@ const TRON_WALLET_OPTIONS_BASE = [
     id: "walletconnect",
     name: "WalletConnect",
     subLabel: "Scan QR code with any Tron wallet",
-    icon: (
-      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6.09 10.08C9.37 6.84 14.63 6.84 17.91 10.08L18.28 10.44C18.44 10.6 18.44 10.86 18.28 11.02L16.95 12.32C16.87 12.4 16.74 12.4 16.66 12.32L16.15 11.82C13.86 9.57 10.14 9.57 7.85 11.82L7.31 12.35C7.23 12.43 7.1 12.43 7.02 12.35L5.69 11.05C5.53 10.89 5.53 10.63 5.69 10.47L6.09 10.08ZM20.67 12.8L21.85 13.95C22.01 14.11 22.01 14.37 21.85 14.53L16.44 19.82C16.28 19.98 16.02 19.98 15.86 19.82L12.16 16.19C12.12 16.15 12.06 16.15 12.02 16.19L8.32 19.82C8.16 19.98 7.9 19.98 7.74 19.82L2.15 14.53C1.99 14.37 1.99 14.11 2.15 13.95L3.33 12.8C3.49 12.64 3.75 12.64 3.91 12.8L7.61 16.43C7.65 16.47 7.71 16.47 7.75 16.43L11.45 12.8C11.61 12.64 11.87 12.64 12.03 12.8L15.73 16.43C15.77 16.47 15.83 16.47 15.87 16.43L19.57 12.8C19.73 12.64 19.99 12.64 20.15 12.8L20.67 12.8Z" fill="#3B99FC" />
-        </svg>
-      </div>
-    ),
+    icon: <WalletWalletConnect className="w-6 h-6" variant="branded" />,
   },
   {
     id: "trust",
     name: "Trust Wallet",
     subLabel: "Mobile wallet",
-    icon: <span className="text-xl">🛡️</span>,
+    icon: <WalletTrust className="w-6 h-6" variant="branded" />,
   },
   {
     id: "safepal",
     name: "SafePal",
     subLabel: "Mobile wallet",
-    icon: <span className="text-xl">🔐</span>,
+    icon: <WalletSafe className="w-6 h-6" variant="branded" />,
   },
   {
     id: "okx",
     name: "OKX Wallet",
     subLabel: "Mobile wallet",
-    icon: <span className="text-xl">⭕</span>,
+    icon: <WalletOkx className="w-6 h-6" variant="branded" />,
   },
   {
     id: "bitget",
     name: "Bitget Wallet",
     subLabel: "Mobile wallet",
-    icon: <span className="text-xl">💎</span>,
+    icon: <ExchangeBitget className="w-6 h-6" variant="branded" />,
   },
 ];
 
@@ -85,7 +91,7 @@ export function ChainSelectModal() {
         id: "extension",
         name: "Browser Extension",
         subLabel: "Connect with desktop extension",
-        icon: <span className="text-xl">🧩</span>,
+        icon: <NetworkTron className="w-6 h-6" variant="branded" />,
       });
     }
     return options;
@@ -321,6 +327,23 @@ export function ChainSelectModal() {
   const undetectedSolanaWallets = solanaAvailableWallets.filter(
     (w) => !w.available
   );
+  const getSolanaWalletIcon = (walletId: string, isAvailable: boolean) => {
+    const className = `w-6 h-6 ${isAvailable ? "" : "opacity-50"}`;
+    switch (walletId) {
+      case "phantom":
+        return <WalletPhantom className={className} variant="branded" />;
+      case "solflare":
+        return <WalletSolflare className={className} variant="branded" />;
+      case "backpack":
+        return <WalletBackpack className={className} variant="branded" />;
+      case "okx":
+        return <WalletOkx className={className} variant="branded" />;
+      case "bitget":
+        return <ExchangeBitget className={className} variant="branded" />;
+      default:
+        return <Wallet className={className} />;
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -483,20 +506,14 @@ export function ChainSelectModal() {
             <ChainButton
               label="MetaMask"
               subLabel={hasMetaMask ? "Browser Extension" : "Not detected"}
-              icon={<span className="text-xl">🦊</span>}
+              icon={<WalletMetamask className="w-6 h-6" variant="branded" />}
               onClick={handleEvmMetaMask}
               disabled={!hasMetaMask}
             />
             <ChainButton
               label="WalletConnect"
               subLabel="Scan QR code with mobile wallet"
-              icon={
-                <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6.09 10.08C9.37 6.84 14.63 6.84 17.91 10.08L18.28 10.44C18.44 10.6 18.44 10.86 18.28 11.02L16.95 12.32C16.87 12.4 16.74 12.4 16.66 12.32L16.15 11.82C13.86 9.57 10.14 9.57 7.85 11.82L7.31 12.35C7.23 12.43 7.1 12.43 7.02 12.35L5.69 11.05C5.53 10.89 5.53 10.63 5.69 10.47L6.09 10.08ZM20.67 12.8L21.85 13.95C22.01 14.11 22.01 14.37 21.85 14.53L16.44 19.82C16.28 19.98 16.02 19.98 15.86 19.82L12.16 16.19C12.12 16.15 12.06 16.15 12.02 16.19L8.32 19.82C8.16 19.98 7.9 19.98 7.74 19.82L2.15 14.53C1.99 14.37 1.99 14.11 2.15 13.95L3.33 12.8C3.49 12.64 3.75 12.64 3.91 12.8L7.61 16.43C7.65 16.47 7.71 16.47 7.75 16.43L11.45 12.8C11.61 12.64 11.87 12.64 12.03 12.8L15.73 16.43C15.77 16.47 15.83 16.47 15.87 16.43L19.57 12.8C19.73 12.64 19.99 12.64 20.15 12.8L20.67 12.8Z" fill="#3B99FC" />
-                  </svg>
-                </div>
-              }
+              icon={<WalletWalletConnect className="w-6 h-6" variant="branded" />}
               onClick={handleEvmWalletConnect}
             />
           </div>
@@ -616,7 +633,7 @@ export function ChainSelectModal() {
                     key={wallet.id}
                     label={wallet.name}
                     subLabel="Click to connect"
-                    icon={<span className="text-xl">{wallet.icon}</span>}
+                    icon={getSolanaWalletIcon(wallet.id, true)}
                     onClick={() => handleSolanaConnect(wallet.id)}
                     badge="Available"
                   />
@@ -635,7 +652,7 @@ export function ChainSelectModal() {
                     key={wallet.id}
                     label={wallet.name}
                     subLabel="Extension not installed"
-                    icon={<span className="text-xl opacity-50">{wallet.icon}</span>}
+                    icon={getSolanaWalletIcon(wallet.id, false)}
                     onClick={() => handleSolanaConnect(wallet.id)}
                     disabled={true}
                   />
@@ -648,22 +665,7 @@ export function ChainSelectModal() {
               <ChainButton
                 label="WalletConnect"
                 subLabel="Connect via QR code (mobile wallets)"
-                icon={
-                  <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M6.09 10.08C9.37 6.84 14.63 6.84 17.91 10.08L18.28 10.44C18.44 10.6 18.44 10.86 18.28 11.02L16.95 12.32C16.87 12.4 16.74 12.4 16.66 12.32L16.15 11.82C13.86 9.57 10.14 9.57 7.85 11.82L7.31 12.35C7.23 12.43 7.1 12.43 7.02 12.35L5.69 11.05C5.53 10.89 5.53 10.63 5.69 10.47L6.09 10.08ZM20.67 12.8L21.85 13.95C22.01 14.11 22.01 14.37 21.85 14.53L16.44 19.82C16.28 19.98 16.02 19.98 15.86 19.82L12.16 16.19C12.12 16.15 12.06 16.15 12.02 16.19L8.32 19.82C8.16 19.98 7.9 19.98 7.74 19.82L2.15 14.53C1.99 14.37 1.99 14.11 2.15 13.95L3.33 12.8C3.49 12.64 3.75 12.64 3.91 12.8L7.61 16.43C7.65 16.47 7.71 16.47 7.75 16.43L11.45 12.8C11.61 12.64 11.87 12.64 12.03 12.8L15.73 16.43C15.77 16.47 15.83 16.47 15.87 16.43L19.57 12.8C19.73 12.64 19.99 12.64 20.15 12.8L20.67 12.8Z"
-                        fill="#3B99FC"
-                      />
-                    </svg>
-                  </div>
-                }
+                icon={<WalletWalletConnect className="w-6 h-6" variant="branded" />}
                 onClick={() => handleSolanaConnect("walletconnect")}
               />
             </div>

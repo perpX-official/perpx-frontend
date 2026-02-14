@@ -6,6 +6,14 @@ import { rewardsStorage, type RewardsState, type ChainKind } from '@/lib/rewards
 const DEMO_WALLET_ADDRESS = '0xDE286bcD39d0a6C106871e106871106871106871';
 const DEMO_MODE_KEY = 'demoMode';
 const DEMO_MODE_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+const REWARDS_IDENTITY_KEY = 'perpx_rewards_identity';
+const REWARDS_IDENTITY_RESET_KEY = 'perpx_rewards_identity_reset';
+
+interface RewardsIdentity {
+  chain: ChainKind;
+  chainType: 'evm' | 'tron' | 'solana';
+  address: string;
+}
 
 function getDemoModeFromStorage() {
   if (typeof window === 'undefined') return false;
@@ -36,6 +44,52 @@ function getStoredConnectedState(): RewardsState | null {
   return null;
 }
 
+function getWalletState(address: string, activeChain: string): RewardsIdentity {
+  const chain: ChainKind =
+    activeChain === 'sol' ? 'sol' : activeChain === 'tron' ? 'tron' : 'evm';
+  const chainType =
+    activeChain === 'sol'
+      ? ('solana' as const)
+      : activeChain === 'tron'
+      ? ('tron' as const)
+      : ('evm' as const);
+
+  return {
+    chain,
+    chainType,
+    address,
+  };
+}
+
+function getStoredIdentity(): RewardsIdentity | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = localStorage.getItem(REWARDS_IDENTITY_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<RewardsIdentity>;
+    if (!parsed.address || !parsed.chain || !parsed.chainType) return null;
+    return {
+      address: parsed.address,
+      chain: parsed.chain,
+      chainType: parsed.chainType,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function setStoredIdentity(identity: RewardsIdentity) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(REWARDS_IDENTITY_KEY, JSON.stringify(identity));
+}
+
+function clearStoredIdentity() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(REWARDS_IDENTITY_KEY);
+}
+
 export function useRewardsState() {
   // Use WalletContext for ALL chain state (including EVM)
   // Do NOT use wagmi's useAccount directly - WalletContext handles EVM filtering
@@ -54,11 +108,20 @@ export function useRewardsState() {
         isConnected: true
       };
     }
-    // Check active chain from WalletContext
+    // Keep one rewards identity across chain switches until explicit disconnect.
+    const storedIdentity = getStoredIdentity();
+    if (storedIdentity) {
+      return {
+        ...storedIdentity,
+        isConnected: walletConnected,
+      };
+    }
+
+    // No stored identity yet; initialize with the current wallet.
     if (walletConnected && walletAddress && activeChain) {
-      const chainKind: ChainKind = activeChain === 'sol' ? 'sol' : activeChain === 'tron' ? 'tron' : 'evm';
-      const chainType = activeChain === 'sol' ? 'solana' as const : activeChain === 'tron' ? 'tron' as const : 'evm' as const;
-      return { chain: chainKind, chainType, address: walletAddress, isConnected: true };
+      const identity = getWalletState(walletAddress, activeChain);
+      setStoredIdentity(identity);
+      return { ...identity, isConnected: true };
     }
     // During OAuth callback round-trip, keep previous wallet state to avoid disconnect flicker.
     if (isOAuthReturnUrl()) {
@@ -96,14 +159,17 @@ export function useRewardsState() {
       return;
     }
     
-    // Use WalletContext state (already filters out unwanted EVM auto-connects)
+    // Use a stable rewards identity across chain switches.
     if (walletConnected && walletAddress && activeChain) {
-      const chainKind: ChainKind = activeChain === 'sol' ? 'sol' : activeChain === 'tron' ? 'tron' : 'evm';
-      const chainType = activeChain === 'sol' ? 'solana' as const : activeChain === 'tron' ? 'tron' as const : 'evm' as const;
+      const storedIdentity = getStoredIdentity();
+      const identity = storedIdentity || getWalletState(walletAddress, activeChain);
+      if (!storedIdentity) {
+        setStoredIdentity(identity);
+      }
       const newState: RewardsState = {
-        chain: chainKind,
-        chainType,
-        address: walletAddress,
+        chain: identity.chain,
+        chainType: identity.chainType,
+        address: identity.address,
         isConnected: true
       };
       setState(newState);
@@ -121,7 +187,16 @@ export function useRewardsState() {
       }
     }
 
-    const newState: RewardsState = { 
+    const shouldResetIdentity =
+      typeof window !== 'undefined' &&
+      localStorage.getItem(REWARDS_IDENTITY_RESET_KEY) === '1';
+
+    if (shouldResetIdentity) {
+      clearStoredIdentity();
+      localStorage.removeItem(REWARDS_IDENTITY_RESET_KEY);
+    }
+
+    const newState: RewardsState = {
       chain: null, 
       chainType: null, 
       address: null, 

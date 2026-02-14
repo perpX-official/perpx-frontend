@@ -289,6 +289,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       address: null,
       isConnected: false,
     });
+    if (typeof window !== 'undefined') {
+      // Explicit disconnect should reset the cross-chain rewards identity.
+      localStorage.setItem('perpx_rewards_identity_reset', '1');
+    }
   }, [evmConnected, wagmiDisconnect, tron, solana]);
 
   const openChainSelect = useCallback(() => {
