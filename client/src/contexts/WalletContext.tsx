@@ -6,6 +6,15 @@ import { useTronWallet } from '@/hooks/useTronWallet';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 
 export type ActiveChain = 'evm' | 'tron' | 'sol' | null;
+const REWARDS_IDENTITY_COOKIE = "perpx_rewards_wallet";
+
+function clearRewardsIdentityCookie() {
+  if (typeof document === "undefined") return;
+  const expires = "Max-Age=0";
+  const base = `${REWARDS_IDENTITY_COOKIE}=; ${expires}; Path=/; SameSite=Lax`;
+  document.cookie = base;
+  document.cookie = `${base}; Domain=.perpx.fi`;
+}
 
 interface WalletContextType {
   // Unified state
@@ -293,6 +302,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Explicit disconnect should reset the cross-chain rewards identity.
       localStorage.setItem('perpx_rewards_identity_reset', '1');
     }
+    clearRewardsIdentityCookie();
   }, [evmConnected, wagmiDisconnect, tron, solana]);
 
   const openChainSelect = useCallback(() => {
