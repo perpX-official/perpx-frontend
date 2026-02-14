@@ -19,6 +19,23 @@ function getDemoModeFromStorage() {
   return DEMO_MODE_ENABLED && stored;
 }
 
+function isOAuthReturnUrl(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get('success') || '';
+  const error = params.get('error') || '';
+  return /^(x_|discord_)/.test(success) || /^(x_|discord_)/.test(error);
+}
+
+function getStoredConnectedState(): RewardsState | null {
+  if (typeof window === 'undefined') return null;
+  const stored = rewardsStorage.get();
+  if (stored.isConnected && stored.address && stored.chain && stored.chainType) {
+    return stored;
+  }
+  return null;
+}
+
 export function useRewardsState() {
   // Use WalletContext for ALL chain state (including EVM)
   // Do NOT use wagmi's useAccount directly - WalletContext handles EVM filtering
@@ -42,6 +59,11 @@ export function useRewardsState() {
       const chainKind: ChainKind = activeChain === 'sol' ? 'sol' : activeChain === 'tron' ? 'tron' : 'evm';
       const chainType = activeChain === 'sol' ? 'solana' as const : activeChain === 'tron' ? 'tron' as const : 'evm' as const;
       return { chain: chainKind, chainType, address: walletAddress, isConnected: true };
+    }
+    // During OAuth callback round-trip, keep previous wallet state to avoid disconnect flicker.
+    if (isOAuthReturnUrl()) {
+      const stored = getStoredConnectedState();
+      if (stored) return stored;
     }
     return { chain: null, chainType: null, address: null, isConnected: false };
   });
@@ -90,6 +112,15 @@ export function useRewardsState() {
     }
     
     // Nothing connected
+    // Keep prior connected state only during OAuth callback return.
+    if (isOAuthReturnUrl()) {
+      const stored = getStoredConnectedState();
+      if (stored) {
+        setState(stored);
+        return;
+      }
+    }
+
     const newState: RewardsState = { 
       chain: null, 
       chainType: null, 

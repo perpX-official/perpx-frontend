@@ -184,6 +184,56 @@ export default function Rewards() {
   // Check OAuth status on mount
   const { data: oauthStatus } = trpc.rewards.getOAuthStatus.useQuery();
 
+  // Handle OAuth callback query params (no reload needed)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
+    const username = params.get("username");
+
+    if (!success && !error) return;
+
+    const successMessageByCode: Record<string, string> = {
+      x_connected: username ? `Connected X account @${username}` : "Connected X account",
+      discord_connected: username ? `Connected Discord account ${username}` : "Connected Discord account",
+    };
+
+    const errorMessageByCode: Record<string, string> = {
+      x_auth_denied: "X connection was cancelled.",
+      x_auth_invalid: "X connection failed (invalid callback).",
+      x_auth_expired: "X connection expired. Please try again.",
+      x_token_failed: "X connection failed while exchanging token.",
+      x_user_failed: "X connection failed while fetching profile.",
+      x_already_connected: "This X account is already linked.",
+      x_auth_error: "X connection failed. Please try again.",
+      discord_auth_denied: "Discord connection was cancelled.",
+      discord_auth_invalid: "Discord connection failed (invalid callback).",
+      discord_auth_expired: "Discord connection expired. Please try again.",
+      discord_token_failed: "Discord connection failed while exchanging token.",
+      discord_user_failed: "Discord connection failed while fetching profile.",
+      discord_already_connected: "This Discord account is already linked.",
+      discord_auth_error: "Discord connection failed. Please try again.",
+    };
+
+    if (success) {
+      toast.success(successMessageByCode[success] || "Social account connected.");
+    }
+    if (error) {
+      toast.error(errorMessageByCode[error] || "Social connection failed.");
+    }
+
+    // Pull fresh profile state immediately after OAuth return
+    if (isConnected && safeAddress) {
+      void refetchProfile();
+    }
+
+    // Remove OAuth query params without page reload
+    const cleanUrl = `${window.location.pathname}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", cleanUrl);
+  }, [isConnected, safeAddress, refetchProfile]);
+
   const handleSocialConnect = (platform: 'twitter' | 'discord') => {
     if (!address) return;
     
