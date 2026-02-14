@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRewardsState } from "@/hooks/useRewardsState";
 import { withApiBase } from "@/lib/apiBase";
@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label";
 export default function Rewards() {
   const { t } = useLanguage();
   const { isConnected, address, chainType } = useRewardsState();
+  const trpcUtils = trpc.useUtils();
   const [loading, setLoading] = useState<string | null>(null);
   
   // Tweet URL verification modal state
@@ -57,10 +58,24 @@ export default function Rewards() {
 
   // Get profile from backend
   const safeAddress = address?.trim() || "";
-  const { data: profile, refetch: refetchProfile, isLoading: profileLoading, error: profileError } = trpc.rewards.getProfile.useQuery(
+  const { data: profileData, refetch: refetchProfile, isLoading: profileLoading, error: profileError } = trpc.rewards.getProfile.useQuery(
     { walletAddress: safeAddress, chainType: chainType || "evm" },
-    { enabled: isConnected && safeAddress.length > 0 && !!chainType }
+    {
+      enabled: isConnected && safeAddress.length > 0 && !!chainType,
+      staleTime: 0,
+      refetchOnMount: "always",
+    }
   );
+  const normalizeWalletAddress = (value: string, type: "evm" | "tron" | "solana") =>
+    type === "evm" ? value.toLowerCase() : value;
+  const isProfileForActiveWallet = !!(
+    profileData &&
+    chainType &&
+    profileData.walletAddress &&
+    normalizeWalletAddress(profileData.walletAddress, chainType) === normalizeWalletAddress(safeAddress, chainType)
+  );
+  const profile = isProfileForActiveWallet ? profileData : undefined;
+  const waitingForActiveWalletProfile = isConnected && safeAddress.length > 0 && !!chainType && !isProfileForActiveWallet;
   const profileErrorMessage = profileError instanceof Error ? profileError.message : null;
 
   // Mutations
@@ -183,6 +198,25 @@ export default function Rewards() {
 
   // Check OAuth status on mount
   const { data: oauthStatus } = trpc.rewards.getOAuthStatus.useQuery();
+
+  // Ensure profile always follows active wallet/chain immediately after switching.
+  const lastWalletKeyRef = useRef<string>("");
+  useEffect(() => {
+    const currentWalletKey = isConnected && safeAddress && chainType
+      ? `${chainType}:${safeAddress.toLowerCase()}`
+      : "";
+
+    if (!currentWalletKey) {
+      lastWalletKeyRef.current = "";
+      return;
+    }
+
+    if (lastWalletKeyRef.current === currentWalletKey) return;
+    lastWalletKeyRef.current = currentWalletKey;
+
+    void trpcUtils.rewards.getProfile.invalidate();
+    void refetchProfile();
+  }, [isConnected, safeAddress, chainType, trpcUtils, refetchProfile]);
 
   // Handle OAuth callback query params (no reload needed)
   useEffect(() => {
@@ -544,7 +578,7 @@ export default function Rewards() {
         />
       )}
 
-      {isConnected && profileLoading && (
+      {isConnected && (profileLoading || waitingForActiveWalletProfile) && (
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <div className="h-10 w-48 bg-white/10 rounded animate-pulse mb-2"></div>
@@ -574,7 +608,7 @@ export default function Rewards() {
         </div>
       )}
 
-      {isConnected && !profileLoading && !profile && (
+      {isConnected && !profileLoading && !waitingForActiveWalletProfile && !profile && (
         <div className="container mx-auto px-4 py-8">
           <Card className="glass-card p-6 sm:p-8 text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Could not load rewards data</h2>
@@ -588,7 +622,7 @@ export default function Rewards() {
         </div>
       )}
 
-      {isConnected && profile && !profileLoading && (
+      {isConnected && profile && !profileLoading && !waitingForActiveWalletProfile && (
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           <div className="mb-4 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">Rewards Center</h1>
