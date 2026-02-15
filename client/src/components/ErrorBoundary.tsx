@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, ReactNode } from "react";
 
+const IS_DEV = import.meta.env.DEV;
+
 interface Props {
   children: ReactNode;
 }
@@ -21,6 +23,24 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error) {
+    // Safari/iOS (and Google Translate) can trigger transient DOM mutation errors
+    // like "removeChild" which can be recovered by a single reload.
+    if (!IS_DEV) {
+      try {
+        const combined = `${error?.message ?? ""}\n${error?.stack ?? ""}`;
+        const isDomMutationError = /removeChild|NotFoundError/i.test(combined);
+        const reloadedKey = "perpx:autoReloaded";
+        if (isDomMutationError && !sessionStorage.getItem(reloadedKey)) {
+          sessionStorage.setItem(reloadedKey, "1");
+          window.location.reload();
+        }
+      } catch {
+        // Ignore - fallback to render the error UI below.
+      }
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -31,13 +51,15 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+            <h2 className="text-xl mb-4">予期しないエラーが発生しました。</h2>
 
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
+            {!IS_DEV ? null : (
+              <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
+                <pre className="text-sm text-muted-foreground whitespace-break-spaces">
+                  {this.state.error?.stack}
+                </pre>
+              </div>
+            )}
 
             <button
               onClick={() => window.location.reload()}
@@ -48,7 +70,7 @@ class ErrorBoundary extends Component<Props, State> {
               )}
             >
               <RotateCcw size={16} />
-              Reload Page
+              再読み込み
             </button>
           </div>
         </div>

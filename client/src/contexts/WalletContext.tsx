@@ -98,25 +98,32 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   let address: string | null = null;
   let chainName: string | null = null;
+  let resolvedChain: ActiveChain = null;
 
   if (activeChain === 'evm' && effectiveEvmConnected && evmAddress) {
     address = evmAddress;
     chainName = 'EVM';
+    resolvedChain = 'evm';
   } else if (activeChain === 'tron' && tron.isConnected && tron.address) {
     address = tron.address;
     chainName = tron.chainName || 'Tron';
+    resolvedChain = 'tron';
   } else if (activeChain === 'sol' && solana.isConnected && solana.address) {
     address = solana.address;
     chainName = solana.walletName || 'Solana';
+    resolvedChain = 'sol';
   } else if (effectiveEvmConnected && evmAddress && !tron.isConnected && !solana.isConnected) {
     address = evmAddress;
     chainName = 'EVM';
+    resolvedChain = 'evm';
   } else if (tron.isConnected && tron.address) {
     address = tron.address;
     chainName = tron.chainName || 'Tron';
+    resolvedChain = 'tron';
   } else if (solana.isConnected && solana.address) {
     address = solana.address;
     chainName = solana.walletName || 'Solana';
+    resolvedChain = 'sol';
   }
 
   // Sync active chain based on connection state
@@ -141,9 +148,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Sync with rewardsStorage
   useEffect(() => {
-    if (isConnected && address && activeChain) {
-      const chainKind: ChainKind = activeChain === 'sol' ? 'sol' : activeChain === 'tron' ? 'tron' : 'evm';
-      const chainType = activeChain === 'sol' ? 'solana' as const : activeChain === 'tron' ? 'tron' as const : 'evm' as const;
+    // Use the chain that actually produced the `address` to avoid mismatches
+    // (e.g. Tron address being labeled as EVM when activeChain is out-of-sync).
+    if (isConnected && address && resolvedChain) {
+      const chainKind: ChainKind = resolvedChain === 'sol' ? 'sol' : resolvedChain === 'tron' ? 'tron' : 'evm';
+      const chainType = resolvedChain === 'sol' ? 'solana' as const : resolvedChain === 'tron' ? 'tron' as const : 'evm' as const;
       rewardsStorage.set({
         chain: chainKind,
         chainType,
@@ -162,7 +171,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         });
       }
     }
-  }, [isConnected, address, activeChain]);
+  }, [isConnected, address, resolvedChain]);
 
   // Connect functions
   const connectEvm = useCallback(
