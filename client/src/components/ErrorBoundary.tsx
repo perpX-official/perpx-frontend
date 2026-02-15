@@ -2,7 +2,11 @@ import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, ReactNode } from "react";
 
-const IS_DEV = import.meta.env.DEV;
+const IS_LOCAL_DEV =
+  import.meta.env.DEV &&
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1");
 
 interface Props {
   children: ReactNode;
@@ -26,7 +30,7 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error) {
     // Safari/iOS (and Google Translate) can trigger transient DOM mutation errors
     // like "removeChild" which can be recovered by a single reload.
-    if (!IS_DEV) {
+    if (!IS_LOCAL_DEV) {
       try {
         const combined = `${error?.message ?? ""}\n${error?.stack ?? ""}`;
         const isDomMutationError = /removeChild|NotFoundError/i.test(combined);
@@ -53,7 +57,7 @@ class ErrorBoundary extends Component<Props, State> {
 
             <h2 className="text-xl mb-4">予期しないエラーが発生しました。</h2>
 
-            {!IS_DEV ? null : (
+            {!IS_LOCAL_DEV ? null : (
               <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
                 <pre className="text-sm text-muted-foreground whitespace-break-spaces">
                   {this.state.error?.stack}

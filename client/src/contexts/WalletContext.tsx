@@ -67,16 +67,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [activeChain, setActiveChain] = useState<ActiveChain>(null);
   const [intendedChain, setIntendedChain] = useState<ActiveChain>(null);
 
-  // Force-disconnect EVM if it connects while the user did not intend EVM.
+  // Force-disconnect EVM only when the user explicitly intends to use Tron/Solana.
+  // We still allow EVM auto-connect when there is no explicit intent, otherwise
+  // a hard refresh can incorrectly show "disconnected" even though MetaMask is connected.
   useEffect(() => {
-    if (evmConnected && intendedChain !== 'evm') {
-      console.log(
-        '[WalletContext] Blocking EVM auto-connect while intended chain is',
-        intendedChain ?? 'none',
-        '- disconnecting...'
-      );
+    if (!evmConnected) return;
+    if (intendedChain === 'tron' || intendedChain === 'sol') {
       wagmiDisconnect();
-      return;
     }
   }, [evmConnected, intendedChain, wagmiDisconnect]);
 
@@ -93,7 +90,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Determine unified state
   const isPending = tron.isPending || solana.isPending || evmConnecting;
 
-  const effectiveEvmConnected = evmConnected && intendedChain === 'evm';
+  const shouldBlockEvm = intendedChain === 'tron' || intendedChain === 'sol';
+  const effectiveEvmConnected = evmConnected && !shouldBlockEvm;
   const isConnected = effectiveEvmConnected || tron.isConnected || solana.isConnected;
 
   let address: string | null = null;
