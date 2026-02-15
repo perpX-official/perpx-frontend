@@ -15,16 +15,19 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  isDomMutationError: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, isDomMutationError: false };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    const combined = `${error?.message ?? ""}\n${error?.stack ?? ""}`;
+    const isDomMutationError = /removeChild|NotFoundError/i.test(combined);
+    return { hasError: true, error, isDomMutationError };
   }
 
   componentDidCatch(error: Error) {
@@ -47,6 +50,30 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      if (!IS_LOCAL_DEV && this.state.isDomMutationError) {
+        // Avoid showing a scary error screen for a transient DOM mutation crash.
+        // We already attempted a one-time reload in componentDidCatch.
+        return (
+          <div className="flex items-center justify-center min-h-screen p-8 bg-background">
+            <div className="flex flex-col items-center w-full max-w-2xl p-8 text-center">
+              <h2 className="text-xl mb-4">読み込み中...</h2>
+
+              <button
+                onClick={() => window.location.reload()}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg",
+                  "bg-primary text-primary-foreground",
+                  "hover:opacity-90 cursor-pointer"
+                )}
+              >
+                <RotateCcw size={16} />
+                再読み込み
+              </button>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="flex items-center justify-center min-h-screen p-8 bg-background">
           <div className="flex flex-col items-center w-full max-w-2xl p-8">
