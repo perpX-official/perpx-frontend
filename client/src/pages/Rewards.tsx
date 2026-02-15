@@ -66,16 +66,12 @@ export default function Rewards() {
       refetchOnMount: "always",
     }
   );
-  const normalizeWalletAddress = (value: string, type: "evm" | "tron" | "solana") =>
-    type === "evm" ? value.toLowerCase() : value;
-  const isProfileForActiveWallet = !!(
-    profileData &&
-    chainType &&
-    profileData.walletAddress &&
-    normalizeWalletAddress(profileData.walletAddress, chainType) === normalizeWalletAddress(safeAddress, chainType)
-  );
-  const profile = isProfileForActiveWallet ? profileData : undefined;
-  const waitingForActiveWalletProfile = isConnected && safeAddress.length > 0 && !!chainType && !isProfileForActiveWallet;
+  // NOTE:
+  // Backend may keep a "sticky" rewards identity (cookie) even if the user switches wallets.
+  // In that case the profile's walletAddress may differ from the currently connected wallet.
+  // We still want to show the linked rewards state (points/tasks) rather than hiding it.
+  const profile = profileData ?? undefined;
+  const waitingForActiveWalletProfile = false;
   const profileErrorMessage = profileError instanceof Error ? profileError.message : null;
 
   // Mutations
