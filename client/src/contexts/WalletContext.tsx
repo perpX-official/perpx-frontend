@@ -48,9 +48,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const { disconnect: wagmiDisconnect } = useDisconnect();
   const evmAddress = wagmiAccount.address || null;
   const evmConnected = wagmiAccount.isConnected;
-  const evmConnectorId = wagmiAccount.connector?.id || null;
   const [evmWcUri, setEvmWcUri] = useState<string | null>(null);
-  const intendedEvmConnectorIdRef = useRef<string | null>(null);
   const evmWcListenerRef = useRef<((uri: string) => void) | null>(null);
 
   // Tron
@@ -76,16 +74,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       wagmiDisconnect();
     }
   }, [evmConnected, intendedChain, wagmiDisconnect]);
-
-  // Ensure we only keep the intended EVM connector (MetaMask or WalletConnect).
-  useEffect(() => {
-    if (!evmConnected || intendedChain !== 'evm') return;
-    const intendedId = intendedEvmConnectorIdRef.current;
-    if (intendedId && evmConnectorId && evmConnectorId !== intendedId) {
-      console.log('[WalletContext] EVM connector mismatch, disconnecting unexpected connector:', evmConnectorId);
-      wagmiDisconnect();
-    }
-  }, [evmConnected, evmConnectorId, intendedChain, wagmiDisconnect]);
 
   // Determine unified state
   const isPending = tron.isPending || solana.isPending || evmConnecting;
@@ -190,12 +178,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (mode === 'metamask') {
         const metaMaskAvailable = detectMetaMaskAvailable();
         if (!metaMaskAvailable) {
-          intendedEvmConnectorIdRef.current = null;
           throw new Error('MetaMask not detected. Disable Phantom EVM or use WalletConnect.');
         }
       }
-
-      intendedEvmConnectorIdRef.current = targetConnector.id;
 
       if (mode === 'walletconnect') {
         setEvmWcUri(null);
@@ -218,7 +203,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           const provider: any = await targetConnector.getProvider();
           if (isPhantomEvmProvider(provider)) {
             wagmiDisconnect();
-            intendedEvmConnectorIdRef.current = null;
             throw new Error('MetaMask not detected. Phantom EVM provider was selected.');
           }
         } catch (err: any) {
@@ -289,7 +273,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (tron.isConnected) tron.disconnect();
     if (solana.isConnected) solana.disconnect();
     setEvmWcUri(null);
-    intendedEvmConnectorIdRef.current = null;
     rewardsStorage.set({
       chain: null,
       chainType: null,

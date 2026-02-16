@@ -18,19 +18,20 @@ export const metadata = {
 // Supported networks
 export const networks = [mainnet, arbitrum, base, optimism];
 
-// Noop storage: prevents wagmi from persisting connection state
-// This ensures EVM wallets do NOT auto-reconnect on page load or
-// when switching to Tron/Solana chains
+// Fallback storage for non-browser contexts.
 const noopStorage = {
   getItem: (_key: string) => null,
   setItem: (_key: string, _value: string) => {},
   removeItem: (_key: string) => {},
 };
 
+const wagmiStorage =
+  typeof window !== 'undefined' ? window.localStorage : noopStorage;
+
 // Create wagmi adapter for AppKit
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
-    storage: noopStorage
+    storage: wagmiStorage
   }),
   ssr: false,
   projectId,
