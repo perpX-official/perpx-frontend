@@ -84,6 +84,15 @@ export function ChainSelectModal() {
   const hasTronExtension =
     typeof window !== "undefined" && (!!(window as any).tronLink || !!(window as any).tronWeb);
   const hasMetaMask = detectMetaMaskAvailable();
+  const isMobileBrowser =
+    typeof navigator !== "undefined" &&
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+
+  const openMetaMaskDeepLink = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const current = window.location.href.replace(/^https?:\/\//, "");
+    window.location.href = `https://metamask.app.link/dapp/${current}`;
+  }, []);
 
   const tronWalletOptions = React.useMemo(() => {
     const options = [...TRON_WALLET_OPTIONS_BASE];
@@ -211,6 +220,10 @@ export function ChainSelectModal() {
 
   const handleEvmMetaMask = async () => {
     if (!hasMetaMask) {
+      if (isMobileBrowser) {
+        openMetaMaskDeepLink();
+        return;
+      }
       toast.error(getWalletConnectionErrorMessage(new Error("MetaMask not detected")));
       return;
     }
@@ -506,10 +519,15 @@ export function ChainSelectModal() {
             </p>
             <ChainButton
               label="MetaMask"
-              subLabel={hasMetaMask ? "Browser Extension" : "Not detected"}
+              subLabel={
+                hasMetaMask
+                  ? "Browser Extension"
+                  : isMobileBrowser
+                  ? "Open MetaMask App"
+                  : "Not detected"
+              }
               icon={<WalletMetamask className="w-6 h-6" variant="branded" />}
               onClick={handleEvmMetaMask}
-              disabled={!hasMetaMask}
             />
             <ChainButton
               label="WalletConnect"
