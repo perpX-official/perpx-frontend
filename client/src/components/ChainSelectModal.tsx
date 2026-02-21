@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Wallet, Zap, Globe, Loader2, X, Copy, Check, AlertTriangle, LogOut } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
+import { EVM_MOBILE_WALLETS, SOLANA_MOBILE_WALLETS } from "@/config/walletConstants";
 import { detectMetaMaskAvailable } from "@/lib/evmProviders";
 import { getWalletConnectionErrorMessage } from "@/lib/walletConnectionError";
 import { toast } from "sonner";
@@ -9,12 +10,8 @@ import {
   WalletMetamask,
   WalletWalletConnect,
   WalletPhantom,
-  WalletSolflare,
-  WalletBackpack,
   WalletTrust,
-  WalletOkx,
   WalletSafe,
-  ExchangeBitget,
   NetworkTron,
 } from "@web3icons/react";
 
@@ -28,39 +25,8 @@ type ModalView =
   | "solana_wallets"
   | "wc_qr";
 
-// Base Tron wallet options to display
-const TRON_WALLET_OPTIONS_BASE = [
-  {
-    id: "walletconnect",
-    name: "WalletConnect",
-    subLabel: "Scan QR code with any Tron wallet",
-    icon: <WalletWalletConnect className="w-6 h-6" variant="branded" />,
-  },
-  {
-    id: "trust",
-    name: "Trust Wallet",
-    subLabel: "Mobile wallet",
-    icon: <WalletTrust className="w-6 h-6" variant="branded" />,
-  },
-  {
-    id: "safepal",
-    name: "SafePal",
-    subLabel: "Mobile wallet",
-    icon: <WalletSafe className="w-6 h-6" variant="branded" />,
-  },
-  {
-    id: "okx",
-    name: "OKX Wallet",
-    subLabel: "Mobile wallet",
-    icon: <WalletOkx className="w-6 h-6" variant="branded" />,
-  },
-  {
-    id: "bitget",
-    name: "Bitget Wallet",
-    subLabel: "Mobile wallet",
-    icon: <ExchangeBitget className="w-6 h-6" variant="branded" />,
-  },
-];
+type EvmWcTarget = "walletconnect" | "trust" | "safepal";
+type SolanaWcTarget = "walletconnect" | "phantom";
 
 export function ChainSelectModal() {
   const {
@@ -69,12 +35,10 @@ export function ChainSelectModal() {
     isConnected,
     activeChain,
     address,
-    chainName,
     connectEvm,
     connectTron,
     connectSolana,
     disconnect,
-    isPending,
     tronWcUri,
     evmWcUri,
     solanaWcUri,
@@ -84,6 +48,9 @@ export function ChainSelectModal() {
   const hasTronExtension =
     typeof window !== "undefined" && (!!(window as any).tronLink || !!(window as any).tronWeb);
   const hasMetaMask = detectMetaMaskAvailable();
+  const hasPhantomSolana = solanaAvailableWallets.some(
+    (wallet) => wallet.id === "phantom" && wallet.available
+  );
   const isMobileBrowser =
     typeof navigator !== "undefined" &&
     /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
@@ -94,24 +61,20 @@ export function ChainSelectModal() {
     window.location.href = `https://metamask.app.link/dapp/${current}`;
   }, []);
 
-  const tronWalletOptions = React.useMemo(() => {
-    const options = [...TRON_WALLET_OPTIONS_BASE];
-    if (hasTronExtension) {
-      options.unshift({
-        id: "extension",
-        name: "Browser Extension",
-        subLabel: "Connect with desktop extension",
-        icon: <NetworkTron className="w-6 h-6" variant="branded" />,
-      });
-    }
-    return options;
-  }, [hasTronExtension]);
+  const openWalletDeepLink = useCallback((deepLinkPrefix: string, uri: string) => {
+    if (typeof window === "undefined") return;
+    const encodedUri = encodeURIComponent(uri);
+    window.location.href = `${deepLinkPrefix}${encodedUri}`;
+  }, []);
 
   const [view, setView] = useState<ModalView>("chains");
   const [connecting, setConnecting] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [evmWcTarget, setEvmWcTarget] = useState<EvmWcTarget>("walletconnect");
+  const [solanaWcTarget, setSolanaWcTarget] = useState<SolanaWcTarget>("walletconnect");
   const [pendingSwitchChain, setPendingSwitchChain] = useState<'evm' | 'tron' | 'sol' | null>(null);
+  const openedMobileUriRef = useRef<string | null>(null);
 
   // Generate QR code when URI changes
   const activeUri =
@@ -144,6 +107,40 @@ export function ChainSelectModal() {
     }
   }, [solanaWcUri, view]);
 
+  useEffect(() => {
+    if (!isMobileBrowser) return;
+
+    let mobileUri: string | null = null;
+    let deepLinkPrefix: string | null = null;
+
+    if (view === "evm_wc_qr" && evmWcUri) {
+      mobileUri = evmWcUri;
+      deepLinkPrefix = EVM_MOBILE_WALLETS[evmWcTarget].deepLinkPrefix;
+    } else if (view === "tron_wc_qr" && tronWcUri) {
+      mobileUri = tronWcUri;
+      deepLinkPrefix = EVM_MOBILE_WALLETS.walletconnect.deepLinkPrefix;
+    } else if (view === "wc_qr" && solanaWcUri) {
+      mobileUri = solanaWcUri;
+      deepLinkPrefix = SOLANA_MOBILE_WALLETS[solanaWcTarget].deepLinkPrefix;
+    }
+
+    if (!mobileUri || !deepLinkPrefix) return;
+
+    const launchKey = `${view}:${deepLinkPrefix}:${mobileUri}`;
+    if (openedMobileUriRef.current === launchKey) return;
+    openedMobileUriRef.current = launchKey;
+    openWalletDeepLink(deepLinkPrefix, mobileUri);
+  }, [
+    isMobileBrowser,
+    view,
+    evmWcUri,
+    tronWcUri,
+    solanaWcUri,
+    evmWcTarget,
+    solanaWcTarget,
+    openWalletDeepLink,
+  ]);
+
   // Reset state when modal opens
   useEffect(() => {
     if (isChainSelectOpen) {
@@ -151,7 +148,10 @@ export function ChainSelectModal() {
       setConnecting(false);
       setQrDataUrl(null);
       setCopied(false);
+      setEvmWcTarget("walletconnect");
+      setSolanaWcTarget("walletconnect");
       setPendingSwitchChain(null);
+      openedMobileUriRef.current = null;
     }
   }, [isChainSelectOpen]);
 
@@ -163,7 +163,10 @@ export function ChainSelectModal() {
     setConnecting(false);
     setQrDataUrl(null);
     setCopied(false);
+    setEvmWcTarget("walletconnect");
+    setSolanaWcTarget("walletconnect");
     setPendingSwitchChain(null);
+    openedMobileUriRef.current = null;
   };
 
   // Format address for display
@@ -237,7 +240,8 @@ export function ChainSelectModal() {
     }
   };
 
-  const handleEvmWalletConnect = async () => {
+  const handleEvmWalletConnect = async (target: EvmWcTarget) => {
+    setEvmWcTarget(target);
     setConnecting(true);
     setView("evm_wc_qr");
     try {
@@ -255,6 +259,10 @@ export function ChainSelectModal() {
   };
 
   const handleTronExtensionConnect = async () => {
+    if (!hasTronExtension && isMobileBrowser) {
+      await handleTronWalletConnect();
+      return;
+    }
     setConnecting(true);
     try {
       await connectTron("tronlink");
@@ -284,22 +292,13 @@ export function ChainSelectModal() {
     }
   };
 
-  // Tron: handle wallet option click
-  const handleTronWalletClick = (walletId: string) => {
-    if (walletId === "extension") {
-      handleTronExtensionConnect();
-      return;
-    }
-    // All other wallets connect via WalletConnect (QR / mobile deep link)
-    handleTronWalletConnect();
-  };
-
   // Solana: show available wallets
   const handleSolanaSelect = () => {
     setView("solana_wallets");
   };
 
-  const handleSolanaConnect = async (walletId: string) => {
+  const handleSolanaConnect = async (walletId: string, target: SolanaWcTarget) => {
+    setSolanaWcTarget(target);
     setConnecting(true);
     try {
       await connectSolana(walletId);
@@ -332,31 +331,6 @@ export function ChainSelectModal() {
   const handleDisconnect = () => {
     disconnect();
     handleClose();
-  };
-
-  // Determine which wallets are detected for Solana
-  const detectedSolanaWallets = solanaAvailableWallets.filter(
-    (w) => w.available
-  );
-  const undetectedSolanaWallets = solanaAvailableWallets.filter(
-    (w) => !w.available
-  );
-  const getSolanaWalletIcon = (walletId: string, isAvailable: boolean) => {
-    const className = `w-6 h-6 ${isAvailable ? "" : "opacity-50"}`;
-    switch (walletId) {
-      case "phantom":
-        return <WalletPhantom className={className} variant="branded" />;
-      case "solflare":
-        return <WalletSolflare className={className} variant="branded" />;
-      case "backpack":
-        return <WalletBackpack className={className} variant="branded" />;
-      case "okx":
-        return <WalletOkx className={className} variant="branded" />;
-      case "bitget":
-        return <ExchangeBitget className={className} variant="branded" />;
-      default:
-        return <Wallet className={className} />;
-    }
   };
 
   return (
@@ -450,21 +424,21 @@ export function ChainSelectModal() {
 
             <ChainButton
               label="EVM Wallets"
-              subLabel="MetaMask, WalletConnect"
+              subLabel="MetaMask, SafePal, Trust, WalletConnect"
               icon={<Globe className="w-6 h-6 text-blue-400" />}
               onClick={() => handleChainClick('evm')}
               active={activeChain === 'evm'}
             />
             <ChainButton
               label="Tron Network"
-              subLabel="Browser Extension, WalletConnect"
+              subLabel="TronLink, WalletConnect"
               icon={<Zap className="w-6 h-6 text-red-500" />}
               onClick={() => handleChainClick('tron')}
               active={activeChain === 'tron'}
             />
             <ChainButton
               label="Solana"
-              subLabel="Phantom, Solflare, Backpack"
+              subLabel="Phantom, WalletConnect"
               icon={<Wallet className="w-6 h-6 text-purple-400" />}
               onClick={() => handleChainClick('sol')}
               active={activeChain === 'sol'}
@@ -530,10 +504,22 @@ export function ChainSelectModal() {
               onClick={handleEvmMetaMask}
             />
             <ChainButton
+              label="SafePal"
+              subLabel={isMobileBrowser ? "Open SafePal App" : "WalletConnect (QR)"}
+              icon={<WalletSafe className="w-6 h-6" variant="branded" />}
+              onClick={() => handleEvmWalletConnect("safepal")}
+            />
+            <ChainButton
+              label="Trust Wallet"
+              subLabel={isMobileBrowser ? "Open Trust Wallet App" : "WalletConnect (QR)"}
+              icon={<WalletTrust className="w-6 h-6" variant="branded" />}
+              onClick={() => handleEvmWalletConnect("trust")}
+            />
+            <ChainButton
               label="WalletConnect"
-              subLabel="Scan QR code with mobile wallet"
+              subLabel={isMobileBrowser ? "Open Wallet App" : "Scan QR code with mobile wallet"}
               icon={<WalletWalletConnect className="w-6 h-6" variant="branded" />}
-              onClick={handleEvmWalletConnect}
+              onClick={() => handleEvmWalletConnect("walletconnect")}
             />
           </div>
         )}
@@ -582,18 +568,29 @@ export function ChainSelectModal() {
               Select a wallet to connect
             </p>
 
-            {tronWalletOptions.map((wallet) => (
-              <ChainButton
-                key={wallet.id}
-                label={wallet.name}
-                subLabel={wallet.subLabel}
-                icon={wallet.icon}
-                onClick={() => handleTronWalletClick(wallet.id)}
-              />
-            ))}
+            <ChainButton
+              label="TronLink"
+              subLabel={
+                hasTronExtension
+                  ? "Browser extension"
+                  : isMobileBrowser
+                  ? "Open Tron wallet app"
+                  : "Install TronLink extension first"
+              }
+              icon={<NetworkTron className="w-6 h-6" variant="branded" />}
+              onClick={handleTronExtensionConnect}
+              disabled={!hasTronExtension && !isMobileBrowser}
+            />
+
+            <ChainButton
+              label="WalletConnect"
+              subLabel={isMobileBrowser ? "Open Wallet App" : "Scan QR code with mobile wallet"}
+              icon={<WalletWalletConnect className="w-6 h-6" variant="branded" />}
+              onClick={handleTronWalletConnect}
+            />
 
             <p className="text-xs text-white/30 text-center mt-2">
-              Choose browser extension or scan the QR code with your Tron-compatible wallet app.
+              TronLink or WalletConnect only.
             </p>
           </div>
         )}
@@ -633,7 +630,7 @@ export function ChainSelectModal() {
               </div>
             )}
             <p className="text-xs text-white/30 text-center">
-              Supported: Trust Wallet, SafePal, OKX, Bitget and other Tron wallets
+              Use TronLink or any WalletConnect-compatible Tron wallet.
             </p>
           </div>
         )}
@@ -641,60 +638,32 @@ export function ChainSelectModal() {
         {/* ===== Solana Wallets View ===== */}
         {view === "solana_wallets" && (
           <div className="space-y-3">
-            {/* Detected wallets first */}
-            {detectedSolanaWallets.length > 0 && (
-              <>
-                <p className="text-xs text-white/40 uppercase tracking-wider font-medium px-1">
-                  Detected
-                </p>
-                {detectedSolanaWallets.map((wallet) => (
-                  <ChainButton
-                    key={wallet.id}
-                    label={wallet.name}
-                    subLabel="Click to connect"
-                    icon={getSolanaWalletIcon(wallet.id, true)}
-                    onClick={() => handleSolanaConnect(wallet.id)}
-                    badge="Available"
-                  />
-                ))}
-              </>
-            )}
+            <p className="text-xs text-white/40 uppercase tracking-wider font-medium px-1">
+              Select a wallet to connect
+            </p>
 
-            {/* Not detected wallets */}
-            {undetectedSolanaWallets.length > 0 && (
-              <>
-                <p className="text-xs text-white/40 uppercase tracking-wider font-medium px-1 mt-2">
-                  Not Detected
-                </p>
-                {undetectedSolanaWallets.map((wallet) => (
-                  <ChainButton
-                    key={wallet.id}
-                    label={wallet.name}
-                    subLabel="Extension not installed"
-                    icon={getSolanaWalletIcon(wallet.id, false)}
-                    onClick={() => handleSolanaConnect(wallet.id)}
-                    disabled={true}
-                  />
-                ))}
-              </>
-            )}
+            <ChainButton
+              label="Phantom"
+              subLabel={
+                hasPhantomSolana
+                  ? "Extension detected"
+                  : isMobileBrowser
+                  ? "Open Phantom App"
+                  : "WalletConnect fallback"
+              }
+              icon={<WalletPhantom className="w-6 h-6" variant="branded" />}
+              onClick={() => handleSolanaConnect("phantom", "phantom")}
+              badge={hasPhantomSolana ? "Available" : undefined}
+            />
 
-            {/* WalletConnect option for mobile */}
             <div className="pt-2 border-t border-white/5">
               <ChainButton
                 label="WalletConnect"
-                subLabel="Connect via QR code (mobile wallets)"
+                subLabel={isMobileBrowser ? "Open Wallet App" : "Connect via QR code"}
                 icon={<WalletWalletConnect className="w-6 h-6" variant="branded" />}
-                onClick={() => handleSolanaConnect("walletconnect")}
+                onClick={() => handleSolanaConnect("walletconnect", "walletconnect")}
               />
             </div>
-
-            {detectedSolanaWallets.length === 0 && (
-              <p className="text-xs text-white/30 text-center mt-2">
-                No Solana wallets detected. Install Phantom, Solflare, or
-                Backpack, or use WalletConnect.
-              </p>
-            )}
           </div>
         )}
 

@@ -60,33 +60,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Chain select modal
   const [isChainSelectOpen, setChainSelectOpen] = useState(false);
 
-  // Track which chain the user INTENDS to use.
-  // Used to prevent EVM auto-connect interference when the user chooses Tron/Solana.
   const [activeChain, setActiveChain] = useState<ActiveChain>(null);
-  const [intendedChain, setIntendedChain] = useState<ActiveChain>(null);
-
-  // Force-disconnect EVM only when the user explicitly intends to use Tron/Solana.
-  // We still allow EVM auto-connect when there is no explicit intent, otherwise
-  // a hard refresh can incorrectly show "disconnected" even though MetaMask is connected.
-  useEffect(() => {
-    if (!evmConnected) return;
-    if (intendedChain === 'tron' || intendedChain === 'sol') {
-      wagmiDisconnect();
-    }
-  }, [evmConnected, intendedChain, wagmiDisconnect]);
 
   // Determine unified state
   const isPending = tron.isPending || solana.isPending || evmConnecting;
-
-  const shouldBlockEvm = intendedChain === 'tron' || intendedChain === 'sol';
-  const effectiveEvmConnected = evmConnected && !shouldBlockEvm;
-  const isConnected = effectiveEvmConnected || tron.isConnected || solana.isConnected;
+  const isConnected = evmConnected || tron.isConnected || solana.isConnected;
 
   let address: string | null = null;
   let chainName: string | null = null;
   let resolvedChain: ActiveChain = null;
 
-  if (activeChain === 'evm' && effectiveEvmConnected && evmAddress) {
+  if (activeChain === 'evm' && evmConnected && evmAddress) {
     address = evmAddress;
     chainName = 'EVM';
     resolvedChain = 'evm';
@@ -98,7 +82,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     address = solana.address;
     chainName = solana.walletName || 'Solana';
     resolvedChain = 'sol';
-  } else if (effectiveEvmConnected && evmAddress && !tron.isConnected && !solana.isConnected) {
+  } else if (evmConnected && evmAddress) {
     address = evmAddress;
     chainName = 'EVM';
     resolvedChain = 'evm';
@@ -112,25 +96,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     resolvedChain = 'sol';
   }
 
-  // Sync active chain based on connection state
-  // But respect the intended chain to prevent wagmi autoConnect interference
+  // Keep activeChain aligned with currently connected wallets.
   useEffect(() => {
-    if (intendedChain === 'tron' && tron.isConnected) {
-      setActiveChain('tron');
-    } else if (intendedChain === 'sol' && solana.isConnected) {
-      setActiveChain('sol');
-    } else if (intendedChain === 'evm' && effectiveEvmConnected && evmAddress) {
+    if (activeChain === 'evm' && evmConnected && evmAddress) return;
+    if (activeChain === 'tron' && tron.isConnected && tron.address) return;
+    if (activeChain === 'sol' && solana.isConnected && solana.address) return;
+
+    if (evmConnected && evmAddress) {
       setActiveChain('evm');
-    } else if (tron.isConnected) {
-      setActiveChain('tron');
-    } else if (solana.isConnected) {
-      setActiveChain('sol');
-    } else if (effectiveEvmConnected && evmAddress) {
-      setActiveChain('evm');
-    } else {
-      setActiveChain(null);
+      return;
     }
-  }, [effectiveEvmConnected, evmAddress, tron.isConnected, solana.isConnected, intendedChain]);
+    if (tron.isConnected && tron.address) {
+      setActiveChain('tron');
+      return;
+    }
+    if (solana.isConnected && solana.address) {
+      setActiveChain('sol');
+      return;
+    }
+    setActiveChain(null);
+  }, [activeChain, evmConnected, evmAddress, tron.isConnected, tron.address, solana.isConnected, solana.address]);
 
   // Sync with rewardsStorage
   useEffect(() => {
@@ -162,10 +147,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Connect functions
   const connectEvm = useCallback(
     async (mode: 'metamask' | 'walletconnect' = 'metamask') => {
-      setIntendedChain('evm');
       // Disconnect other chains first
-      if (tron.isConnected) tron.disconnect();
-      if (solana.isConnected) solana.disconnect();
+      if (tron.isConnected) await tron.disconnect();
+      if (solana.isConnected) await solana.disconnect();
 
       const metaMaskConnector = connectors.find(c => c.id === 'metaMask' || c.name === 'MetaMask');
       const walletConnectConnector = connectors.find(c => c.id === 'walletConnect' || c.name === 'WalletConnect');
@@ -211,6 +195,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           }
         }
       }
+      setActiveChain('evm');
 
       // Cleanup display_uri listener and QR once connected
       if (mode === 'walletconnect') {
@@ -231,8 +216,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connectTron = useCallback(
     async (mode?: 'auto' | 'tronlink' | 'walletconnect') => {
-      // Set intended chain BEFORE connecting
-      setIntendedChain('tron');
       // Disconnect EVM first
       if (evmConnected) {
         wagmiDisconnect();
@@ -243,14 +226,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Small delay to ensure wagmi disconnect completes
       await new Promise(resolve => setTimeout(resolve, 150));
       await tron.connect(mode);
+      setActiveChain('tron');
     },
     [evmConnected, wagmiDisconnect, solana, tron]
   );
 
   const connectSolana = useCallback(
     async (walletId?: string) => {
-      // Set intended chain BEFORE connecting
-      setIntendedChain('sol');
       // Disconnect EVM first
       if (evmConnected) {
         wagmiDisconnect();
@@ -261,18 +243,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Small delay to ensure wagmi disconnect completes
       await new Promise(resolve => setTimeout(resolve, 150));
       await solana.connect(walletId);
+      setActiveChain('sol');
     },
     [evmConnected, wagmiDisconnect, tron, solana]
   );
 
   const disconnect = useCallback(() => {
-    setIntendedChain(null);
     if (evmConnected) {
       wagmiDisconnect();
     }
     if (tron.isConnected) tron.disconnect();
     if (solana.isConnected) solana.disconnect();
     setEvmWcUri(null);
+    setActiveChain(null);
     rewardsStorage.set({
       chain: null,
       chainType: null,

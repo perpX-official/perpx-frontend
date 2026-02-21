@@ -142,12 +142,6 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
 
       if (uri) {
         setWcUri(uri);
-
-        // On mobile, try to open Phantom
-        if (isMobileDevice()) {
-          const encodedUri = encodeURIComponent(uri);
-          window.location.href = `phantom://wc?uri=${encodedUri}`;
-        }
       }
 
       const session = await approval();

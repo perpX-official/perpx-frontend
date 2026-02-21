@@ -6,7 +6,6 @@ import {
   TRON_CHAIN_NAMES,
   TRON_FULL_NODES,
   isMobileDevice,
-  TRON_MOBILE_WALLETS,
 } from '@/config/walletConstants';
 import { getWalletConnectionErrorMessage } from '@/lib/walletConnectionError';
 
@@ -164,15 +163,6 @@ export function useTronWallet(): UseTronWalletReturn {
 
       if (uri) {
         setWcUri(uri);
-
-        // On mobile, try to open wallet app
-        if (isMobileDevice()) {
-          const wallet = TRON_MOBILE_WALLETS[0]; // Trust Wallet as default
-          if (wallet) {
-            const encodedUri = encodeURIComponent(uri);
-            window.location.href = `${wallet.deepLink}?uri=${encodedUri}`;
-          }
-        }
       }
 
       // Store approval promise and wait for it

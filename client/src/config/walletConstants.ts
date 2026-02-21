@@ -52,6 +52,34 @@ export const TRON_MOBILE_WALLETS = [
   },
 ];
 
+// EVM mobile wallets for WalletConnect URI handoff
+export const EVM_MOBILE_WALLETS = {
+  walletconnect: {
+    name: "WalletConnect",
+    deepLinkPrefix: "wc://wc?uri=",
+  },
+  trust: {
+    name: "Trust Wallet",
+    deepLinkPrefix: "trust://wc?uri=",
+  },
+  safepal: {
+    name: "SafePal",
+    deepLinkPrefix: "safepal://wc?uri=",
+  },
+} as const;
+
+// Solana mobile wallet deep links
+export const SOLANA_MOBILE_WALLETS = {
+  phantom: {
+    name: "Phantom",
+    deepLinkPrefix: "phantom://wc?uri=",
+  },
+  walletconnect: {
+    name: "WalletConnect",
+    deepLinkPrefix: "wc://wc?uri=",
+  },
+} as const;
+
 // Solana injected wallet IDs
 export const SOLANA_WALLETS = [
   { id: 'phantom', name: 'Phantom', windowKey: 'solana', icon: '👻' },

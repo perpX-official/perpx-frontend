@@ -93,7 +93,12 @@ function clearStoredIdentity() {
 export function useRewardsState() {
   // Use WalletContext for ALL chain state (including EVM)
   // Do NOT use wagmi's useAccount directly - WalletContext handles EVM filtering
-  const { address: walletAddress, activeChain, isConnected: walletConnected } = useWallet();
+  const {
+    address: walletAddress,
+    activeChain,
+    isConnected: walletConnected,
+    isPending: walletPending,
+  } = useWallet();
   
   // Check for demo mode
   const [isDemoMode, setIsDemoMode] = useState(getDemoModeFromStorage);
@@ -177,6 +182,11 @@ export function useRewardsState() {
       return;
     }
     
+    // Chain switch in progress: keep current rewards identity/state stable.
+    if (walletPending) {
+      return;
+    }
+
     // Nothing connected
     // Keep prior connected state only during OAuth callback return.
     if (isOAuthReturnUrl()) {
@@ -208,7 +218,7 @@ export function useRewardsState() {
     if (currentStorage.isConnected) {
       rewardsStorage.set(newState);
     }
-  }, [walletConnected, walletAddress, activeChain, isDemoMode]);
+  }, [walletConnected, walletAddress, activeChain, walletPending, isDemoMode]);
 
   return state;
 }
