@@ -131,7 +131,7 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
       signClientRef.current = client;
 
       const { uri, approval } = await client.connect({
-        requiredNamespaces: {
+        optionalNamespaces: {
           solana: {
             chains: [SOLANA_CHAINS.mainnet],
             methods: ['solana_signMessage', 'solana_signTransaction'],

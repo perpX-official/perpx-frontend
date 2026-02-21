@@ -148,7 +148,7 @@ export function useTronWallet(): UseTronWalletReturn {
       signClientRef.current = client;
 
       const { uri, approval } = await client.connect({
-        requiredNamespaces: {
+        optionalNamespaces: {
           tron: {
             chains: [TRON_CHAINS.mainnet],
             methods: [
