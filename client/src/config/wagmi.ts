@@ -1,7 +1,6 @@
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { mainnet, arbitrum, base, optimism } from '@reown/appkit/networks';
-import { createStorage, injected } from '@wagmi/core';
-import { walletConnect } from '@wagmi/connectors';
+import { createConfig, createStorage, http } from 'wagmi';
+import { mainnet, arbitrum, base, optimism } from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
 import { getMetaMaskProvider } from '@/lib/evmProviders';
 
 // WalletConnect Project ID - https://cloud.walletconnect.com
@@ -28,14 +27,20 @@ const noopStorage = {
 const wagmiStorage =
   typeof window !== 'undefined' ? window.localStorage : noopStorage;
 
-// Create wagmi adapter for AppKit
-export const wagmiAdapter = new WagmiAdapter({
+export const config = createConfig({
+  chains: [mainnet, arbitrum, base, optimism],
+  transports: {
+    [mainnet.id]: http(),
+    [arbitrum.id]: http(),
+    [base.id]: http(),
+    [optimism.id]: http(),
+  },
   storage: createStorage({
     storage: wagmiStorage
   }),
+  // Avoid generic injected wallet discovery (prevents Phantom EVM auto-selection).
+  multiInjectedProviderDiscovery: false,
   ssr: false,
-  projectId,
-  networks,
   connectors: [
     injected({
       target: {
@@ -49,9 +54,9 @@ export const wagmiAdapter = new WagmiAdapter({
       projectId,
       metadata,
       showQrModal: false,
+      qrModalOptions: {
+        explorerRecommendedWalletIds: 'NONE',
+      },
     }),
   ]
 });
-
-// Export config for WagmiProvider
-export const config = wagmiAdapter.wagmiConfig;

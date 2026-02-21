@@ -222,6 +222,7 @@ export function ChainSelectModal() {
   };
 
   const handleEvmMetaMask = async () => {
+    if (connecting) return;
     if (!hasMetaMask) {
       if (isMobileBrowser) {
         openMetaMaskDeepLink();
@@ -241,6 +242,7 @@ export function ChainSelectModal() {
   };
 
   const handleEvmWalletConnect = async (target: EvmWcTarget) => {
+    if (connecting) return;
     setEvmWcTarget(target);
     setConnecting(true);
     setView("evm_wc_qr");
@@ -259,6 +261,7 @@ export function ChainSelectModal() {
   };
 
   const handleTronExtensionConnect = async () => {
+    if (connecting) return;
     if (!hasTronExtension && isMobileBrowser) {
       await handleTronWalletConnect();
       return;
@@ -275,6 +278,7 @@ export function ChainSelectModal() {
 
   // Tron: connect via WalletConnect (show QR code)
   const handleTronWalletConnect = async () => {
+    if (connecting) return;
     setConnecting(true);
     setView("tron_wc_qr");
     try {
@@ -298,6 +302,7 @@ export function ChainSelectModal() {
   };
 
   const handleSolanaConnect = async (walletId: string, target: SolanaWcTarget) => {
+    if (connecting) return;
     setSolanaWcTarget(target);
     setConnecting(true);
     try {

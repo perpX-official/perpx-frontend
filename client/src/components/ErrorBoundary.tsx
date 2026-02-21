@@ -15,19 +15,22 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
-  isDomMutationError: boolean;
+  isRecoverableError: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, isDomMutationError: false };
+    this.state = { hasError: false, error: null, isRecoverableError: false };
   }
 
   static getDerivedStateFromError(error: Error): State {
     const combined = `${error?.message ?? ""}\n${error?.stack ?? ""}`;
-    const isDomMutationError = /removeChild|NotFoundError/i.test(combined);
-    return { hasError: true, error, isDomMutationError };
+    const isRecoverableError =
+      /removeChild|NotFoundError/i.test(combined) ||
+      /cannot read properties of undefined \(reading ['"]list['"]\)/i.test(combined) ||
+      /publishCustom is not a function/i.test(combined);
+    return { hasError: true, error, isRecoverableError };
   }
 
   componentDidCatch(error: Error) {
@@ -36,9 +39,12 @@ class ErrorBoundary extends Component<Props, State> {
     if (!IS_LOCAL_DEV) {
       try {
         const combined = `${error?.message ?? ""}\n${error?.stack ?? ""}`;
-        const isDomMutationError = /removeChild|NotFoundError/i.test(combined);
+        const isRecoverableError =
+          /removeChild|NotFoundError/i.test(combined) ||
+          /cannot read properties of undefined \(reading ['"]list['"]\)/i.test(combined) ||
+          /publishCustom is not a function/i.test(combined);
         const reloadedKey = "perpx:autoReloaded";
-        if (isDomMutationError && !sessionStorage.getItem(reloadedKey)) {
+        if (isRecoverableError && !sessionStorage.getItem(reloadedKey)) {
           sessionStorage.setItem(reloadedKey, "1");
           window.location.reload();
         }
@@ -50,7 +56,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      if (!IS_LOCAL_DEV && this.state.isDomMutationError) {
+      if (!IS_LOCAL_DEV && this.state.isRecoverableError) {
         // Avoid showing a scary error screen for a transient DOM mutation crash.
         // We already attempted a one-time reload in componentDidCatch.
         return (

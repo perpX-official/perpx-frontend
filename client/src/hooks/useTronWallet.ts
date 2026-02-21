@@ -54,6 +54,7 @@ export function useTronWallet(): UseTronWalletReturn {
   const signClientRef = useRef<SignClient | null>(null);
   const sessionRef = useRef<any>(null);
   const approvalRef = useRef<Promise<any> | null>(null);
+  const connectInFlightRef = useRef<Promise<void> | null>(null);
 
   const getTronWeb = () => {
     return window.tronWeb || window.tronLink?.tronWeb || null;
@@ -194,6 +195,10 @@ export function useTronWallet(): UseTronWalletReturn {
       });
     } catch (err: any) {
       const message = getWalletConnectionErrorMessage(err);
+      signClientRef.current = null;
+      sessionRef.current = null;
+      approvalRef.current = null;
+      setWcUri(null);
       setState((prev) => ({
         ...prev,
         isPending: false,
@@ -206,30 +211,43 @@ export function useTronWallet(): UseTronWalletReturn {
   // Main connect function
   const connect = useCallback(
     async (mode: 'auto' | 'tronlink' | 'walletconnect' = 'auto') => {
-      setState((prev) => ({ ...prev, isPending: true, error: null }));
-      try {
-        if (mode === 'tronlink') {
-          await connectExtension();
-          return;
-        }
-        if (mode === 'walletconnect') {
+      if (connectInFlightRef.current) {
+        return connectInFlightRef.current;
+      }
+
+      const run = (async () => {
+        setState((prev) => ({ ...prev, isPending: true, error: null }));
+        try {
+          if (mode === 'tronlink') {
+            await connectExtension();
+            return;
+          }
+          if (mode === 'walletconnect') {
+            await connectWalletConnect();
+            return;
+          }
+          // Auto: prefer extension on desktop, fallback to WalletConnect
+          if (hasTronExtension() && !isMobileDevice()) {
+            await connectExtension();
+            return;
+          }
           await connectWalletConnect();
-          return;
+        } catch (err: any) {
+          const message = getWalletConnectionErrorMessage(err);
+          setState((prev) => ({
+            ...prev,
+            isPending: false,
+            error: message,
+          }));
+          throw err;
         }
-        // Auto: prefer extension on desktop, fallback to WalletConnect
-        if (hasTronExtension() && !isMobileDevice()) {
-          await connectExtension();
-          return;
-        }
-        await connectWalletConnect();
-      } catch (err: any) {
-        const message = getWalletConnectionErrorMessage(err);
-        setState((prev) => ({
-          ...prev,
-          isPending: false,
-          error: message,
-        }));
-        throw err;
+      })();
+
+      connectInFlightRef.current = run;
+      try {
+        await run;
+      } finally {
+        connectInFlightRef.current = null;
       }
     },
     [connectWalletConnect]

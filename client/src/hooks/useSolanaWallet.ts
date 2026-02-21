@@ -60,6 +60,7 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
   const signClientRef = useRef<SignClient | null>(null);
   const sessionRef = useRef<any>(null);
   const providerRef = useRef<any>(null);
+  const connectInFlightRef = useRef<Promise<void> | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -168,6 +169,9 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
       });
     } catch (err: any) {
       const message = getWalletConnectionErrorMessage(err);
+      signClientRef.current = null;
+      sessionRef.current = null;
+      setWcUri(null);
       setState((prev) => ({
         ...prev,
         isPending: false,
@@ -180,41 +184,54 @@ export function useSolanaWallet(): UseSolanaWalletReturn {
   // Main connect function
   const connect = useCallback(
     async (walletId?: string) => {
-      setState((prev) => ({ ...prev, isPending: true, error: null }));
-      try {
-        if (walletId && walletId !== 'walletconnect') {
-          // Try injected first
-          const walletDef = SOLANA_WALLETS.find((w) => w.id === walletId);
-          if (walletDef) {
-            const provider = getInjectedProvider(walletDef.windowKey);
-            if (provider) {
-              await connectInjected(walletId);
-              return;
+      if (connectInFlightRef.current) {
+        return connectInFlightRef.current;
+      }
+
+      const run = (async () => {
+        setState((prev) => ({ ...prev, isPending: true, error: null }));
+        try {
+          if (walletId && walletId !== 'walletconnect') {
+            // Try injected first
+            const walletDef = SOLANA_WALLETS.find((w) => w.id === walletId);
+            if (walletDef) {
+              const provider = getInjectedProvider(walletDef.windowKey);
+              if (provider) {
+                await connectInjected(walletId);
+                return;
+              }
             }
-          }
-          // Injected not available, fall back to WalletConnect
-          await connectWalletConnect();
-        } else if (walletId === 'walletconnect') {
-          await connectWalletConnect();
-        } else {
-          // Auto: try first available injected wallet, then WalletConnect
-          for (const w of SOLANA_WALLETS) {
-            const provider = getInjectedProvider(w.windowKey);
-            if (provider && !isMobileDevice()) {
-              await connectInjected(w.id);
-              return;
+            // Injected not available, fall back to WalletConnect
+            await connectWalletConnect();
+          } else if (walletId === 'walletconnect') {
+            await connectWalletConnect();
+          } else {
+            // Auto: try first available injected wallet, then WalletConnect
+            for (const w of SOLANA_WALLETS) {
+              const provider = getInjectedProvider(w.windowKey);
+              if (provider && !isMobileDevice()) {
+                await connectInjected(w.id);
+                return;
+              }
             }
+            await connectWalletConnect();
           }
-          await connectWalletConnect();
+        } catch (err: any) {
+          const message = getWalletConnectionErrorMessage(err);
+          setState((prev) => ({
+            ...prev,
+            isPending: false,
+            error: message,
+          }));
+          throw err;
         }
-      } catch (err: any) {
-        const message = getWalletConnectionErrorMessage(err);
-        setState((prev) => ({
-          ...prev,
-          isPending: false,
-          error: message,
-        }));
-        throw err;
+      })();
+
+      connectInFlightRef.current = run;
+      try {
+        await run;
+      } finally {
+        connectInFlightRef.current = null;
       }
     },
     [connectInjected, connectWalletConnect]

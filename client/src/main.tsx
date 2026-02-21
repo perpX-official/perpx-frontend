@@ -78,6 +78,46 @@ queryClient.getMutationCache().subscribe(event => {
 
 const trpcUrl = withApiBase("/api/trpc");
 
+const NON_FATAL_WALLET_ERROR_PATTERNS = [
+  /cannot read properties of undefined \(reading ['"]list['"]\)/i,
+  /publishcustom is not a function/i,
+  /walletconnect core is already initialized/i,
+];
+
+function isNonFatalWalletError(reason: unknown): boolean {
+  const message =
+    typeof reason === "string"
+      ? reason
+      : reason instanceof Error
+      ? `${reason.message}\n${reason.stack ?? ""}`
+      : JSON.stringify(reason ?? "");
+
+  return NON_FATAL_WALLET_ERROR_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+function installWalletErrorGuard() {
+  if (typeof window === "undefined") return;
+
+  const guardKey = "__PERPX_WALLET_ERROR_GUARD_INSTALLED__";
+  const w = window as Window & { [guardKey]?: boolean };
+  if (w[guardKey]) return;
+  w[guardKey] = true;
+
+  window.addEventListener("error", (event) => {
+    if (!isNonFatalWalletError(event.error ?? event.message)) return;
+    console.warn("[WalletGuard] Suppressed non-fatal wallet runtime error:", event.error ?? event.message);
+    event.preventDefault();
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    if (!isNonFatalWalletError(event.reason)) return;
+    console.warn("[WalletGuard] Suppressed non-fatal wallet rejection:", event.reason);
+    event.preventDefault();
+  });
+}
+
+installWalletErrorGuard();
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({

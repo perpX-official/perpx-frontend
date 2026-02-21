@@ -50,6 +50,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const evmConnected = wagmiAccount.isConnected;
   const [evmWcUri, setEvmWcUri] = useState<string | null>(null);
   const evmWcListenerRef = useRef<((uri: string) => void) | null>(null);
+  const evmConnectInFlightRef = useRef<Promise<void> | null>(null);
 
   // Tron
   const tron = useTronWallet();
@@ -147,12 +148,25 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Connect functions
   const connectEvm = useCallback(
     async (mode: 'metamask' | 'walletconnect' = 'metamask') => {
+      if (evmConnectInFlightRef.current) {
+        return evmConnectInFlightRef.current;
+      }
+
+      const run = (async () => {
       // Disconnect other chains first
       if (tron.isConnected) await tron.disconnect();
       if (solana.isConnected) await solana.disconnect();
 
-      const metaMaskConnector = connectors.find(c => c.id === 'metaMask' || c.name === 'MetaMask');
-      const walletConnectConnector = connectors.find(c => c.id === 'walletConnect' || c.name === 'WalletConnect');
+      const metaMaskConnector = connectors.find((c) => {
+        const id = c.id.toLowerCase();
+        const name = c.name.toLowerCase();
+        return id === 'metamask' || id === 'injected' || name.includes('metamask') || name.includes('injected');
+      });
+      const walletConnectConnector = connectors.find((c) => {
+        const id = c.id.toLowerCase();
+        const name = c.name.toLowerCase();
+        return id === 'walletconnect' || name.includes('walletconnect');
+      });
 
       const targetConnector = mode === 'walletconnect' ? walletConnectConnector : metaMaskConnector;
       if (!targetConnector) {
@@ -180,7 +194,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      await connectAsync({ connector: targetConnector });
+      try {
+        await connectAsync({ connector: targetConnector });
+      } catch (error) {
+        if (mode === 'walletconnect') {
+          try {
+            const provider: any = await targetConnector.getProvider();
+            if (provider?.off && evmWcListenerRef.current) {
+              provider.off('display_uri', evmWcListenerRef.current);
+            }
+          } catch {
+            // ignore
+          }
+          evmWcListenerRef.current = null;
+          setEvmWcUri(null);
+        }
+        throw error;
+      }
 
       if (mode === 'metamask') {
         try {
@@ -209,6 +239,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
         evmWcListenerRef.current = null;
         setEvmWcUri(null);
+      }
+      })();
+
+      evmConnectInFlightRef.current = run;
+      try {
+        await run;
+      } finally {
+        evmConnectInFlightRef.current = null;
       }
     },
     [connectAsync, connectors, tron, solana]
